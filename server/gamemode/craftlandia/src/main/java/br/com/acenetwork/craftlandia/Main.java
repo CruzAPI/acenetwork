@@ -3,9 +3,13 @@ package br.com.acenetwork.craftlandia;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -27,6 +31,21 @@ public class Main extends Common implements Listener
 		super.onEnable();
 		
 		getServer().getPluginManager().registerEvents(this, this);
+	}
+	
+	@EventHandler
+	public void a(BlockPlaceEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(b.getType() == Material.BEDROCK)
+		{
+			e.setCancelled(true);
+			
+			World w = b.getWorld();
+			
+			w.spawnEntity(b.getLocation().add(0.5D, 1.0D, 0.5D), EntityType.ENDER_CRYSTAL);
+		}
 	}
 	
 	@EventHandler
