@@ -21,7 +21,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import br.com.acenetwork.common.Common;
+import br.com.acenetwork.commons.Common;
 
 public class Main extends Common implements Listener
 {
