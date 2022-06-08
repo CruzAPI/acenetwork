@@ -131,7 +131,7 @@ public class Wallet implements TabExecutor, Listener
 				{
 					Bukkit.getScheduler().cancelTask(taskId);
 					
-					ResourceBundle bundle = ResourceBundle.getBundle("message", CommonsUtil.getLocaleFromMinecraft(p.getLocale()));
+					ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 					
 					if(result.equalsIgnoreCase("NOT_FOUND"))
 					{

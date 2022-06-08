@@ -97,11 +97,11 @@ public class Tp implements TabExecutor
 			
 			TextComponent[] extra = new TextComponent[2];
 			
-			extra[0] = new TextComponent();
+			extra[0] = new TextComponent("");
 			extra[0].addExtra(t1.getDisplayName());
 			extra[0].setColor(ChatColor.YELLOW);
 			
-			extra[1] = new TextComponent();
+			extra[1] = new TextComponent("");
 			extra[1].addExtra(t2.getDisplayName());
 			extra[1].setColor(ChatColor.YELLOW);
 			
@@ -131,7 +131,7 @@ public class Tp implements TabExecutor
 				
 				TextComponent[] extra = new TextComponent[4];
 				
-				extra[0] = new TextComponent();
+				extra[0] = new TextComponent("");
 				extra[0].addExtra(t.getDisplayName());
 				extra[0].setColor(ChatColor.YELLOW);
 				

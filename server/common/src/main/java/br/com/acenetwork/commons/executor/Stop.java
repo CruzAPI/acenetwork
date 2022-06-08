@@ -71,7 +71,7 @@ public class Stop implements TabExecutor
 	public static void stop()
 	{
 		Common.setRestarting(true);
-		Arrays.stream(Bukkit.getOnlinePlayers()).forEach(x -> CommonsUtil.bungeeSendPlayer(x.getName(), "lobby"));
+		Bukkit.getOnlinePlayers().forEach(x -> CommonsUtil.bungeeSendPlayer(x.getName(), "lobby"));
 	 	
 	 	Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
 	 	{

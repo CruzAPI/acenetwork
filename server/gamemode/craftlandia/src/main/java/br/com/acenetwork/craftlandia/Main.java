@@ -9,7 +9,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -22,6 +24,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import br.com.acenetwork.commons.Common;
+import br.com.acenetwork.craftlandia.listener.PlayerMode;
 
 public class Main extends Common implements Listener
 {
@@ -31,6 +34,19 @@ public class Main extends Common implements Listener
 		super.onEnable();
 		
 		getServer().getPluginManager().registerEvents(this, this);
+		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
+	}
+	
+	@EventHandler
+	public void a(BlockSpreadEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void a(BlockBurnEvent e)
+	{
+		e.setCancelled(true);
 	}
 	
 	@EventHandler

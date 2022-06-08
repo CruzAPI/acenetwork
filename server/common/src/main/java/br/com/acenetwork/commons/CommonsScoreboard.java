@@ -23,7 +23,7 @@ public abstract class CommonsScoreboard implements Listener
 	public CommonsScoreboard(CommonPlayer cp)
 	{
 		Player p = cp.getPlayer();
-		locale = p.getLocale();
+		locale = p.spigot().getLocale();
 
 		this.cp = cp;
 		this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();

@@ -13,7 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLocaleChangeEvent;
+//import org.bukkit.event.player.PlayerLocaleChangeEvent;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
@@ -33,6 +33,8 @@ public class PlayerJoin implements Listener
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void on(PlayerJoinEvent e)
 	{
+		Bukkit.broadcastMessage("test");
+		
 		Player p = e.getPlayer();
 			
 		File playerFile = CommonsConfig.getFile(Type.PLAYER, true, p.getUniqueId());
@@ -83,28 +85,29 @@ public class PlayerJoin implements Listener
 			e.setJoinMessage(null);
 		}
 		
-		String locale = p.getLocale();
-		
-		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(Common.getPlugin(), new Runnable()
-		{
-			int ticks = 200;
-			
-			@Override
-			public void run()
-			{
-				if(!locale.equals(p.getLocale()))
-				{
-					Bukkit.getPluginManager().callEvent(new PlayerLocaleChangeEvent(p, p.getLocale()));
-					Bukkit.getScheduler().cancelTask(TASK.remove(p));
-				}
-				else if(ticks <= 0)
-				{
-					Bukkit.getScheduler().cancelTask(TASK.remove(p));
-				}
-				
-				ticks--;
-			}
-		}, 1L, 1L);
+//		
+//		String locale = p.spigot().getLocale();
+//		
+//		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(Common.getPlugin(), new Runnable()
+//		{
+//			int ticks = 200;
+//			
+//			@Override
+//			public void run()
+//			{
+//				if(!locale.equals(p.spigot().getLocale()))
+//				{
+//					Bukkit.getPluginManager().callEvent(new PlayerLocaleChangeEvent(p, p.spigot().getLocale()));
+//					Bukkit.getScheduler().cancelTask(TASK.remove(p));
+//				}
+//				else if(ticks <= 0)
+//				{
+//					Bukkit.getScheduler().cancelTask(TASK.remove(p));
+//				}
+//				
+//				ticks--;
+//			}
+//		}, 1L, 1L);
 		
 		try
 		{
@@ -116,7 +119,7 @@ public class PlayerJoin implements Listener
 			e1.printStackTrace();
 		}
 		
-		TASK.put(p, id);
+//		TASK.put(p, id);
 	}
 	
 	@EventHandler

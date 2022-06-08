@@ -68,7 +68,7 @@ public class BroadcastCMD implements TabExecutor
 				
 				String key = BROADCASTS.get(i);
 				
-				List<CommandSender> senderList = Arrays.asList(Bukkit.getOnlinePlayers());
+				List<CommandSender> senderList = new ArrayList<>(Bukkit.getOnlinePlayers());
 				senderList.add(Bukkit.getConsoleSender());
 				
 				for(CommandSender sender : senderList)
@@ -97,13 +97,12 @@ public class BroadcastCMD implements TabExecutor
 					
 					TextComponent extra1 = new TextComponent("➟ ");
 					extra1.setColor(ChatColor.GRAY);
-					
 					TextComponent extra3 = new TextComponent("✕");
 					extra3.setColor(ChatColor.RED);
 					extra3.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/mutebroadcast " + key));
 					TextComponent label = new TextComponent(bundle.getString("commons.cmd.mutebroadcast.click-to-mute"));
 					label.setColor(ChatColor.RED);
-					extra3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new BaseComponent[] {label}));
+					extra3.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[] {label}));
 					
 					TextComponent extra2 = new TextComponent(" ");
 					extra2.setColor(ChatColor.DARK_GRAY);
@@ -111,7 +110,7 @@ public class BroadcastCMD implements TabExecutor
 					extra2.addExtra(extra3);
 					extra2.addExtra("]");
 					
-					TextComponent text = new TextComponent();
+					TextComponent text = new TextComponent("");
 					TextComponent[] extra = new TextComponent[0];
 					
 					if(key.equals("commons.broadcast.1"))
@@ -287,8 +286,8 @@ public class BroadcastCMD implements TabExecutor
 				
 				i++;
 			}
-		}, 4L * 60L * 20L, 4L * 60L * 20L);
-//		}, 50L, 50L);
+//		}, 4L * 60L * 20L, 4L * 60L * 20L);
+		}, 50L, 50L);
 	}
 	
 	public static void suffle()
@@ -336,16 +335,16 @@ public class BroadcastCMD implements TabExecutor
 		
 		if(args.length > 0)
 		{
-		 	String msg = "";
-
-		 	for(int i = 0; i < args.length; i++)			
-		 	{
-		 		msg += args[i] + " ";
-		 	}
-
-		 	msg = msg.substring(0, msg.length() - 1);
-		 	
-		 	Bukkit.broadcastMessage("§b§lBroadcast§7 » §f" + msg.replace('&', '§'));
+			String msg = "";
+			
+			for(int i = 0; i < args.length; i++)			
+			{
+				msg += args[i] + " ";
+			}
+			
+			msg = msg.substring(0, msg.length() - 1);
+			
+			Bukkit.broadcastMessage("§b§lBroadcast§7 » §f" + msg.replace('&', '§'));
 		}
 		else
 		{

@@ -28,7 +28,7 @@ public class Message
 		
 		String[] split = pattern.split("\\{[0-9][^}]*\\}");
 		
-		TextComponent base = new TextComponent();
+		TextComponent base = new TextComponent("");
 		
 		for(int i = 0; ; i++)
 		{

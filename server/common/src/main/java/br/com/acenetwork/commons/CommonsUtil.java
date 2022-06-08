@@ -11,6 +11,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -20,6 +21,8 @@ import com.google.common.io.ByteStreams;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public class CommonsUtil
 {
@@ -28,10 +31,12 @@ public class CommonsUtil
 		if(sender instanceof Player)
 		{
 			((Player) sender).spigot().sendMessage(text);
+//			PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a(text.toLegacyText()));
+//			((CraftPlayer) sender).getHandle().playerConnection.sendPacket(packet);
 		}
 		else
 		{
-			sender.sendMessage(text);
+			sender.sendMessage(text.toLegacyText());
 		}
 	}
 	

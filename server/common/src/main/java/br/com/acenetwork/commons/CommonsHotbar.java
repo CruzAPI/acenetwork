@@ -19,7 +19,7 @@ public abstract class CommonsHotbar implements Listener
 		
 		this.cp = cp;
 		
-		locale = p.getLocale();
+		locale = p.spigot().getLocale();
 	}
 	
 	@EventHandler

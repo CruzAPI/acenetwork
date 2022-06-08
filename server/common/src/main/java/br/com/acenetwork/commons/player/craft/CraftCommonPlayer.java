@@ -503,7 +503,6 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		p.setVelocity(new Vector());
 		p.setMaximumNoDamageTicks(20);
 		p.setFireTicks(0);
-		p.setArrowsStuck(0);
 		
 		p.getInventory().clear();
 		p.getInventory().setArmorContents(null);
@@ -533,7 +532,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	@Override
 	public Locale getLocale()
 	{
-		return CommonsUtil.getLocaleFromMinecraft(p.getLocale());
+		return CommonsUtil.getLocaleFromMinecraft(p.spigot().getLocale());
 	}
 	
 	@Override
