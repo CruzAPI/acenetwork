@@ -77,12 +77,14 @@ public class Common extends JavaPlugin
 		
 		if(TEST)
 		{
-			Bukkit.getConsoleSender().sendMessage("§dServer is in test mode!");
+			Bukkit.getConsoleSender().sendMessage("§dServer is in test mode!!!");
 		}
 		else
 		{
 			Bukkit.getConsoleSender().sendMessage("§aServer is in production!");
 		}
+		
+		Bukkit.getConsoleSender().sendMessage("§aListening socket port on " + getSocketPort());
 		
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, "commons:commons", new PluginMessage());
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "commons:commons");
@@ -151,24 +153,18 @@ public class Common extends JavaPlugin
 		{
 			while(true)
 			{
-				try(ServerSocket ss = new ServerSocket(getSocketPort()); Socket s = ss.accept();
-						DataInputStream in = new DataInputStream(s.getInputStream()))
+				try(ServerSocket ss = new ServerSocket(getSocketPort()); Socket s = ss.accept(); 
+						DataInputStream in = new DataInputStream(s.getInputStream());)
 				{
-					List<String> list = new ArrayList<>();
+					String line = "";
+					int read;
 					
-					while(true)
+					while((read = in.read()) != -1)
 					{
-						try
-						{
-							list.add(in.readUTF());
-						}
-						catch(EOFException ex)
-						{
-							break;
-						}
+						line += (char) read;
 					}
 					
-					Bukkit.getPluginManager().callEvent(new SocketEvent(list.toArray(String[]::new)));
+					Bukkit.getPluginManager().callEvent(new SocketEvent(line.split(" ")));
 				}
 				catch(IOException e)
 				{

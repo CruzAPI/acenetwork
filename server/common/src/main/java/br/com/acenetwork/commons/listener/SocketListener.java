@@ -9,9 +9,23 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import br.com.acenetwork.commons.event.SocketEvent;
+import br.com.acenetwork.commons.executor.Stop;
 
 public class SocketListener implements Listener
 {
+	@EventHandler
+	public void a(SocketEvent e)
+	{
+		String[] args = e.getArgs();
+		
+		String cmd = args[0];
+		
+		if(cmd.equals("stop"))
+		{
+			Stop.stop();
+		}
+	}
+	
 //	@EventHandler
 //	public synchronized void a(SocketEvent e)
 //	{

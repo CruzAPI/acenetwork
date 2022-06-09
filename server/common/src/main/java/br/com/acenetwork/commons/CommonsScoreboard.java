@@ -110,6 +110,6 @@ public abstract class CommonsScoreboard implements Listener
 			return;
 		}
 		
-		locale = e.getLocale();
+		locale = e.getOldLocale();
 	}
 }

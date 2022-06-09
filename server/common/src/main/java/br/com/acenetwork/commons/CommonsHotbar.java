@@ -30,6 +30,6 @@ public abstract class CommonsHotbar implements Listener
 			return;
 		}
 		
-		locale = e.getLocale();
+		locale = e.getOldLocale();
 	}
 }
