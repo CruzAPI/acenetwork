@@ -68,7 +68,8 @@ public class Common extends JavaPlugin
 	private static Common instance;
 	private static boolean restarting;
 	public static final boolean TEST = !new File(System.getProperty("user.dir")).getParentFile().getName().equals("acenetwork");
-	
+
+	//
 	public void onEnable()
 	{
 		instance = this;
