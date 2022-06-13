@@ -73,9 +73,14 @@ public class Stop implements TabExecutor
 		Common.setRestarting(true);
 		Bukkit.getOnlinePlayers().forEach(x -> CommonsUtil.bungeeSendPlayer(x.getName(), "lobby"));
 	 	
-	 	Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
-	 	{
-	 		Bukkit.shutdown();
-	 	}, 60L);
+		Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
+		{
+			Bukkit.shutdown();
+		});
+		
+//	 	Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+//	 	{
+//	 		Bukkit.shutdown();
+//	 	}, 60L);
 	}
 }

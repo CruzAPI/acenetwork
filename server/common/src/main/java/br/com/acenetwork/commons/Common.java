@@ -13,13 +13,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.generator.ChunkGenerator.BiomeGrid;
+import org.bukkit.generator.ChunkGenerator.ChunkData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -77,7 +82,7 @@ public class Common extends JavaPlugin
 		
 		if(TEST)
 		{
-			Bukkit.getConsoleSender().sendMessage("§dServer is in test mode!!!");
+			Bukkit.getConsoleSender().sendMessage("§dServer is in test mode!!!!!!!!!!!!!");
 		}
 		else
 		{
@@ -214,12 +219,7 @@ public class Common extends JavaPlugin
 	
 	public File getConfigFolder()
 	{
-		if(TEST)
-		{
-			return new File(System.getProperty("user.home") +  "/.aceconfigtest");
-		}
-		
-		return new File(System.getProperty("user.home") +  "/.aceconfig");
+		return new File(System.getProperty("user.home") + "/." + new File(System.getProperty("user.dir")).getParentFile().getName());
 	}
 
 	public static void setRestarting(boolean value)

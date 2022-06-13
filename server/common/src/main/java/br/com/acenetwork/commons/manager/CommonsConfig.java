@@ -11,6 +11,8 @@ public class CommonsConfig
 {
 	public enum Type
 	{
+		ITEM_INFO_FOLDER,
+		ITEM_INFO,
 		WHITELISTED_IP,
 		BALANCE_FOLDER, BALANCE_RAID_PLAYER, BALANCE_RAID_FOLDER, 
 		CLANS_JSON, MESSAGE, GROUP, USER, 
@@ -25,6 +27,12 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case ITEM_INFO:
+			file = new File(Common.getPlugin().getConfigFolder() + "/item_info", args[0] + ".yml");
+			break;
+		case ITEM_INFO_FOLDER:
+			file = new File(Common.getPlugin().getConfigFolder() + "/item_info");
+			break;
 		case WHITELISTED_IP:
 			file = new File(Common.getPlugin().getConfigFolder(), "whitelisted_ips.yml");
 			break;
@@ -69,6 +77,12 @@ public class CommonsConfig
 		
 		if(createNewFile && !file.exists())
 		{
+			if(type.name().contains("FOLDER"))
+			{
+				file.mkdirs();
+				return file;
+			}
+			
 			file.toPath().getParent().toFile().mkdirs();
 			
 			try

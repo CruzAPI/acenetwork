@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -109,9 +110,9 @@ public class Tp implements TabExecutor
         	text.setColor(ChatColor.GREEN);
 			CommonsUtil.sendMessage(sender, text);
 		}
-		else if(p != null && args.length == 3 || args.length == 4)
+		else if(p != null && args.length >= 3 && args.length <= 5)
 		{
-			Player t = args.length == 4 ? Bukkit.getPlayer(args[0]) : p;
+			Player t = args.length >= 4 ? Bukkit.getPlayer(args[0]) : p;
 			
 			if(t == null)
 			{
@@ -121,13 +122,21 @@ public class Tp implements TabExecutor
 				return true;
 			}
 			
+			World w = args.length == 5 ? Bukkit.getWorld(args[1]) : t.getWorld();
+			
+			if(w == null)
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.world-not-found"));
+				return true;
+			}
+			
 			try
 			{
 				double x = Double.parseDouble(args[args.length - 3]);
 				double y = Double.parseDouble(args[args.length - 2]);
 				double z = Double.parseDouble(args[args.length - 1]);
 				
-				t.teleport(new Location(t.getWorld(), x, y, z));
+				t.teleport(new Location(w, x, y, z));
 				
 				TextComponent[] extra = new TextComponent[4];
 				

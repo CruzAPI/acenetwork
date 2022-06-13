@@ -1,0 +1,5 @@
+name: AceGenerator
+version: 0.0.1
+main: br.com.acenetwork.acegenerator.Main
+author: CruzAPI
+load: startup
