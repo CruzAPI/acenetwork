@@ -190,14 +190,13 @@ public class Permission implements TabExecutor
 				final String group = args[1].toLowerCase();
 				final String user = args[4].toLowerCase();
 				
-				OfflinePlayer op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-						x.getName().equalsIgnoreCase(user)).findAny().orElse(null);				
+				OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
 					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 					return true;	
 				}
 
@@ -205,7 +204,7 @@ public class Permission implements TabExecutor
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-group-syntax"));
 					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 					return true;	
 				}
 

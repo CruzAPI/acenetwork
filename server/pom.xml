@@ -26,7 +26,7 @@
     </dependencies>
   </dependencyManagement>
   <dependencies>
-    <dependency>
+  <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
       <version>1.8.8-R0.1-SNAPSHOT</version>
@@ -40,5 +40,6 @@
   <modules>
   	<module>common</module>
   	<module>gamemode</module>
+  	<module>plugins</module>
   </modules>
 </project>
