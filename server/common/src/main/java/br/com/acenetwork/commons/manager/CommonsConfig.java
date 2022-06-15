@@ -11,6 +11,7 @@ public class CommonsConfig
 {
 	public enum Type
 	{
+		BLOCK_DATA,
 		ITEM_INFO_FOLDER,
 		ITEM_INFO,
 		WHITELISTED_IP,
@@ -27,6 +28,9 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case BLOCK_DATA:
+			file = new File(Common.getPlugin().getConfigFolder() + "/block_data", args[0] + ".txt");
+			break;
 		case ITEM_INFO:
 			file = new File(Common.getPlugin().getConfigFolder() + "/item_info", args[0] + ".yml");
 			break;
