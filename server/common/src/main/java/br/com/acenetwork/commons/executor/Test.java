@@ -13,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.Message;
@@ -37,9 +38,12 @@ public class Test implements TabExecutor
 	{
 		Player p = (Player) sender;
 		
-		p.sendMessage("testttttttt");
+		ItemStack item = p.getItemInHand();
 		
-		Bukkit.broadcastMessage(p.getName() + " " + p.getUniqueId() + " v" + p.getUniqueId().version());
+		p.sendMessage("durability " + item.getDurability());
+		p.sendMessage("data.getData" + item.getData().getData());
+		
+//		Bukkit.broadcastMessage(p.getName() + " " + p.getUniqueId() + " v" + p.getUniqueId().version());
 		
 //		if(args.length == 1)
 //		{

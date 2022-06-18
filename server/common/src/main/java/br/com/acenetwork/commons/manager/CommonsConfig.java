@@ -12,13 +12,14 @@ public class CommonsConfig
 	public enum Type
 	{
 		BLOCK_DATA,
+		SIGN_DATA,
 		ITEM_INFO_FOLDER,
 		ITEM_INFO,
 		WHITELISTED_IP,
-		BALANCE_FOLDER, BALANCE_RAID_PLAYER, BALANCE_RAID_FOLDER, 
 		CLANS_JSON, MESSAGE, GROUP, USER, 
 		PLAYER, 
-		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE;
+		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE,
+		;
 	}
 
 	public static File getFile(Type type, boolean createNewFile, Object... args)
@@ -28,6 +29,9 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case SIGN_DATA:
+			file = new File(Common.getPlugin().getConfigFolder() + "/sign_data", args[0] + ".txt");
+			break;
 		case BLOCK_DATA:
 			file = new File(Common.getPlugin().getConfigFolder() + "/block_data", args[0] + ".txt");
 			break;
@@ -42,17 +46,6 @@ public class CommonsConfig
 			break;
 		case DATABASE:
 			file = new File(Common.getPlugin().getConfigFolder(), "database.yml");
-			break;
-		case BALANCE_FOLDER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/balance");
-			break;
-		case BALANCE_RAID_FOLDER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/balance/raid");
-			break;
-		case BALANCE_RAID_PLAYER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/balance/raid", args[0] + ".yml");
-			config = YamlConfiguration.loadConfiguration(file);
-			config.set("max-balance", 3000.0D);
 			break;
 		case MESSAGE:
 			file = new File(Common.getPlugin().getConfigFolder() + "/messages", args[0] + ".yml");

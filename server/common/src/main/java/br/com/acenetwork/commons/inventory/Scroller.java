@@ -54,7 +54,7 @@ public abstract class Scroller extends GUI
 			
 			try
 			{
-				itemStack = itemList.get(row * 9 + i).itemStack;
+				itemStack = itemList.get(row * 9 + i);
 			}
 			catch(IndexOutOfBoundsException ex)
 			{

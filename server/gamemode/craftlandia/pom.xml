@@ -27,7 +27,8 @@
               <includes>
                 <include>br/com/acenetwork/**</include>
                 <include>plugin.yml</include>
-                <include>message*.properties</include> -->
+                <include>message*.properties</include>
+                <include>minecraft*.properties</include>
               </includes>
               <excludes>
                 <exclude>**/*.java</exclude>

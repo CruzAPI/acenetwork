@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,6 +14,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -53,6 +56,28 @@ public class CraftCommonAdmin extends CraftCommonPlayer implements CommonAdmin
 	public boolean canBuild()
 	{
 		return build;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(HangingPlaceEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		e.setCancelled(!build);
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(HangingBreakByEntityEvent e)
+	{
+		if(e.getRemover() != p)
+		{
+			return;
+		}
+		
+		e.setCancelled(!build);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -145,7 +170,23 @@ public class CraftCommonAdmin extends CraftCommonPlayer implements CommonAdmin
 
 		e.setCancelled(!build);
 	}
-
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(PlayerInteractEntityEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		Entity entity = e.getRightClicked();
+		
+		if(entity instanceof ItemFrame)
+		{
+			e.setCancelled(!build);
+		}
+	}
+	
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent e)

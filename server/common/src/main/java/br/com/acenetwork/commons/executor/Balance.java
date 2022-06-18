@@ -72,8 +72,7 @@ public class Balance implements TabExecutor
 		}
 		else if(args.length == 1)
 		{
-			op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-				x.getName().equalsIgnoreCase(args[0])).findAny().orElse(null);
+			op = CommonsUtil.getOfflinePlayerIfCached(args[0]);
 		}
 		else
 		{
@@ -107,11 +106,10 @@ public class Balance implements TabExecutor
 			return true;
 		}
 		
-		File file = CommonsConfig.getFile(CommonsConfig.Type.BALANCE_RAID_PLAYER, true, op.getUniqueId());
+		File file = CommonsConfig.getFile(CommonsConfig.Type.PLAYER, true, op.getUniqueId());
 		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		
 		double balance = config.getDouble("balance");
-		double maxBalance = config.getDouble("max-balance");
 		
 		DecimalFormat df = new DecimalFormat("#,###.##", new DecimalFormatSymbols(bundle.getLocale()));
 		
@@ -119,10 +117,8 @@ public class Balance implements TabExecutor
 		{
 			TextComponent[] extra = new TextComponent[1];
 			
-			extra[0] = new TextComponent();
+			extra[0] = new TextComponent("");
 			extra[0].addExtra(df.format(balance));
-			extra[0].addExtra("/");
-			extra[0].addExtra(df.format(maxBalance));
 			extra[0].setColor(ChatColor.YELLOW);
 			
 			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.balance.self"), extra);
@@ -138,10 +134,8 @@ public class Balance implements TabExecutor
 			extra[0] = new TextComponent(op.getName());
 			extra[0].setColor(ChatColor.YELLOW);
 			
-			extra[1] = new TextComponent();
+			extra[1] = new TextComponent("");
 			extra[1].addExtra(df.format(balance));
-			extra[1].addExtra("/");
-			extra[1].addExtra(df.format(maxBalance));
 			extra[1].setColor(ChatColor.YELLOW);
 			
 			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.balance.other"), extra);

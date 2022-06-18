@@ -1,6 +1,7 @@
 package br.com.acenetwork.commons.inventory;
 
 import java.util.ResourceBundle;
+import java.util.function.Supplier;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
@@ -17,20 +18,32 @@ public abstract class GUI implements Listener
 		
 	public GUI(CommonPlayer cp, Inventory inv)
 	{
+		this(cp, inv, true);
+	}
+	
+	public GUI(CommonPlayer cp, Inventory inv, boolean openInventory)
+	{
 		this.cp = cp;
 		this.inv = inv;
 		
-		cp.getPlayer().openInventory(inv);
+		if(openInventory)
+		{
+			cp.getPlayer().openInventory(inv);
+		}
+		
 		cp.setGUI(this);
 	}
 	
-	protected class Item
+	protected class Item extends ItemStack
 	{
-		protected final ItemStack itemStack;
-		
 		public Item(ItemStack itemStack)
 		{
-			this.itemStack = itemStack;
+			super(itemStack);
+		}
+		
+		public Item(Supplier<ItemStack> supplier)
+		{
+			super(supplier.get());
 		}
 	}
 	
@@ -40,6 +53,15 @@ public abstract class GUI implements Listener
 		
 		this.cp = cp;
 		this.inv = Bukkit.createInventory(cp.getPlayer(), type, bundle.getString(key));
+		
+		cp.getPlayer().openInventory(inv);
+		cp.setGUI(this);
+	}
+	
+	public GUI(CommonPlayer cp, Supplier<Inventory> supplier)
+	{
+		this.cp = cp;
+		this.inv = supplier.get();
 		
 		cp.getPlayer().openInventory(inv);
 		cp.setGUI(this);

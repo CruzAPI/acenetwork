@@ -38,6 +38,7 @@ import br.com.acenetwork.commons.executor.BroadcastCMD;
 import br.com.acenetwork.commons.executor.Build;
 import br.com.acenetwork.commons.executor.ChatCMD;
 import br.com.acenetwork.commons.executor.ChatClean;
+import br.com.acenetwork.commons.executor.Give;
 import br.com.acenetwork.commons.executor.Ignore;
 import br.com.acenetwork.commons.executor.Invis;
 import br.com.acenetwork.commons.executor.Invsee;
@@ -112,6 +113,7 @@ public class Common extends JavaPlugin
 		registerCommand(new BTA(), "bta");
 		registerCommand(new ChatClean(), "chatclean", "cc");
 		registerCommand(new ChatCMD(), "chat");
+		registerCommand(new Give(), "give");
 		registerCommand(new Ignore(), "ignore");
 		registerCommand(new Invis(), "invis", "v", "vanish");
 		registerCommand(new Invis(), "vis");

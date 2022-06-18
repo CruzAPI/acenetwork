@@ -1,5 +1,7 @@
 package br.com.acenetwork.craftlandia;
 
+import org.bukkit.World;
+
 import net.md_5.bungee.api.ChatColor;
 
 public enum ItemTag 
@@ -11,10 +13,12 @@ public enum ItemTag
 	
 	private final String tag;
 	private final byte data;
+	private final String color;
 	
 	ItemTag(String color, byte data)
 	{
 		tag = color + name();
+		this.color = color;
 		this.data = data;
 	}
 	
@@ -40,5 +44,17 @@ public enum ItemTag
 		}
 		
 		return null;
+	}
+	
+	public String getColor()
+	{
+		return color;
+	}
+	
+	public static ItemTag getByDataOrWorld(byte data, World world)
+	{
+		ItemTag rarity = getByData(data);
+		rarity = rarity == null ? Util.getRarity(world) : rarity;
+		return rarity;
 	}
 }
