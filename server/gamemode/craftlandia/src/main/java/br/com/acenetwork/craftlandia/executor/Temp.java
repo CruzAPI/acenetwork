@@ -14,6 +14,8 @@ import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
+import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.CryptoInfo;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
@@ -250,6 +252,8 @@ public class Temp implements TabExecutor
 	{
 		if(sender instanceof Player)
 		{
+			Player p = (Player) sender;
+			p.sendMessage(Util.isShoppable(p.getItemInHand(), p.getItemInHand()) + "");
 			sender.sendMessage("Unknown command. Type \"/help\" for help.");
 			return true;
 		}

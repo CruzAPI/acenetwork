@@ -1,9 +1,8 @@
 package br.com.acenetwork.craftlandia;
 
-import static br.com.acenetwork.craftlandia.ItemTag.COMMON;
-import static br.com.acenetwork.craftlandia.ItemTag.LEGENDARY;
-import static br.com.acenetwork.craftlandia.ItemTag.RARE;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static br.com.acenetwork.craftlandia.Rarity.COMMON;
+import static br.com.acenetwork.craftlandia.Rarity.LEGENDARY;
+import static br.com.acenetwork.craftlandia.Rarity.RARE;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +17,10 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Damageable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
@@ -27,7 +28,7 @@ import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 
 public class Util
 {
-	public static ItemTag getRarity(World w)
+	public static Rarity getRarity(World w)
 	{
 		switch(w.getName())
 		{
@@ -42,7 +43,7 @@ public class Util
 		}
 	}
 	
-	public static ItemTag getRarity(ItemStack item)
+	public static Rarity getRarity(ItemStack item)
 	{
 		if(!item.hasItemMeta())
 		{
@@ -56,7 +57,7 @@ public class Util
 		
 		for(String line : item.getItemMeta().getLore())
 		{
-			for(ItemTag itemTag : ItemTag.values())
+			for(Rarity itemTag : Rarity.values())
 			{
 				if(line.equals(itemTag.toString()))
 				{
@@ -68,7 +69,7 @@ public class Util
 		return null;
 	}
 	
-	public static byte readBlock(Block b)
+	public static byte readBlockRarity(Block b)
 	{
 		if(!b.hasMetadata("pos"))
 		{
@@ -80,6 +81,27 @@ public class Util
 		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
 		{
 			access.seek(b.getMetadata("pos").get(0).asLong() + 12L);
+			return access.readByte();
+		}
+		catch(IOException ex)
+		{
+			ex.printStackTrace();
+			return 0;
+		}
+	}
+	
+	public static byte readBlockProperties(Block b)
+	{
+		if(!b.hasMetadata("pos"))
+		{
+			return 0;
+		}
+		
+		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, b.getWorld().getName());
+		
+		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
+		{
+			access.seek(b.getMetadata("pos").get(0).asLong() + 13L);
 			return access.readByte();
 		}
 		catch(IOException ex)
@@ -178,46 +200,28 @@ public class Util
 		}
 	}
 	
-	public static void setRarity(ItemStack itemStack, ItemTag rarity)
+	public static void setItemTag(ItemStack itemStack, ItemTag itemTag)
 	{
 		ItemMeta meta = itemStack.getItemMeta();
 		
 		List<String> lore = new ArrayList<>();
 		
-		boolean set = false;
-		
 		if(meta.hasLore())
 		{
-			loop:for(String line : meta.getLore())
-			{
-				for(ItemTag rarities : ItemTag.values())
-				{
-					if(line.equals(rarities.toString()))
-					{
-						if(!set)
-						{
-							lore.add(rarity.toString());
-						}
-						
-						set = true;
-						continue loop;
-					}
-				}
-				
-				lore.add(line);
-			}
+			lore = meta.getLore();
 		}
 		
-		if(!set)
+		if(lore.contains(itemTag.toString()))
 		{
-			lore.add(rarity.toString());
+			return;
 		}
 		
+		lore.add(itemTag.toString());
 		meta.setLore(lore);
 		itemStack.setItemMeta(meta);
 	}
 
-	public static void addRarity(ItemStack itemStack, ItemTag rarity)
+	public static void addRarity(ItemStack itemStack, Rarity rarity)
 	{
 		if(rarity == null)
 		{
@@ -258,7 +262,7 @@ public class Util
 			
 			try
 			{
-				ItemTag.valueOf(line);
+				Rarity.valueOf(line);
 				iterator.remove();
 				break;
 			}
@@ -272,7 +276,7 @@ public class Util
 		itemStack.setItemMeta(meta);
 	}
 
-	public static ItemTag getLastRarity(ItemStack item)
+	public static Rarity getLastRarity(ItemStack item)
 	{
 		ItemMeta meta = item.getItemMeta();
 		
@@ -291,7 +295,7 @@ public class Util
 			
 			try
 			{
-				return ItemTag.valueOf(line);
+				return Rarity.valueOf(line);
 			}
 			catch(IllegalArgumentException e)
 			{
@@ -325,5 +329,83 @@ public class Util
 		}
 		
 		return o;
+	}
+	
+	public static boolean isShoppable(ItemStack shop, ItemStack toCompare)
+	{
+		if(shop.getType() != toCompare.getType())
+		{
+			Bukkit.broadcastMessage("A");
+			return false;
+		}
+		
+		if(shop.getDurability() != toCompare.getDurability())
+		{
+			Bukkit.broadcastMessage("B");
+			return false;
+		}
+		
+		ItemMeta shopMeta = shop.getItemMeta();
+		ItemMeta toCompareMeta = toCompare.getItemMeta();
+		
+		if(shopMeta == null || !shopMeta.hasLore() || toCompareMeta == null || !toCompareMeta.hasLore())
+		{
+			Bukkit.broadcastMessage("C1");
+			return false;
+		}
+		
+		if(!shopMeta.getLore().equals(toCompareMeta.getLore()))
+		{
+			Bukkit.broadcastMessage("C2");
+			return false;
+		}
+		
+		if(!shop.getEnchantments().equals(toCompare.getEnchantments()))
+		{
+			Bukkit.broadcastMessage("D");
+			return false;
+		}
+		
+		if(shopMeta instanceof Repairable)
+		{
+			Repairable repairable = (Repairable) shopMeta;
+			
+			if(Util.containsItemTag(shop, Property.SOLD) && repairable.getRepairCost() != 0)
+			{
+				Bukkit.broadcastMessage("E");
+				return false;
+			}
+			
+			if(shop.getDurability() != 0)
+			{
+				Bukkit.broadcastMessage("F");
+				return false;
+			}
+		}
+		
+		Bukkit.broadcastMessage("G");
+		return true;
+	}
+	
+	private static boolean containsItemTag(ItemStack item, ItemTag tag)
+	{
+		ItemMeta meta = item.getItemMeta();
+		
+		List<String> lore = new ArrayList<>();
+		
+		if(meta.hasLore())
+		{
+			lore = meta.getLore();
+		}
+		
+		for(String line : lore)
+		{
+			if(ItemTag.getByTag(line) == tag)
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

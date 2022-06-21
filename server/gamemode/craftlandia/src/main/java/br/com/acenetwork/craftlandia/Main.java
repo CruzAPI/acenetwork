@@ -1,6 +1,6 @@
 package br.com.acenetwork.craftlandia;
 
-import static br.com.acenetwork.craftlandia.ItemTag.*;
+import static br.com.acenetwork.craftlandia.Rarity.*;
 import static org.bukkit.block.BlockFace.*;
 
 import java.io.File;
@@ -16,6 +16,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
@@ -24,6 +25,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -121,6 +123,11 @@ public class Main extends Common implements Listener
 		wc.generateStructures(true);
 		wc.createWorld();
 		
+		wc = new WorldCreator("newbie");
+		wc.environment(Environment.NORMAL);
+		wc.generateStructures(true);
+		wc.createWorld();
+		
 		wc = new WorldCreator("farm");
 		wc.environment(Environment.THE_END);
 		new Farm(wc.createWorld());
@@ -210,7 +217,7 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void b(BlockPlaceEvent e)
 	{
-		ItemTag rarity = Util.getRarity(e.getItemInHand());
+		Rarity rarity = Util.getRarity(e.getItemInHand());
 		
 		if(rarity == null)
 		{
@@ -239,7 +246,7 @@ public class Main extends Common implements Listener
 		{
 			Block b = e.getBlocks().get(i);
 			
-			byte data = Util.readBlock(b);
+			byte data = Util.readBlockRarity(b);
 			
 			list.add(data);
 			
@@ -285,8 +292,8 @@ public class Main extends Common implements Listener
 				}
 			}
 			
-			byte data = Util.readBlock(b);
-			ItemTag rarity = ItemTag.getByData(data);
+			byte data = Util.readBlockRarity(b);
+			Rarity rarity = Rarity.getByData(data);
 			rarity = rarity == null ? Util.getRarity(w) : rarity;
 			
 			b.setType(Material.AIR, true);
@@ -322,7 +329,7 @@ public class Main extends Common implements Listener
 			break;
 		}
 		
-		byte data = Util.readBlock(source);
+		byte data = Util.readBlockRarity(source);
 		
 		Util.writeBlock(newState.getBlock(), data);
 	}
@@ -336,10 +343,10 @@ public class Main extends Common implements Listener
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
 		
-		byte data = Util.readBlock(b);
+		byte data = Util.readBlockRarity(b);
 		Util.writeBlock(b, (byte) 0);
 		
-		ItemTag rarity = ItemTag.getByDataOrWorld(data, b.getWorld());
+		Rarity rarity = Rarity.getByDataOrWorld(data, b.getWorld());
 		
 		Util.addRarity(item, Util.getRarity(itemInHand));
 		Util.addRarity(item, rarity);
@@ -356,7 +363,7 @@ public class Main extends Common implements Listener
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
 		
-		ItemTag rarity = Util.getLastRarity(itemInHand);
+		Rarity rarity = Util.getLastRarity(itemInHand);
 		byte data = rarity == null ? 0 : rarity.getData();
 		Util.writeBlock(b, data);
 		
@@ -381,10 +388,10 @@ public class Main extends Common implements Listener
 		Entity entity = e.getEntity();
 		
 		final byte data = entity.hasMetadata("rarity") 
-				? ItemTag.getByDataOrWorld(entity.getMetadata("rarity").get(0).asByte(), entity.getWorld()).getData() 
+				? Rarity.getByDataOrWorld(entity.getMetadata("rarity").get(0).asByte(), entity.getWorld()).getData() 
 				: Util.getRarity(entity.getWorld()).getData();
 		
-		e.getDrops().forEach(x -> Util.setRarity(x, ItemTag.getByData(data)));
+		e.getDrops().forEach(x -> Util.setItemTag(x, Rarity.getByData(data)));
 	}
 	
 	@EventHandler
@@ -405,7 +412,7 @@ public class Main extends Common implements Listener
 	public void a(SpawnerSpawnEvent e)
 	{
 		Entity entity = e.getEntity();
-		byte data = ItemTag.getByDataOrWorld(Util.readBlock(e.getSpawner().getBlock()), entity.getWorld()).getData();
+		byte data = Rarity.getByDataOrWorld(Util.readBlockRarity(e.getSpawner().getBlock()), entity.getWorld()).getData();
 		entity.setMetadata("rarity", new FixedMetadataValue(this, data));
 	}
 	
@@ -422,7 +429,7 @@ public class Main extends Common implements Listener
 				continue;
 			}
 			
-			ItemTag rarity = Util.getRarity(content);
+			Rarity rarity = Util.getRarity(content);
 			
 			if(rarity == null)
 			{
@@ -436,10 +443,10 @@ public class Main extends Common implements Listener
 			}
 		}
 		
-		ItemTag rarity = ItemTag.getByData(data);
+		Rarity rarity = Rarity.getByData(data);
 		
 		ItemStack result = inv.getResult();
-		Util.setRarity(result, rarity);
+		Util.setItemTag(result, rarity);
 		inv.setResult(result);
 	}
 	
@@ -458,7 +465,7 @@ public class Main extends Common implements Listener
 		{
 			Block b = e.getBlocks().get(i);
 			
-			byte data = Util.readBlock(b);
+			byte data = Util.readBlockRarity(b);
 			
 			list.add(data);
 			
@@ -487,7 +494,7 @@ public class Main extends Common implements Listener
 		
 		if(e.getTo() == Material.AIR)
 		{
-			byte data = Util.readBlock(b);
+			byte data = Util.readBlockRarity(b);
 			entity.setMetadata("rarity", new FixedMetadataValue(this, data));
 			
 			Util.writeBlock(b, (byte) 0);
@@ -514,7 +521,7 @@ public class Main extends Common implements Listener
 		
 		Block b = e.getBlock();
 		
-		ItemTag rarity = ItemTag.getByDataOrWorld(Util.readBlock(b), b.getWorld());
+		Rarity rarity = Rarity.getByDataOrWorld(Util.readBlockRarity(b), b.getWorld());
 				
 		e.setCancelled(true);
 		
@@ -540,6 +547,70 @@ public class Main extends Common implements Listener
 			{
 				b.getWorld().dropItemNaturally(b.getLocation(), item);
 			});
+		}
+		
+		short damage;
+		
+		loop:switch(tool.getType())
+		{
+		case SHEARS:
+			switch(b.getType())
+			{
+			case TRIPWIRE:
+			case LEAVES:
+			case LEAVES_2:
+			case WEB:
+			case DEAD_BUSH:
+			case LONG_GRASS:
+			case VINE:
+			case WOOL:
+				damage = 1;
+				break loop;
+			default:
+				damage = 0;
+				break loop;
+			}
+		case DIAMOND_SWORD:
+		case GOLD_SWORD:
+		case IRON_SWORD:
+		case STONE_SWORD:
+		case WOOD_SWORD:
+			damage = 2;
+			break;
+		case DIAMOND_SPADE:
+		case GOLD_SPADE:
+		case IRON_SPADE:
+		case STONE_SPADE:
+		case WOOD_SPADE:
+		case DIAMOND_PICKAXE:
+		case GOLD_PICKAXE:
+		case IRON_PICKAXE:
+		case STONE_PICKAXE:
+		case WOOD_PICKAXE:
+		case DIAMOND_AXE:
+		case GOLD_AXE:
+		case IRON_AXE:
+		case STONE_AXE:
+		case WOOD_AXE:
+			damage = 1;
+			break;
+		default:
+			damage = 0;
+			break;
+		}
+		
+		Random r = new Random();
+		
+		if(r.nextDouble() <= (1.0D / (tool.getEnchantmentLevel(Enchantment.DURABILITY) + 1.0D)))
+		{
+			tool.setDurability((short) (tool.getDurability() + damage));
+			
+			if(tool.getDurability() > tool.getType().getMaxDurability())
+			{
+				Bukkit.broadcastMessage("break");
+				p.playSound(p.getLocation(), Sound.ITEM_BREAK, 1.0F, 1.0F);
+				p.setItemInHand(null);
+			}
 		}
 		
 		b.setType(Material.AIR);

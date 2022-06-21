@@ -125,12 +125,15 @@ public class Price implements TabExecutor
 	public boolean onCommand(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
 		ResourceBundle bundle = ResourceBundle.getBundle("message");
+		ResourceBundle minecraftBundle = ResourceBundle.getBundle("minecraft");
+		
 		Player p = null;
 		
 		if(sender instanceof Player)
 		{
 			p = (Player) sender;
 			bundle = ResourceBundle.getBundle("message", CraftCommonPlayer.get(p).getLocale());
+			minecraftBundle = ResourceBundle.getBundle("minecraft", CraftCommonPlayer.get(p).getLocale());
 		}
 		
 		Material type;
@@ -216,12 +219,7 @@ public class Price implements TabExecutor
 		
 		String price = Balance.getDecimalFormat().format(marketCap / circulatingSupply);
 		
-		String translationKey = CommonsUtil.getTranslation(key);
-		
-		TranslatableComponent tc = new TranslatableComponent(translationKey);
-		
-		TextComponent text = new TextComponent("");
-		text.addExtra(tc);
+		TextComponent text = new TextComponent(CommonsUtil.getTranslation(key, minecraftBundle));
 		text.addExtra(": ");
 		text.setColor(ChatColor.GREEN);
 		

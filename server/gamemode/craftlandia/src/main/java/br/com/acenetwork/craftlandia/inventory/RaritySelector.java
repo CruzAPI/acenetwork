@@ -18,7 +18,6 @@ import br.com.acenetwork.commons.inventory.AnvilCommand;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.inventory.Scroller;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.ItemTag;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

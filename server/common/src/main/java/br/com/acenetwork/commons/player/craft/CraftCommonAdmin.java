@@ -160,7 +160,7 @@ public class CraftCommonAdmin extends CraftCommonPlayer implements CommonAdmin
 		e.setCancelled(!build);
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent e)
 	{		
 		if(e.getWhoClicked() != p)

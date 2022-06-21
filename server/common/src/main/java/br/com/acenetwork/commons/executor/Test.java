@@ -13,7 +13,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.Message;
@@ -40,9 +43,15 @@ public class Test implements TabExecutor
 		
 		ItemStack item = p.getItemInHand();
 		
-		p.sendMessage("durability " + item.getDurability());
-		p.sendMessage("data.getData" + item.getData().getData());
 		
+		ItemMeta meta = item.getItemMeta();
+		
+		if(meta instanceof Repairable)
+		{
+			p.sendMessage("repairCost = " + ((Repairable) meta).getRepairCost());
+		}
+		
+		p.sendMessage((item.getItemMeta() instanceof Repairable) + "");
 //		Bukkit.broadcastMessage(p.getName() + " " + p.getUniqueId() + " v" + p.getUniqueId().version());
 		
 //		if(args.length == 1)

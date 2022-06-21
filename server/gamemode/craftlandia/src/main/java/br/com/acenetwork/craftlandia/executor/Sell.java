@@ -88,6 +88,7 @@ public class Sell implements TabExecutor
 	public static void sell(CommonPlayer cp, SellType sellType)
 	{
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		ResourceBundle minecraftBundle = ResourceBundle.getBundle("minecraft", cp.getLocale());
 		
 		Player p = cp.getPlayer();
 
@@ -234,7 +235,7 @@ public class Sell implements TabExecutor
 					TextComponent[] extra = new TextComponent[2];
 					
 					extra[0] = new TextComponent(ap.amount + " ");
-					extra[0].addExtra(new TranslatableComponent(CommonsUtil.getTranslation(key)));
+					extra[0].addExtra(CommonsUtil.getTranslation(key, minecraftBundle));
 					extra[0].setColor(ChatColor.YELLOW);
 					
 					extra[1] = new TextComponent(df.format(ap.price));

@@ -108,7 +108,6 @@ public class ItemInfo implements TabExecutor
 	public static int getItemInfoData(ItemStack item) throws IOException
 	{
 		String iteminfo = getItemInfo(item);
-		
 		String[] split = iteminfo.split("#");
 		return split.length == 2 ? Integer.valueOf(split[1]) : 0;
 	}
@@ -248,6 +247,8 @@ public class ItemInfo implements TabExecutor
 				}
 			}
 		}
+		
+		item.setItemMeta(meta);
 		
 		return item;
 	}
