@@ -9,10 +9,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -69,6 +73,27 @@ public class Util
 		return null;
 	}
 	
+	public static List<String> getLore(Block b)
+	{
+		byte[] bytes = Util.readBlock(b);
+		byte[] propertyByteArray = new byte[bytes.length - 1];
+		
+		System.arraycopy(bytes, 1, propertyByteArray, 0, propertyByteArray.length);
+		
+		Rarity rarity = Rarity.getByDataOrWorld(bytes[0], b.getWorld());
+		
+		List<String> lore = new ArrayList<>();
+		
+		lore.add(rarity.toString());
+		
+		for(Property property : Property.getPropertySet(propertyByteArray))
+		{
+			lore.add(property.toString());
+		}
+		
+		return lore;
+	}
+	
 	public static byte readBlockRarity(Block b)
 	{
 		if(!b.hasMetadata("pos"))
@@ -90,24 +115,49 @@ public class Util
 		}
 	}
 	
-	public static byte readBlockProperties(Block b)
+	public static int getArrayLength()
+	{
+		return 1 + Property.getByteArrayLength();
+	}
+	
+	public static byte[] emptyArray()
+	{
+		byte[] emptyArray = new byte[getArrayLength()];
+		
+		for(int i = 0; i < emptyArray.length; i++)
+		{
+			emptyArray[i] = Byte.MIN_VALUE;
+		}
+		
+		return emptyArray;
+	}
+	
+	public static byte[] readBlock(Block b)
 	{
 		if(!b.hasMetadata("pos"))
 		{
-			return 0;
+			return emptyArray();
 		}
 		
 		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, b.getWorld().getName());
 		
 		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
 		{
-			access.seek(b.getMetadata("pos").get(0).asLong() + 13L);
-			return access.readByte();
+			access.seek(b.getMetadata("pos").get(0).asLong() + 12L);
+			
+			byte[] bytes = new byte[getArrayLength()];
+			
+			for(int i = 0; i < bytes.length; i++)
+			{
+				bytes[i] = access.readByte();
+			}
+			
+			return bytes;
 		}
 		catch(IOException ex)
 		{
 			ex.printStackTrace();
-			return 0;
+			return emptyArray();
 		}
 	}
 	
@@ -140,7 +190,43 @@ public class Util
 		}
 	}
 	
-	public static void writeBlock(Block b, byte data)
+	public static byte[] getByteArray(ItemStack item)
+	{
+		ItemMeta meta = item.getItemMeta();
+		
+		if(!meta.hasLore())
+		{
+			return emptyArray();
+		}
+		
+		List<String> lore = meta.getLore();
+		
+		ListIterator<String> iterator = lore.listIterator(lore.size());
+		
+		byte[] bytes = emptyArray();
+		
+		while(iterator.hasPrevious())
+		{
+			Rarity rarity = Rarity.valueOfToString(iterator.previous());
+			
+			if(rarity != null)
+			{
+				bytes[0] = rarity.getData();
+				break;
+			}
+		}
+		
+		byte[] propertyArray = Property.getByteArray(getProperties(item));
+		
+		for(int i = 0; i + 1 < bytes.length && i < propertyArray.length; i++)
+		{
+			bytes[i + 1] = propertyArray[i];
+		}
+		
+		return bytes;
+	}
+	
+	public static void writeBlock(Block b, byte[] bytes)
 	{
 		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, b.getWorld().getName());
 		
@@ -162,7 +248,7 @@ public class Util
 			access.writeInt(b.getX());
 			access.writeInt(b.getY());
 			access.writeInt(b.getZ());
-			access.writeByte(data);
+			access.write(bytes);
 		}
 		catch(IOException ex)
 		{
@@ -407,5 +493,12 @@ public class Util
 		}
 		
 		return false;
+	}
+	
+	public static Set<Property> getProperties(ItemStack item)
+	{
+		ItemMeta meta = item.getItemMeta();
+		List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+		return Arrays.stream(Property.values()).filter(x -> lore.contains(x.toString())).collect(Collectors.toSet());
 	}
 }

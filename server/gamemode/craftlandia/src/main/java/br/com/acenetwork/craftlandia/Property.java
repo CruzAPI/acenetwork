@@ -31,6 +31,24 @@ public enum Property implements ItemTag
 		return color;
 	}
 	
+	public static byte[] getEmptyByteArray()
+	{
+		byte[] bytes = new byte[getByteArrayLength()];
+		
+		for(int i = 0; i < bytes.length; i++)
+		{
+			bytes[i] = Byte.MIN_VALUE;
+		}
+		
+		return bytes;
+	}
+	
+	public static int getByteArrayLength()
+	{
+		int length = values().length;
+		return length / 8 + (length % 8 == 0 ? 0 : 1);
+	}
+	
 	public static byte[] getByteArray(Set<Property> set)
 	{
 		Property[] values = values();
