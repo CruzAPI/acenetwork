@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
@@ -19,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Damageable;
@@ -29,6 +31,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.craftlandia.manager.BreakReason;
 
 public class Util
 {
@@ -500,5 +503,20 @@ public class Util
 		ItemMeta meta = item.getItemMeta();
 		List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 		return Arrays.stream(Property.values()).filter(x -> lore.contains(x.toString())).collect(Collectors.toSet());
+	}
+	
+	public static Collection<ItemStack> getDrops(Block b, BreakReason reason)
+	{
+		return getDrops(b, reason, null);
+	}
+	
+	public static Collection<ItemStack> getDrops(Block b, ItemStack tool)
+	{
+		return getDrops(b, BreakReason.PLAYER, tool);
+	}
+	
+	private static Collection<ItemStack> getDrops(Block b, BreakReason reason, ItemStack tool)
+	{
+		return null;
 	}
 }

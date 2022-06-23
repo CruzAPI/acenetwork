@@ -27,10 +27,15 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Wither;
+import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -84,6 +89,7 @@ import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
+import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
@@ -204,7 +210,36 @@ public class Main extends Common implements Listener
 	
 
 	
-	
+	@EventHandler
+	public void a(EntityExplodeEvent e)
+	{
+		Entity entity = e.getEntity();
+		
+		if(entity instanceof Creeper)
+		{
+			Creeper creeper = (Creeper) entity;
+			Bukkit.broadcastMessage("POWER: " + (creeper.isPowered() ? 6 : 3));
+		}
+		else if(entity instanceof TNTPrimed)
+		{
+			TNTPrimed tntPrimed = (TNTPrimed) entity;
+			Bukkit.broadcastMessage("POWER: 4 (yield = " + tntPrimed.getYield() + ")");
+		}
+		else if(entity instanceof EnderCrystal)
+		{
+			Bukkit.broadcastMessage("POWER: 6");
+		}
+		else if(entity instanceof Wither)
+		{
+			
+		}
+		else if(entity instanceof WitherSkull)
+		{
+			
+		}
+		
+		Bukkit.broadcastMessage(e.getEntityType() + " type");
+	}
 	
 	@EventHandler
 	public void a(SignChangeEvent e)
@@ -230,7 +265,7 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void a(BlockFromToEvent e)
 	{
-		e.setCancelled(true);
+		e.setCancelled(false);
 	}
 	
 	@EventHandler
@@ -261,6 +296,8 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void a(BlockPhysicsEvent e)
 	{
+		e.setCancelled(true);
+		
 		Block b = e.getBlock();
 		World w = b.getWorld();
 		
