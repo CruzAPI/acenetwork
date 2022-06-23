@@ -118,6 +118,7 @@ public class Main extends Common implements Listener
 		
 		registerCommand(new Temp(), "temp");
 		
+		registerCommand(new Jackpot(), "jackpot");
 		registerCommand(new Price(), "price");
 		registerCommand(new Sell(), "sell");
 		registerCommand(new Sellall(), "sellall");
