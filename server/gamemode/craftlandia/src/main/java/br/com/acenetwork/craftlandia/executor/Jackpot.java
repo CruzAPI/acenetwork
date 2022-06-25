@@ -6,7 +6,10 @@ import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,6 +27,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
@@ -31,6 +35,8 @@ import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.event.SellItemEvent;
+import br.com.acenetwork.craftlandia.inventory.JackpotGUI;
+import br.com.acenetwork.craftlandia.inventory.JackpotPercentage;
 import br.com.acenetwork.craftlandia.manager.AmountPrice;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
@@ -41,6 +47,186 @@ import net.md_5.bungee.api.chat.TranslatableComponent;
 
 public class Jackpot implements TabExecutor
 {
+	public static final List<ItemStack> PRIZE_LIST = new ArrayList<>();
+	public static final ItemStack JACKPOT_ITEM = new ItemStack(Material.BEACON);
+	private static final String JACKPOT_UUID = CommonsUtil.getRandomItemUUID();
+	public static final ItemStack NONE_ITEM = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
+	public static final String SHARDS_UUID = CommonsUtil.getRandomItemUUID();
+	
+	private static int jackpot;
+	
+	public static final Map<ItemStack, Integer> MAP = new LinkedHashMap<>();
+	
+	public Jackpot()
+	{
+		File file = Config.getFile(Type.JACKPOT, true);
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		setJackpot(config.getInt("jackpot"));
+		
+		ItemMeta meta;
+		
+		PRIZE_LIST.addAll(Collections.nCopies(1, JACKPOT_ITEM));
+		MAP.put(JACKPOT_ITEM, 1);
+		
+		ItemStack randomItem = new ItemStack(Material.COBBLESTONE);
+		
+		meta = randomItem.getItemMeta();
+		meta.setDisplayName(ChatColor.WHITE + "Random Item");
+		randomItem.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(3000, randomItem.clone()));
+		MAP.put(randomItem.clone(), 3000);
+		
+		ItemStack vip = new ItemStack(Material.WOOL, 1, (short) 5);
+		
+		meta = vip.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GREEN + ChatColor.BOLD + "VIP");
+		vip.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(30, vip.clone()));
+		MAP.put(vip.clone(), 30);
+		
+		ItemStack nugget = new ItemStack(Material.GOLD_NUGGET);
+		
+		nugget.setAmount(1);
+		meta = nugget.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "100 SHARDS" + SHARDS_UUID);
+		nugget.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(900, nugget.clone()));
+		MAP.put(nugget.clone(), 900);
+
+		nugget.setAmount(2);
+		meta = nugget.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "200 SHARDS" + SHARDS_UUID);
+		nugget.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(1350, nugget.clone()));
+		MAP.put(nugget.clone(), 1350);
+		
+		nugget.setAmount(3);
+		meta = nugget.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "300 SHARDS" + SHARDS_UUID);
+		nugget.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
+		MAP.put(nugget.clone(), 1800);
+		
+		nugget.setAmount(4);
+		meta = nugget.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "400 SHARDS" + SHARDS_UUID);
+		nugget.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(2250, nugget.clone()));
+		MAP.put(nugget.clone(), 2250);
+		
+		nugget.setAmount(5);
+		meta = nugget.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "500 SHARDS" + SHARDS_UUID);
+		nugget.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(2700, nugget.clone()));
+		MAP.put(nugget.clone(), 2700);
+		
+		
+		
+		ItemStack ingot = new ItemStack(Material.GOLD_INGOT);
+		
+		ingot.setAmount(1);
+		meta = ingot.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "1,000 SHARDS" + SHARDS_UUID);
+		ingot.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(1800, ingot.clone()));
+		MAP.put(ingot.clone(), 1800);
+		
+		ingot.setAmount(2);
+		meta = ingot.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "2,000 SHARDS" + SHARDS_UUID);
+		ingot.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(1500, ingot.clone()));
+		MAP.put(ingot.clone(), 1500);
+		
+		ingot.setAmount(3);
+		meta = ingot.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "3,000 SHARDS" + SHARDS_UUID);
+		ingot.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(1200, ingot.clone()));
+		MAP.put(ingot.clone(), 1200);
+		
+		ingot.setAmount(4);
+		meta = ingot.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "4,000 SHARDS" + SHARDS_UUID);
+		ingot.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(900, ingot.clone()));
+		MAP.put(ingot.clone(), 900);
+		
+		ingot.setAmount(5);
+		meta = ingot.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "5,000 SHARDS" + SHARDS_UUID);
+		ingot.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(600, ingot.clone()));
+		MAP.put(ingot.clone(), 600);
+		
+		
+		
+		ItemStack block = new ItemStack(Material.GOLD_BLOCK);
+		
+		block.setAmount(1);
+		meta = block.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "10,000 SHARDS" + SHARDS_UUID);
+		block.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(120, block.clone()));
+		MAP.put(block.clone(), 120);
+		
+		block.setAmount(2);
+		meta = block.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "20,000 SHARDS" + SHARDS_UUID);
+		block.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(90, block.clone()));
+		MAP.put(block.clone(), 90);
+		
+		block.setAmount(3);
+		meta = block.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "30,000 SHARDS" + SHARDS_UUID);
+		block.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(45, block.clone()));
+		MAP.put(block.clone(), 45);
+		
+		block.setAmount(4);
+		meta = block.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "40,000 SHARDS" + SHARDS_UUID);
+		block.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(30, block.clone()));
+		MAP.put(block.clone(), 30);
+		
+		block.setAmount(5);
+		meta = block.getItemMeta();
+		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "50,000 SHARDS" + SHARDS_UUID);
+		block.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(15, block.clone()));
+		MAP.put(block.clone(), 15);
+		
+		Bukkit.getConsoleSender().sendMessage("PRIZE_LIST " + PRIZE_LIST.size());
+		
+		meta = NONE_ITEM.getItemMeta();
+		meta.setDisplayName("" + ChatColor.RED + "None" + CommonsUtil.getRandomItemUUID());
+		NONE_ITEM.setItemMeta(meta);
+		
+		int nCopies = Math.max(0, 30000 - PRIZE_LIST.size());
+		PRIZE_LIST.addAll(Collections.nCopies(nCopies, NONE_ITEM));
+		MAP.put(NONE_ITEM, nCopies);
+	}
+	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
@@ -63,209 +249,76 @@ public class Jackpot implements TabExecutor
 		
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
-		if(args.length == 1 && args[0].equals("1"))
+		if(args.length == 0)
 		{
-			Random r = new Random();
+			if(cp.isJackpoting())
+			{
+				return true;
+			}
 			
-			double d = r.nextInt(100) + r.nextDouble();
+			Collections.shuffle(PRIZE_LIST);
 			
+			setJackpot(getJackpot() + 1000);
 			
+			Bukkit.broadcastMessage("jackpot = " + jackpot);
+			
+			cp.setJackpoting(true);
+			new JackpotGUI(cp, PRIZE_LIST);
 		}
 		else
 		{
-			TextComponent[] extra = new TextComponent[1];
-			
-			extra[0] = new TextComponent("/" + aliases);
-			
-			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
-			text.setColor(ChatColor.RED);
-			p.spigot().sendMessage(text);
+			new JackpotPercentage(cp);
+//			TextComponent[] extra = new TextComponent[1];
+//			
+//			extra[0] = new TextComponent("/" + aliases);
+//			
+//			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
+//			text.setColor(ChatColor.RED);
+//			p.spigot().sendMessage(text);
 		}
 
 		return false;
 	}
 	
-	public static void sell(CommonPlayer cp, SellType sellType)
+	public static int getJackpot()	
 	{
-		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
-		ResourceBundle minecraftBundle = ResourceBundle.getBundle("minecraft", cp.getLocale());
+		return jackpot;
+	}
+	
+	public static void setJackpot(int jackpot)
+	{
+		Jackpot.jackpot = jackpot;
+		File file = Config.getFile(Type.JACKPOT, true);
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		
-		Player p = cp.getPlayer();
-
-		File playerFile = CommonsConfig.getFile(CommonsConfig.Type.PLAYER, true, p.getUniqueId());
-		YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
+		DecimalFormat df = new DecimalFormat();
+		df.setGroupingSize(3);
+		df.setGroupingUsed(true);
 		
-		double balance = playerConfig.getDouble("balance");
+		ItemMeta meta;
 		
-		Map<String, AmountPrice> map = new HashMap<>();
-		
-		List<ItemStack> itemsToSell = new ArrayList<>();
-		
-		if(sellType == SellType.HAND)
+		if(jackpot > 0)
 		{
-			itemsToSell.add(p.getItemInHand());
+			JACKPOT_ITEM.setType(Material.BEACON);
+			meta = JACKPOT_ITEM.getItemMeta();
+			meta.setDisplayName("" + ChatColor.AQUA + ChatColor.BOLD + "JACKPOT" + JACKPOT_UUID);
+			meta.setLore(Arrays.asList(ChatColor.GRAY + "Prize: " + ChatColor.WHITE + df.format(jackpot) + " SHARDS"));
+			JACKPOT_ITEM.setItemMeta(meta);
 		}
 		else
 		{
-			for(ItemStack content : p.getInventory())
-			{
-				itemsToSell.add(content);
-			}
+			CommonsUtil.setItemCopyOf(JACKPOT_ITEM, NONE_ITEM);
 		}
 		
-		double total = 0.0D;
+		config.set("jackpot", jackpot);
 		
-		List<SellItemEvent> events = new ArrayList<>();
-		
-		File file = Config.getFile(Type.PRICE, false);
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-		{
-			for(int i = 0; i < itemsToSell.size(); i++)
-			{
-				ItemStack item = itemsToSell.get(i);
-				
-				if(item == null || item.getType() == Material.AIR)
-				{
-					if(sellType == SellType.HAND)
-					{
-						TextComponent text = new TextComponent(bundle.getString("raid.cmd.sell.need-hoolding-item"));
-						text.setColor(ChatColor.RED);
-						p.spigot().sendMessage(text);
-						return;
-					}
-					
-					continue;
-				}
-				
-				final int id = item.getTypeId();
-				final short data = item.getData().getData();
-				final String key = id + ":" + data;
-				
-				if(!Price.MAP.containsKey(key))
-				{
-					if(sellType == SellType.HAND)
-					{
-						p.sendMessage(ChatColor.RED + bundle.getString("raid.cmd.sell.item-not-for-sale"));
-						return;
-					}
-					
-					continue;
-				}
-				
-				CryptoInfo cryptoInfo = Price.MAP.get(key);
-				
-				
-				final double oldMarketCap = cryptoInfo.getMarketCap();
-				double marketCap = oldMarketCap;
-				final double oldCirculatingSupply = cryptoInfo.getCirculatingSupply();
-				double circulatingSupply = oldCirculatingSupply;
-				
-				final int amountToSell = item.getAmount();
-				
-				if(sellType == SellType.HAND)
-				{
-					p.setItemInHand(null);
-				}
-				else
-				{
-					p.getInventory().setItem(i, null);
-				}
-				
-				double oldPrice = marketCap / circulatingSupply;
-				double newPrice = (marketCap - oldPrice * amountToSell) / (circulatingSupply + amountToSell);
-				
-				final double price = (oldPrice + newPrice) / 2.0D;
-				
-				double shards = price * amountToSell;
-				
-				marketCap -= shards;
-				circulatingSupply += amountToSell;
-				
-				cryptoInfo.setMarketCap(marketCap);
-				cryptoInfo.setCirculatingSupply(circulatingSupply);
-				
-				
-				access.seek(cryptoInfo.getPos() + 4L + 2L);
-				access.writeDouble(marketCap);
-				access.writeDouble(circulatingSupply);
-				
-				playerConfig.set("balance", balance += shards);
-				
-				total += shards;
-				
-				AmountPrice ap = map.containsKey(key) ? map.get(key) : new AmountPrice();
-				
-				ap.amount += amountToSell;
-				ap.price += shards;
-				
-				map.put(key, ap);
-				
-				events.add(new SellItemEvent(p, key, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
-			}
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
 		try
 		{
-			playerConfig.save(playerFile);
-			
-			events.forEach(x -> Bukkit.getPluginManager().callEvent(x));
-			
-			if(map.isEmpty())
-			{
-				TextComponent text = new TextComponent(bundle.getString("raid.cmd.sellall.no-items-to-sell"));
-				text.setColor(ChatColor.RED);
-				p.spigot().sendMessage(text);
-			}
-			else
-			{
-				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-				
-				df.setGroupingSize(3);
-				df.setGroupingUsed(true);
-				
-				for(Entry<String, AmountPrice> entry : map.entrySet())
-				{
-					String key = entry.getKey();
-					AmountPrice ap = entry.getValue();
-					
-					TextComponent[] extra = new TextComponent[2];
-					
-					extra[0] = new TextComponent(ap.amount + " ");
-					extra[0].addExtra(CommonsUtil.getTranslation(key, minecraftBundle));
-					extra[0].setColor(ChatColor.YELLOW);
-					
-					extra[1] = new TextComponent(df.format(ap.price));
-					extra[1].setColor(ChatColor.YELLOW);
-					
-					TextComponent text = Message.getTextComponent(bundle.getString("raid.cmd.sell.item-sold"), extra);
-					text.setColor(ChatColor.GREEN);
-					p.spigot().sendMessage(text);
-				}
-				
-				if(sellType == SellType.ALL)
-				{
-					TextComponent[] extra = new TextComponent[1];
-					
-					extra[0] = new TextComponent(df.format(total));
-					extra[0].setColor(ChatColor.YELLOW);
-					
-					TextComponent text = Message.getTextComponent(bundle.getString("raid.cmd.sellall.totalizing"), extra);
-					text.setColor(ChatColor.GREEN);
-					p.spigot().sendMessage(text);
-				}
-			}
+			config.save(file);
 		}
-		catch(IOException ex)
+		catch(IOException e)
 		{
-			ex.printStackTrace();
-			
-			TextComponent text = new TextComponent(bundle.getString("commons.unexpected-error"));
-			text.setColor(ChatColor.RED);
-			p.spigot().sendMessage(text);
+			e.printStackTrace();
 		}
 	}
 }

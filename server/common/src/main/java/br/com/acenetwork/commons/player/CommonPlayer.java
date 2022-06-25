@@ -12,6 +12,8 @@ import br.com.acenetwork.commons.inventory.GUI;
 
 public interface CommonPlayer extends Listener
 {
+	void setJackpoting(boolean value);
+	boolean isJackpoting();
 	CommonsScoreboard getCommonsScoreboard();
 	void setCommonsScoreboard(CommonsScoreboard commonsScoreboard);
 	CommonsHotbar getCommonsHotbar();
