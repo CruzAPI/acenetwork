@@ -43,13 +43,17 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.block.EntityBlockFormEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
@@ -77,6 +81,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
@@ -89,7 +94,6 @@ import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
-import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
@@ -294,8 +298,73 @@ public class Main extends Common implements Listener
 	}
 	
 	@EventHandler
+	public void temp(LeavesDecayEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(BlockBurnEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(BlockIgniteEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(EntityChangeBlockEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(EntityBlockFormEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(StructureGrowEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temasd(EntityBlockFormEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(BlockSpreadEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(BlockGrowEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void temp(BlockFormEvent e)
+	{
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
 	public void a(BlockPhysicsEvent e)
 	{
+		if(true)
+		{
+			e.setCancelled(true);
+			return;
+		}
 		e.setCancelled(true);
 		
 		Block b = e.getBlock();
