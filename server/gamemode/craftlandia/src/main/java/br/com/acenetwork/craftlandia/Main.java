@@ -89,7 +89,6 @@ import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
-import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
