@@ -2,6 +2,7 @@ package br.com.acenetwork.craftlandia.inventory;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -34,20 +35,42 @@ public class JackpotPercentage extends GUI
 		});
 		
 		int size = Jackpot.PRIZE_LIST.size();
+		int i = 0;
+		double totalAvg = 0;
+		
+		DecimalFormat df = new DecimalFormat("#.###");
+		
+		int bet = 1000;
 		
 		for(Entry<ItemStack, Integer> entry : Jackpot.MAP.entrySet())
 		{
 			ItemStack key = entry.getKey().clone();
 			int value = entry.getValue();
 			
+			int shards = Jackpot.getValueInShardsTheoretically(bet, key);
+			
 			ItemMeta meta = key.getItemMeta();
 			
-			DecimalFormat df = new DecimalFormat("#.####");
+			double div = ((double) value / size);
+			double avg = div * shards;
+			totalAvg += avg;
 			
-			meta.setDisplayName("" + ChatColor.GREEN + value + "/" + size + " (" + df.format(((double) value / size) * 100.0D) + "%)");
+			meta.setDisplayName("" + ChatColor.GREEN + value + "/" + size + " (" + df.format(div * 100.0D) + "%) "
+					+ ChatColor.GRAY + "(" + df.format(avg) + " shards)");
 			key.setItemMeta(meta);
-			inv.addItem(key);
+			inv.setItem(i++, key);
 		}
+		
+		ItemStack info = new ItemStack(Material.PAPER);
+		ItemMeta meta = info.getItemMeta();
+		meta.setDisplayName(ChatColor.WHITE + "Total Average = " + df.format(totalAvg));
+		
+		double avgJackpot = (bet - totalAvg) * (30000.0D);
+
+		meta.setLore(Arrays.asList(ChatColor.GRAY + "Average jackpot prize = " + df.format(avgJackpot)));
+		info.setItemMeta(meta);
+		
+		inv.setItem(inv.getSize() - 1, info);
 	}
 	
 	@EventHandler

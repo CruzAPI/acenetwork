@@ -2,25 +2,18 @@ package br.com.acenetwork.craftlandia.executor;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import javax.accessibility.AccessibleKeyBinding;
-
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -30,20 +23,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.commons.manager.CommonsConfig;
-import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.event.SellItemEvent;
 import br.com.acenetwork.craftlandia.inventory.JackpotGUI;
 import br.com.acenetwork.craftlandia.inventory.JackpotPercentage;
-import br.com.acenetwork.craftlandia.manager.AmountPrice;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
-import br.com.acenetwork.craftlandia.manager.CryptoInfo;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.TranslatableComponent;
 
 public class Jackpot implements TabExecutor
 {
@@ -52,8 +38,11 @@ public class Jackpot implements TabExecutor
 	private static final String JACKPOT_UUID = CommonsUtil.getRandomItemUUID();
 	public static final ItemStack NONE_ITEM = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
 	public static final String SHARDS_UUID = CommonsUtil.getRandomItemUUID();
+	public static final String VIP_UUID = CommonsUtil.getRandomItemUUID();
+	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
 	
 	private static int jackpot;
+	private static final int $BTA_TO_SHARDS = 200;
 	
 	public static final Map<ItemStack, Integer> MAP = new LinkedHashMap<>();
 	
@@ -80,7 +69,7 @@ public class Jackpot implements TabExecutor
 		ItemStack vip = new ItemStack(Material.WOOL, 1, (short) 5);
 		
 		meta = vip.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GREEN + ChatColor.BOLD + "VIP");
+		meta.setDisplayName("" + ChatColor.GREEN + ChatColor.BOLD + "VIP" + VIP_UUID);
 		vip.setItemMeta(meta);
 		
 		PRIZE_LIST.addAll(Collections.nCopies(30, vip.clone()));
@@ -93,16 +82,16 @@ public class Jackpot implements TabExecutor
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "100 SHARDS" + SHARDS_UUID);
 		nugget.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(900, nugget.clone()));
-		MAP.put(nugget.clone(), 900);
+		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
+		MAP.put(nugget.clone(), 1800);
 
 		nugget.setAmount(2);
 		meta = nugget.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "200 SHARDS" + SHARDS_UUID);
 		nugget.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(1350, nugget.clone()));
-		MAP.put(nugget.clone(), 1350);
+		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
+		MAP.put(nugget.clone(), 1800);
 		
 		nugget.setAmount(3);
 		meta = nugget.getItemMeta();
@@ -117,16 +106,16 @@ public class Jackpot implements TabExecutor
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "400 SHARDS" + SHARDS_UUID);
 		nugget.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(2250, nugget.clone()));
-		MAP.put(nugget.clone(), 2250);
+		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
+		MAP.put(nugget.clone(), 1800);
 		
 		nugget.setAmount(5);
 		meta = nugget.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "500 SHARDS" + SHARDS_UUID);
 		nugget.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(2700, nugget.clone()));
-		MAP.put(nugget.clone(), 2700);
+		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
+		MAP.put(nugget.clone(), 1800);
 		
 		
 		
@@ -137,40 +126,40 @@ public class Jackpot implements TabExecutor
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "1,000 SHARDS" + SHARDS_UUID);
 		ingot.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(1800, ingot.clone()));
-		MAP.put(ingot.clone(), 1800);
+		PRIZE_LIST.addAll(Collections.nCopies(1500, ingot.clone()));
+		MAP.put(ingot.clone(), 1500);
 		
 		ingot.setAmount(2);
 		meta = ingot.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "2,000 SHARDS" + SHARDS_UUID);
 		ingot.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(1500, ingot.clone()));
-		MAP.put(ingot.clone(), 1500);
+		PRIZE_LIST.addAll(Collections.nCopies(1200, ingot.clone()));
+		MAP.put(ingot.clone(), 1200);
 		
 		ingot.setAmount(3);
 		meta = ingot.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "3,000 SHARDS" + SHARDS_UUID);
 		ingot.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(1200, ingot.clone()));
-		MAP.put(ingot.clone(), 1200);
+		PRIZE_LIST.addAll(Collections.nCopies(900, ingot.clone()));
+		MAP.put(ingot.clone(), 900);
 		
 		ingot.setAmount(4);
 		meta = ingot.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "4,000 SHARDS" + SHARDS_UUID);
 		ingot.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(900, ingot.clone()));
-		MAP.put(ingot.clone(), 900);
+		PRIZE_LIST.addAll(Collections.nCopies(600, ingot.clone()));
+		MAP.put(ingot.clone(), 600);
 		
 		ingot.setAmount(5);
 		meta = ingot.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "5,000 SHARDS" + SHARDS_UUID);
 		ingot.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(600, ingot.clone()));
-		MAP.put(ingot.clone(), 600);
+		PRIZE_LIST.addAll(Collections.nCopies(300, ingot.clone()));
+		MAP.put(ingot.clone(), 300);
 		
 		
 		
@@ -181,42 +170,66 @@ public class Jackpot implements TabExecutor
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "10,000 SHARDS" + SHARDS_UUID);
 		block.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(120, block.clone()));
-		MAP.put(block.clone(), 120);
+		PRIZE_LIST.addAll(Collections.nCopies(225, block.clone()));
+		MAP.put(block.clone(), 225);
 		
 		block.setAmount(2);
 		meta = block.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "20,000 SHARDS" + SHARDS_UUID);
 		block.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(90, block.clone()));
-		MAP.put(block.clone(), 90);
+		PRIZE_LIST.addAll(Collections.nCopies(30, block.clone()));
+		MAP.put(block.clone(), 30);
 		
 		block.setAmount(3);
 		meta = block.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "30,000 SHARDS" + SHARDS_UUID);
 		block.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(45, block.clone()));
-		MAP.put(block.clone(), 45);
+		PRIZE_LIST.addAll(Collections.nCopies(20, block.clone()));
+		MAP.put(block.clone(), 20);
 		
 		block.setAmount(4);
 		meta = block.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "40,000 SHARDS" + SHARDS_UUID);
 		block.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(30, block.clone()));
-		MAP.put(block.clone(), 30);
+		PRIZE_LIST.addAll(Collections.nCopies(15, block.clone()));
+		MAP.put(block.clone(), 15);
 		
 		block.setAmount(5);
 		meta = block.getItemMeta();
 		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "50,000 SHARDS" + SHARDS_UUID);
 		block.setItemMeta(meta);
 		
-		PRIZE_LIST.addAll(Collections.nCopies(15, block.clone()));
-		MAP.put(block.clone(), 15);
+		PRIZE_LIST.addAll(Collections.nCopies(10, block.clone()));
+		MAP.put(block.clone(), 10);
 		
-		Bukkit.getConsoleSender().sendMessage("PRIZE_LIST " + PRIZE_LIST.size());
+		ItemStack bta = new ItemStack(Material.NETHER_STAR);
+		
+		bta.setAmount(1);
+		meta = bta.getItemMeta();
+		meta.setDisplayName("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "1 $BTA" + $BTA_UUID);
+		bta.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(900, bta.clone()));
+		MAP.put(bta.clone(), 900);
+		
+		bta.setAmount(3);
+		meta = bta.getItemMeta();
+		meta.setDisplayName("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "3 $BTA" + $BTA_UUID);
+		bta.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(450, bta.clone()));
+		MAP.put(bta.clone(), 450);
+		
+		bta.setAmount(5);
+		meta = bta.getItemMeta();
+		meta.setDisplayName("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "5 $BTA" + $BTA_UUID);
+		bta.setItemMeta(meta);
+		
+		PRIZE_LIST.addAll(Collections.nCopies(150, bta.clone()));
+		MAP.put(bta.clone(), 150);
 		
 		meta = NONE_ITEM.getItemMeta();
 		meta.setDisplayName("" + ChatColor.RED + "None" + CommonsUtil.getRandomItemUUID());
@@ -320,6 +333,60 @@ public class Jackpot implements TabExecutor
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public static int getValueInShards(int bet, ItemStack item)
+	{
+		if(CommonsUtil.compareUUID(item, Jackpot.JACKPOT_UUID))
+		{
+			return Math.max(0, jackpot);
+		}
+		
+		if(CommonsUtil.compareUUID(item, Jackpot.SHARDS_UUID))
+		{
+			double multiplier;
+			
+			switch(item.getType())
+			{
+			case GOLD_NUGGET:
+				multiplier = 0.1D;
+				break;
+			case GOLD_INGOT:
+				multiplier = 1.0D;
+				break;
+			case GOLD_BLOCK:
+				multiplier = 10.0D;
+				break;
+			default:
+				return 0;
+			}
+			
+			return (int) (bet * item.getAmount() * multiplier);
+		}
+		
+		if(CommonsUtil.compareUUID(item, Jackpot.$BTA_UUID))
+		{
+			double multiplier = 0.001D;
+			
+			return (int) (bet * item.getAmount() * multiplier * $BTA_TO_SHARDS);
+		}
+		
+		if(CommonsUtil.compareUUID(item, Jackpot.VIP_UUID))
+		{
+			return 10000;
+		}
+		
+		return 0;
+	}
+	
+	public static int getValueInShardsTheoretically(int bet, ItemStack item)
+	{
+		if(CommonsUtil.compareUUID(item, JACKPOT_UUID))
+		{
+			return 0;
+		}
+		
+		return getValueInShards(bet, item);
 	}
 }
 
