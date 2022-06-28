@@ -11,6 +11,7 @@ public class Config
 {
 	public enum Type
 	{
+		JACKPOT,
 		BOT, 
 		COMBATLOG, 
 		PRICE, 
@@ -25,6 +26,9 @@ public class Config
 
 		switch(type)
 		{
+		case JACKPOT:
+			file = new File(Main.getInstance().getDataFolder(), "jackpot.yml");
+			break;
 		case PLAYER_INFO:
 			file = new File(Main.getInstance().getDataFolder() + "/player_info", args[0] + ".yml");
 			break;

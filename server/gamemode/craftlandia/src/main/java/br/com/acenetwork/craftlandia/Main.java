@@ -43,13 +43,17 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.block.EntityBlockFormEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
@@ -77,6 +81,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
@@ -117,6 +122,7 @@ public class Main extends Common implements Listener
 		
 		registerCommand(new Temp(), "temp");
 		
+		registerCommand(new Jackpot(), "jackpot");
 		registerCommand(new Price(), "price");
 		registerCommand(new Sell(), "sell");
 		registerCommand(new Sellall(), "sellall");
@@ -212,6 +218,7 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void a(EntityExplodeEvent e)
 	{
+		e.blockList().clear();
 		Entity entity = e.getEntity();
 		
 		if(entity instanceof Creeper)
@@ -295,8 +302,6 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void a(BlockPhysicsEvent e)
 	{
-		e.setCancelled(true);
-		
 		Block b = e.getBlock();
 		World w = b.getWorld();
 		

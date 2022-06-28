@@ -69,8 +69,8 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	private boolean ignoreInvisAndSpecs;
 	private String walletAddress;
 	private Inventory vipChest;
-	
 	public int taskRequest;
+	private boolean isJackpoting;
 	
 	public CraftCommonPlayer(Player p)
 	{
@@ -546,11 +546,22 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	}
 	
 	@Override
-	public void sendMessage(String string, Object... args) {
-		// TODO REMOVE
+	public void sendMessage(String string, Object... args)
+	{
 		
 	}
 	
+	@Override
+	public void setJackpoting(boolean value)
+	{
+		this.isJackpoting = value;
+	}
+	
+	@Override
+	public boolean isJackpoting()
+	{
+		return isJackpoting;
+	}
 	
 	@Override
 	public Inventory getVipChest()
