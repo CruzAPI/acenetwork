@@ -60,10 +60,19 @@ public abstract class GUI implements Listener
 	
 	public GUI(CommonPlayer cp, Supplier<Inventory> supplier)
 	{
+		this(cp, supplier, true);
+	}
+	
+	public GUI(CommonPlayer cp, Supplier<Inventory> supplier, boolean openInventory)
+	{
 		this.cp = cp;
 		this.inv = supplier.get();
 		
-		cp.getPlayer().openInventory(inv);
+		if(openInventory)
+		{
+			cp.getPlayer().openInventory(inv);
+		}
+		
 		cp.setGUI(this);
 	}
 	

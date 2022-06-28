@@ -2,10 +2,12 @@ package br.com.acenetwork.commons.manager;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import br.com.acenetwork.commons.Common;
+import br.com.acenetwork.commons.inventory.VipChestGUI;
 
 public class CommonsConfig
 {
@@ -18,7 +20,7 @@ public class CommonsConfig
 		WHITELISTED_IP,
 		CLANS_JSON, MESSAGE, GROUP, USER, 
 		PLAYER, 
-		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE,
+		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP,
 		;
 	}
 
@@ -29,6 +31,9 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case CHEST_VIP:
+			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".txt");
+			break;
 		case SIGN_DATA:
 			file = new File(Common.getPlugin().getConfigFolder() + "/sign_data", args[0] + ".txt");
 			break;
@@ -85,6 +90,36 @@ public class CommonsConfig
 			try
 			{
 				file.createNewFile();
+				
+				if(!file.getName().endsWith(".txt"))
+				{
+					switch(type)
+					{
+					case CHEST_VIP:
+//						try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+//						{
+//							for(int i = 0; i < 9 * 3; i++)
+//							{
+//								access.writeByte(0);
+//							}
+//							
+//							break;
+//						}
+//						catch(IOException ex)
+//						{
+//							throw ex;
+//						}
+					default:
+						break;
+					}
+					
+					return file;
+				}
+				
+				if(!file.getName().endsWith(".yml"))
+				{
+					return file;
+				}
 				
 				if(config == null)
 				{

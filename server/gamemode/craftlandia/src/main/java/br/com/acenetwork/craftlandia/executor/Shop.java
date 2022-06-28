@@ -33,6 +33,7 @@ import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.material.Directional;
 
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.constants.Currency;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
@@ -49,7 +50,6 @@ import br.com.acenetwork.craftlandia.inventory.EnchantSelector;
 import br.com.acenetwork.craftlandia.inventory.ItemSelector;
 import br.com.acenetwork.craftlandia.inventory.PriceSelector;
 import br.com.acenetwork.craftlandia.inventory.RaritySelector;
-import br.com.acenetwork.craftlandia.manager.Currency;
 import br.com.acenetwork.craftlandia.manager.InvalidCommandArgumentException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;

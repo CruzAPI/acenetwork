@@ -55,6 +55,7 @@ import br.com.acenetwork.commons.executor.Tell;
 import br.com.acenetwork.commons.executor.Test;
 import br.com.acenetwork.commons.executor.Tp;
 import br.com.acenetwork.commons.executor.Unmute;
+import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.executor.Wallet;
 import br.com.acenetwork.commons.executor.WatchCMD;
 import br.com.acenetwork.commons.listener.EntitySpawn;
@@ -131,6 +132,7 @@ public class Common extends JavaPlugin
 		registerCommand(new Test(), "test");
 		registerCommand(new Tp(), "teleport", "tp");
 		registerCommand(new Unmute(), "unmute");
+		registerCommand(new VipChest(), "vipchest");
 		registerCommand(new WatchCMD(), "watch");
 		registerCommand(new Wallet(), "wallet");
 		

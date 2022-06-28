@@ -2,17 +2,24 @@ package br.com.acenetwork.commons.player.craft;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -20,8 +27,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import br.com.acenetwork.commons.Common;
@@ -31,6 +44,7 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.event.PlayerModeChangeEvent;
 import br.com.acenetwork.commons.executor.Balance;
+import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
@@ -54,6 +68,9 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	private boolean invis;
 	private boolean ignoreInvisAndSpecs;
 	private String walletAddress;
+	private Inventory vipChest;
+	
+	public int taskRequest;
 	
 	public CraftCommonPlayer(Player p)
 	{
@@ -106,11 +123,17 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		ResourceBundle bundle = ResourceBundle.getBundle("message", getLocale());
 		
 //		p.sendMessage(ChatColor.GREEN + bundle.getString("commons.cmds.checking-database"));
-		
-		return Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+		taskRequest = Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
 		{
 			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.request-timed-out"));
 		}, timeout);
+		return taskRequest;
+	}
+	
+	@Override
+	public boolean isRequesting()
+	{
+		return Bukkit.getScheduler().isQueued(taskRequest);
 	}
 	
 	@Override
@@ -528,6 +551,153 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 	}
 	
+	
+	@Override
+	public Inventory getVipChest()
+	{
+		return vipChest;
+	}
+	
+	@EventHandler
+	public void aasda(WorldSaveEvent e)
+	{
+		if(!e.getWorld().getName().equals("world"))
+		{
+			return;
+		}
+		
+		try
+		{
+			writeVipChest();
+		}
+		catch(IOException e1)
+		{
+			e1.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void readVipChest() throws IOException
+	{
+		if(Bukkit.getScheduler().isQueued(taskRequest))
+		{
+			return;
+		}
+		
+		writeVipChest();
+		
+		String path = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId()).toPath().toString();
+		
+		Runtime.getRuntime().exec(String.format("node %s/reset/vip %s %s %s %s", System.getProperty("user.home"),
+				Common.getSocketPort(), 
+				requestDatabase(), 
+				p.getUniqueId(), 
+				path));
+	}
+	
+	@Override
+	public void writeVipChest() throws IOException
+	{
+		if(vipChest == null)
+		{
+			Bukkit.broadcastMessage("return ");
+			return;
+		}
+		
+		File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
+		
+		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+		{
+			for(int i = 0; i < vipChest.getSize(); i++)
+			{
+				ItemStack item = vipChest.getItem(i);
+				
+				if(item != null && VipChestGUI.getVipItem().isSimilar(item))
+				{
+					access.writeByte(item.getAmount());
+				}
+				else
+				{
+					access.writeByte(0);
+				}
+			}
+		}
+		catch(IOException ex)
+		{
+			throw ex;
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void vipActivation(PlayerInteractEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		ItemStack item = e.getItem();
+		
+		if(!VipChestGUI.getVipItem().isSimilar(item))
+		{
+			return;
+		}
+		
+		e.setCancelled(true);
+		
+		if(!e.getAction().name().contains("RIGHT"))
+		{
+			return;
+		}
+		
+		int amount = item.getAmount();
+		
+		if(amount <= 0)
+		{
+			return;
+		}
+		
+		item.setAmount(--amount);
+		
+		if(amount <= 0)
+		{
+			p.setItemInHand(null);
+		}
+		
+		Bukkit.broadcastMessage(" Um Troxa (" + p.getDisplayName() + ChatColor.WHITE + ")  ativou VIP");
+		
+		p.setFallDistance(-9999.9F);
+		p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20 * 5, 5));
+		p.getWorld().createExplosion(p.getLocation(), 6.0F);
+		
+		Firework f = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+		FireworkMeta meta = f.getFireworkMeta();
+		
+		meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.GRAY).build());
+		meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE).withColor(Color.AQUA).build());
+		meta.setPower(1);
+		
+		ItemStack[] armor = new ItemStack[] 
+		{
+			new ItemStack(Material.DIAMOND_HELMET),
+			new ItemStack(Material.DIAMOND_CHESTPLATE),
+			new ItemStack(Material.DIAMOND_LEGGINGS),
+			new ItemStack(Material.DIAMOND_BOOTS)
+		};
+		
+		for(ItemStack values : p.getInventory().addItem(armor).values())
+		{
+			p.getWorld().dropItemNaturally(p.getLocation(), values);
+		}
+		
+		f.setFireworkMeta(meta);
+	}
+	
+	@Override
+	public void setVipChest(Inventory inv)
+	{
+		this.vipChest = inv;
+	}
 	
 	@Override
 	public Locale getLocale()

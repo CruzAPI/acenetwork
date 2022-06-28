@@ -1,17 +1,25 @@
 package br.com.acenetwork.commons.player;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 
 import br.com.acenetwork.commons.CommonsHotbar;
 import br.com.acenetwork.commons.CommonsScoreboard;
 import br.com.acenetwork.commons.constants.Tag;
+import br.com.acenetwork.commons.executor.VipChest;
+import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.inventory.GUI;
 
 public interface CommonPlayer extends Listener
 {
+	void setVipChest(Inventory inv);
+	Inventory getVipChest();
+	void readVipChest() throws IOException;
+	void writeVipChest() throws IOException;
 	CommonsScoreboard getCommonsScoreboard();
 	void setCommonsScoreboard(CommonsScoreboard commonsScoreboard);
 	CommonsHotbar getCommonsHotbar();
@@ -43,6 +51,7 @@ public interface CommonPlayer extends Listener
 	void sendMessage(String string, Object... args);
 	String getWalletAddress();
 	void setWalletAddress(String address);
+	boolean isRequesting();
 	int requestDatabase();
 	int requestDatabase(long timeout);
 	int getPing();

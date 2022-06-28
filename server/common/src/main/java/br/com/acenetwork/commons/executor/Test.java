@@ -1,5 +1,10 @@
 package br.com.acenetwork.commons.executor;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -19,6 +24,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
 import br.com.acenetwork.commons.Common;
+import br.com.acenetwork.commons.manager.CommonsConfig;
+import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
@@ -41,17 +48,95 @@ public class Test implements TabExecutor
 	{
 		Player p = (Player) sender;
 		
-		ItemStack item = p.getItemInHand();
 		
 		
-		ItemMeta meta = item.getItemMeta();
+		File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
 		
-		if(meta instanceof Repairable)
+		if(args.length == 1)
 		{
-			p.sendMessage("repairCost = " + ((Repairable) meta).getRepairCost());
+			try
+			{
+				int vip = Integer.valueOf(args[0]);
+				
+				Bukkit.broadcastMessage(file.exists() + " exists");
+				Bukkit.broadcastMessage(file.length() + " length");
+				
+				try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+				{
+					long pos;
+					
+					while((pos = access.getFilePointer()) < access.length() && vip > 0)
+					{
+						byte b = (byte) Math.max(0, access.readByte());
+						byte amountAvailable = (byte) (64 - b);
+						
+						Bukkit.broadcastMessage("byte " + pos + " " + b);
+						
+						if(amountAvailable <= 0)
+						{
+							continue;
+						}
+						
+						if(vip > amountAvailable)
+						{
+							vip -= amountAvailable;
+							access.seek(pos);
+							access.write((byte) 64);
+							Bukkit.broadcastMessage("newByte " + pos + " 64");
+						}
+						else
+						{
+							b += vip;
+							vip = 0;
+							access.seek(pos);
+							access.write(b);
+							Bukkit.broadcastMessage("newByte " + pos + " " + b);
+						}
+					}
+				}
+				catch(IOException ex)
+				{
+					throw ex;
+				}
+				
+				Bukkit.broadcastMessage("exitCode vip " + vip);
+			}
+			catch(Exception ex)
+			{
+				Bukkit.broadcastMessage("exitCode -1 !!");
+			}
+		}
+		else
+		{
+			try(RandomAccessFile access = new RandomAccessFile(file, "r"))
+			{
+				List<Byte> list = new ArrayList<>();
+				
+				while(access.getFilePointer() < access.length())
+				{
+					list.add(access.readByte());
+				}
+				
+				Bukkit.broadcastMessage(ChatColor.RED + list.toString());
+			}
+			catch(IOException e)
+			{
+				Bukkit.broadcastMessage("ERRO");
+				e.printStackTrace();
+			}
 		}
 		
-		p.sendMessage((item.getItemMeta() instanceof Repairable) + "");
+//		ItemStack item = p.getItemInHand();
+//		
+//		
+//		ItemMeta meta = item.getItemMeta();
+//		
+//		if(meta instanceof Repairable)
+//		{
+//			p.sendMessage("repairCost = " + ((Repairable) meta).getRepairCost());
+//		}
+//		
+//		p.sendMessage((item.getItemMeta() instanceof Repairable) + "");
 //		Bukkit.broadcastMessage(p.getName() + " " + p.getUniqueId() + " v" + p.getUniqueId().version());
 		
 //		if(args.length == 1)
