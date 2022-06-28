@@ -20,6 +20,8 @@ public interface CommonPlayer extends Listener
 	Inventory getVipChest();
 	void readVipChest() throws IOException;
 	void writeVipChest() throws IOException;
+	void setJackpoting(boolean value);
+	boolean isJackpoting();
 	CommonsScoreboard getCommonsScoreboard();
 	void setCommonsScoreboard(CommonsScoreboard commonsScoreboard);
 	CommonsHotbar getCommonsHotbar();

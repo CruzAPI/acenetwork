@@ -2,8 +2,11 @@ package br.com.acenetwork.commons;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -23,6 +26,7 @@ import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
@@ -1716,5 +1720,76 @@ public class CommonsUtil
 		}
 		
 		return null;
+	}
+	
+	public static <T> void shuffleList(Random r, List<T> list)
+	{
+		List<T> newList = new ArrayList<>();
+		
+		while(!list.isEmpty())
+		{
+			newList.add(list.remove(r.nextInt(list.size())));
+		}
+		
+		list.addAll(newList);
+	}
+	
+	public static boolean compareUUID(ItemStack i1, ItemStack i2)
+	{
+		if(!i1.hasItemMeta() || !i2.hasItemMeta())
+		{
+			return false;
+		}
+		
+		if(!i1.getItemMeta().hasDisplayName() || !i2.getItemMeta().hasDisplayName())
+		{
+			return false;
+		}
+		
+		if(i1.getItemMeta().getDisplayName().length() < 64 || i2.getItemMeta().getDisplayName().length() < 64)
+		{
+			return false;
+		}
+		
+		String hiddenData = i1.getItemMeta().getDisplayName().substring(
+				i1.getItemMeta().getDisplayName().length() - 64, i1.getItemMeta().getDisplayName().length());
+		
+		return i2.getItemMeta().getDisplayName().endsWith(hiddenData);
+	}
+	
+	public static void setItemCopyOf(ItemStack i1, ItemStack i2)
+	{
+		i1.setType(i2.getType());
+		i1.setAmount(i2.getAmount());
+		i1.setDurability(i2.getDurability());
+		i1.setData(i2.getData());
+		i1.setItemMeta(i2.getItemMeta());
+	}
+	
+	public static boolean compareUUID(ItemStack i, String hiddenData)
+	{
+		if(!i.hasItemMeta())
+		{
+			return false;
+		}
+		
+		if(!i.getItemMeta().hasDisplayName())
+		{
+			return false;
+		}
+		
+		return i.getItemMeta().getDisplayName().endsWith(hiddenData);
+	}
+	
+	public static String getRandomItemUUID()
+	{
+		String hiddenData = "";
+		
+		for(char c : UUID.randomUUID().toString().replace("-", "").toCharArray())
+		{
+			hiddenData += ChatColor.COLOR_CHAR + "" + c;
+		}
+		
+		return hiddenData;
 	}
 }

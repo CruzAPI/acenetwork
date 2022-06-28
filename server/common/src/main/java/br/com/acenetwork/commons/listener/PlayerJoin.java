@@ -74,7 +74,7 @@ public class PlayerJoin implements Listener
 		
 		for(CommonPlayer cpall : CraftCommonPlayer.SET)
 		{
-			if(cpall.isInvis())
+			if(cpall.isInvis() && !cp.canSpecs())
 			{
 				p.hidePlayer(cpall.getPlayer());
 			}
