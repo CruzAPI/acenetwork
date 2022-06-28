@@ -20,7 +20,7 @@ public class CommonsConfig
 		WHITELISTED_IP,
 		CLANS_JSON, MESSAGE, GROUP, USER, 
 		PLAYER, 
-		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP,
+		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, ACTIVATED_VIPS, CONFIG,
 		;
 	}
 
@@ -31,8 +31,14 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case CONFIG:
+			file = new File(Common.getPlugin().getConfigFolder(), "config.yml");
+			break;
 		case CHEST_VIP:
 			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".yml");
+			break;
+		case ACTIVATED_VIPS:
+			file = new File(Common.getPlugin().getConfigFolder(), "activated_vips.txt");
 			break;
 		case SIGN_DATA:
 			file = new File(Common.getPlugin().getConfigFolder() + "/sign_data", args[0] + ".txt");

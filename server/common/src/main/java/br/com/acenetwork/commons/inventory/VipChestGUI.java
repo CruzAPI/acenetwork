@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.SocketEvent;
+import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
@@ -32,10 +33,44 @@ public class VipChestGUI extends GUI
 	{
 		ItemStack item = new ItemStack(Material.WOOL, 1, (short) 5);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GREEN + ChatColor.BOLD + "VIP");
+		meta.setDisplayName(VipChest.getVipFirstHiddenUUID() + ChatColor.GREEN + ChatColor.BOLD + "VIP" + CommonsUtil.getRandomItemUUID());
 		item.setItemMeta(meta);
 		return item;
 	};
+	
+	public static boolean isItemStackVIP(ItemStack item)
+	{
+		if(item == null || !item.hasItemMeta() || !item.getItemMeta().hasDisplayName())
+		{
+			return false;
+		}
+		
+		return item.getItemMeta().getDisplayName().startsWith(VipChest.getVipFirstHiddenUUID());
+	}
+	
+	public static boolean isValidItemStackVIP(ItemStack item)
+	{
+		if(!isItemStackVIP(item))
+		{
+			return false;
+		}
+		
+		
+		String hiddenLastUUID;
+		UUID uuid;
+		
+		try
+		{
+			hiddenLastUUID = CommonsUtil.getHiddenLastUUID(item);
+			uuid = CommonsUtil.convertHiddenUUID(hiddenLastUUID);
+		}
+		catch(Exception e)
+		{
+			return false;
+		}
+		
+		return !VipChest.ACTIVATED_VIPS.contains(uuid);
+	}
 	
 	public VipChestGUI(CommonPlayer cp, Inventory inv)
 	{
@@ -66,10 +101,14 @@ public class VipChestGUI extends GUI
 		{
 			return;
 		}
+//		
+//		ItemStack current = e.getCurrentItem();
+//		ItemStack cursor = e.getCursor();
 		
-		if(!getVipItem().isSimilar(e.getCurrentItem()))
+		if(!isItemStackVIP(e.getCurrentItem()))
 		{
-			e.setCancelled(true);
+//			Bukkit.broadcastMessage("not a vip item, canceling InventoryClickEvent");
+//			e.setCancelled(true);
 			return;
 		}
 	}

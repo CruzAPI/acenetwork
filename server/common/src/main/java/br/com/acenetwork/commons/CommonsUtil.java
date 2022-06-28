@@ -1781,6 +1781,23 @@ public class CommonsUtil
 		return i.getItemMeta().getDisplayName().endsWith(hiddenData);
 	}
 	
+	public static UUID convertHiddenUUID(String hiddenUUID) throws Exception
+	{
+		hiddenUUID = hiddenUUID.replace("" + ChatColor.COLOR_CHAR, "");
+		return UUID.fromString(hiddenUUID.substring(0, 8) + "-" 
+				+ hiddenUUID.substring(8, 12) + "-" 
+				+ hiddenUUID.substring(12, 16) + "-" 
+				+ hiddenUUID.substring(16, 20) + "-" 
+				+ hiddenUUID.substring(20, 32));
+	}
+	
+	public static String getHiddenLastUUID(ItemStack item) throws Exception
+	{
+		String displayName = item.getItemMeta().getDisplayName();
+		String hiddenLastUUID = displayName.substring(displayName.length() - 64, displayName.length());
+		return hiddenLastUUID;
+	}
+	
 	public static String getRandomItemUUID()
 	{
 		String hiddenData = "";
