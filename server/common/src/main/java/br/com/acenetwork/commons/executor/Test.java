@@ -17,6 +17,7 @@ import org.bukkit.WorldType;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.inventory.ItemStack;
@@ -48,83 +49,11 @@ public class Test implements TabExecutor
 	{
 		Player p = (Player) sender;
 		
-		
-		
 		File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		
-		if(args.length == 1)
-		{
-			try
-			{
-				int vip = Integer.valueOf(args[0]);
-				
-				Bukkit.broadcastMessage(file.exists() + " exists");
-				Bukkit.broadcastMessage(file.length() + " length");
-				
-				try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-				{
-					long pos;
-					
-					while((pos = access.getFilePointer()) < access.length() && vip > 0)
-					{
-						byte b = (byte) Math.max(0, access.readByte());
-						byte amountAvailable = (byte) (64 - b);
-						
-						Bukkit.broadcastMessage("byte " + pos + " " + b);
-						
-						if(amountAvailable <= 0)
-						{
-							continue;
-						}
-						
-						if(vip > amountAvailable)
-						{
-							vip -= amountAvailable;
-							access.seek(pos);
-							access.write((byte) 64);
-							Bukkit.broadcastMessage("newByte " + pos + " 64");
-						}
-						else
-						{
-							b += vip;
-							vip = 0;
-							access.seek(pos);
-							access.write(b);
-							Bukkit.broadcastMessage("newByte " + pos + " " + b);
-						}
-					}
-				}
-				catch(IOException ex)
-				{
-					throw ex;
-				}
-				
-				Bukkit.broadcastMessage("exitCode vip " + vip);
-			}
-			catch(Exception ex)
-			{
-				Bukkit.broadcastMessage("exitCode -1 !!");
-			}
-		}
-		else
-		{
-			try(RandomAccessFile access = new RandomAccessFile(file, "r"))
-			{
-				List<Byte> list = new ArrayList<>();
-				
-				while(access.getFilePointer() < access.length())
-				{
-					list.add(access.readByte());
-				}
-				
-				Bukkit.broadcastMessage(ChatColor.RED + list.toString());
-			}
-			catch(IOException e)
-			{
-				Bukkit.broadcastMessage("ERRO");
-				e.printStackTrace();
-			}
-		}
+		p.sendMessage("Vips inside inventory: " + config.getList("inventory").stream().filter(x -> x != null).count());
+		p.sendMessage("Vips outside inventory: " + config.getInt("vip"));
 		
 //		ItemStack item = p.getItemInHand();
 //		

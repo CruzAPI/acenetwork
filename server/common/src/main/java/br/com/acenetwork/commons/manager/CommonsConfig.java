@@ -32,7 +32,7 @@ public class CommonsConfig
 		switch(type)
 		{
 		case CHEST_VIP:
-			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".txt");
+			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".yml");
 			break;
 		case SIGN_DATA:
 			file = new File(Common.getPlugin().getConfigFolder() + "/sign_data", args[0] + ".txt");
@@ -90,31 +90,6 @@ public class CommonsConfig
 			try
 			{
 				file.createNewFile();
-				
-				if(!file.getName().endsWith(".txt"))
-				{
-					switch(type)
-					{
-					case CHEST_VIP:
-//						try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-//						{
-//							for(int i = 0; i < 9 * 3; i++)
-//							{
-//								access.writeByte(0);
-//							}
-//							
-//							break;
-//						}
-//						catch(IOException ex)
-//						{
-//							throw ex;
-//						}
-					default:
-						break;
-					}
-					
-					return file;
-				}
 				
 				if(!file.getName().endsWith(".yml"))
 				{

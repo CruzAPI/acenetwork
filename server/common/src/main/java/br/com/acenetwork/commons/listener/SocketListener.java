@@ -5,15 +5,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.executor.Stop;
@@ -56,46 +60,57 @@ public class SocketListener implements Listener
 				return;
 			}
 			
-			int taskId = Integer.valueOf(args[1]);
-			
-			if(!Bukkit.getScheduler().isQueued(taskId))
-			{
-				return;
-			}
+			final int taskId = Integer.valueOf(args[1]);
+			final boolean isQueued = Bukkit.getScheduler().isQueued(taskId);
 			
 			Bukkit.getScheduler().cancelTask(taskId);
 			
-			int exitCode = Integer.valueOf(args[3]);
+			final int amount = Math.max(0, Integer.valueOf(args[3]));
 			
 			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 			
-			if(exitCode == -1)
+			File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
+			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+			
+			Inventory inv = Bukkit.createInventory(p, 3 * 9, "VIP Chest");
+			
+			if(isQueued)
 			{
-				p.sendMessage(ChatColor.RED + bundle.getString("commons.unexpected-error"));
-				return;
+				new VipChestGUI(cp, inv);
 			}
 			
-			File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
-			
-			Inventory inv = cp.getVipChest();
-			inv = inv == null ? Bukkit.createInventory(p, 3 * 9, "VIP Chest") : inv;
-			
-			p.openInventory(inv);
-			
-			try(RandomAccessFile access = new RandomAccessFile(file, "r"))
+			try
 			{
-				for(int i = 0; i < inv.getSize() && access.getFilePointer() < access.length(); i++)
+				List<ItemStack> list = config.contains("inventory") ? (List<ItemStack>) config.getList("inventory") : new ArrayList<>();
+				int vip = config.getInt("vip") + amount;
+				
+				for(int i = 0; i < list.size() && i < inv.getSize(); i++)
 				{
-					byte b = access.readByte();
-					inv.setItem(i, b == 0 ? null : VipChestGUI.getVipItem(b));
+					inv.setItem(i, list.get(i));
+				}
+				
+				int firstEmpty;
+				
+				while((firstEmpty = inv.firstEmpty()) != -1 && vip > 0)
+				{
+					inv.setItem(firstEmpty, VipChestGUI.getVipItem());
+					vip--;
 				}
 				
 				cp.setVipChest(inv);
+				
+				config.set("inventory", inv.getContents());
+				config.set("vip", vip);
+				config.save(file);
 			}
 			catch(IOException ex)
 			{
 				ex.printStackTrace();
-				p.sendMessage(ChatColor.RED + bundle.getString("commons.unexpected-error"));
+				
+				if(isQueued)
+				{
+					p.sendMessage(ChatColor.RED + bundle.getString("commons.unexpected-error"));
+				}
 				return;
 			}
 		}

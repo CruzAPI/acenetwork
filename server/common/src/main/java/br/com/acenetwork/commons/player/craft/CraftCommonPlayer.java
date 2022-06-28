@@ -605,22 +605,12 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		}
 		
 		File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+		try
 		{
-			for(int i = 0; i < vipChest.getSize(); i++)
-			{
-				ItemStack item = vipChest.getItem(i);
-				
-				if(item != null && VipChestGUI.getVipItem().isSimilar(item))
-				{
-					access.writeByte(item.getAmount());
-				}
-				else
-				{
-					access.writeByte(0);
-				}
-			}
+			config.set("inventory", vipChest.getContents());
+			config.save(file);
 		}
 		catch(IOException ex)
 		{
