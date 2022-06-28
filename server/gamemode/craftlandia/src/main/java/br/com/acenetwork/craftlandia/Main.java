@@ -75,6 +75,7 @@ import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
+import br.com.acenetwork.craftlandia.executor.Playtime;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
@@ -96,14 +97,15 @@ public class Main extends Common implements Listener
 		
 		super.onEnable();
 		
-		registerCommand(new ItemInfo(), "iteminfo");
 		
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
 		
 		registerCommand(new Temp(), "temp");
 		
+		registerCommand(new ItemInfo(), "iteminfo");
 		registerCommand(new Jackpot(), "jackpot");
+		registerCommand(new Playtime(), "playtime");
 		registerCommand(new Price(), "price");
 		registerCommand(new Sell(), "sell");
 		registerCommand(new Sellall(), "sellall");
