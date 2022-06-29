@@ -1,11 +1,22 @@
 package br.com.acenetwork.commons.executor;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Writer;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
@@ -37,89 +48,36 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class Permission implements TabExecutor, Listener
 {
-	private static final Map<String, Map<String, Long>> GROUP_PERMISSION = new HashMap<>();
-	private static final Map<String, Map<UUID, Long>> GROUP_USER = new HashMap<>();
-	private static final Map<UUID, Map<String, Long>> USER_PERMISSION = new HashMap<>();
+	private final Map<String, Map<String, Long>> groupPermission;
+	private final Map<String, Map<UUID, Long>> groupUser;
+	public final Map<UUID, Map<String, Long>> userPermission;
 	
-	public Permission()
+	@SuppressWarnings("unchecked")
+	public Permission() throws Exception
 	{
-		Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+		File file = CommonsConfig.getFile(Type.PERMISSIONS, false);
+		
+		if(file.exists())
 		{
-			File folder;
-			
-			folder = CommonsConfig.getFile(Type.GROUPS_FOLDER, true);
-			
-			for(File file : folder.listFiles())
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream stream = new ByteArrayInputStream(fileIn.readAllBytes());
+					ObjectInputStream in = new ObjectInputStream(stream))
 			{
-				YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-				String groupName = FilenameUtils.removeExtension(file.getName());
-				
-				ConfigurationSection section;
-				Map<String, Long> map = new HashMap<>();
-				
-				if((section = config.getConfigurationSection("permission")) != null)
-				{
-					for(String key : section.getKeys(true))
-					{
-						if(config.isConfigurationSection("permission." + key))
-						{
-							continue;
-						}
-						
-						map.put(key, config.getLong("permission." + key));
-					}
-				}
-				
-				GROUP_PERMISSION.put(groupName, map);
-				
-				Map<UUID, Long> userMap = new HashMap<>();
-				
-				if((section = config.getConfigurationSection("user")) != null)
-				{
-					for(String key : section.getKeys(true))
-					{
-						if(config.isConfigurationSection("user." + key))
-						{
-							continue;
-						}
-						
-						userMap.put(UUID.fromString(key), config.getLong("user." + key));
-					}
-				}
-				
-				GROUP_USER.put(groupName, userMap);
+				groupPermission = (Map<String, Map<String, Long>>) in.readObject();
+				groupUser = (Map<String, Map<UUID, Long>>) in.readObject();
+				userPermission = (Map<UUID, Map<String, Long>>) in.readObject();
 			}
-			
-			folder = CommonsConfig.getFile(Type.USERS_FOLDER, true);
-			
-			for(File file : folder.listFiles())
+			catch(ClassNotFoundException | IOException ex)
 			{
-				YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-				UUID uuid = UUID.fromString(FilenameUtils.removeExtension(file.getName()));
-				
-				ConfigurationSection section;
-				Map<String, Long> permissionMap = new HashMap<>();
-				
-				if((section = config.getConfigurationSection("permission")) != null)
-				{
-					for(String key : section.getKeys(true))
-					{
-						if(config.isConfigurationSection("permission." + key))
-						{
-							continue;
-						}
-						
-						permissionMap.put(key, config.getLong("permission." + key));
-					}
-				}
-				
-				USER_PERMISSION.put(uuid, permissionMap);
+				throw ex;
 			}
-			
-			Bukkit.broadcastMessage(GROUP_PERMISSION.toString());
-			Bukkit.broadcastMessage(GROUP_USER.toString());
-			Bukkit.broadcastMessage(USER_PERMISSION.toString());
-		}, 20L);
+		}
+		else
+		{
+			groupPermission = new HashMap<>();
+			groupUser = new HashMap<>();
+			userPermission = new HashMap<>();
+		}
 		
 		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
 	}
@@ -180,30 +138,25 @@ public class Permission implements TabExecutor, Listener
 			{
 				final String group = args[1].toLowerCase();
 				final String permission = args[3].toLowerCase();
-				final String configPermission = permission.replace('.', ':');
 
 				if(!CommonsUtil.groupSyntaxIsValid(group))
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-group-syntax"));
-					text.setColor(ChatColor.RED);
-					CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.invalid-group-syntax"));
 					return true;	
 				}
 
 				if(!CommonsUtil.permissionSyntaxIsValid(permission))
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-permission-syntax"));
-					text.setColor(ChatColor.RED);
-					CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.invalid-permission-syntax"));
 					return true;
 				}
 				
-				if(!GROUP_PERMISSION.containsKey(group))
+				if(!groupPermission.containsKey(group))
 				{
-					GROUP_PERMISSION.put(group, new HashMap<>());
+					groupPermission.put(group, new HashMap<>());
 				}
 				
-				Map<String, Long> MAP = GROUP_PERMISSION.get(group);
+				Map<String, Long> MAP = groupPermission.get(group);
 				MAP.put(permission, 0L);
 				
 				TextComponent[] extra = new TextComponent[2];
@@ -223,22 +176,20 @@ public class Permission implements TabExecutor, Listener
 			{
 				final String group = args[1].toLowerCase();
 				final String permission = args[3].toLowerCase();
-				final String configPermission = permission.replace('.', ':');
 				
-				File groupFile = CommonsConfig.getFile(Type.GROUP, false, group);
-				YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-				
-				if(!groupFile.exists())
+				if(!groupPermission.containsKey(group))
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.group-not-found"));
 					text.setColor(ChatColor.RED);
 					CommonsUtil.sendMessage(sender, text);
 					return true;
 				}
-
+				
+				Map<String, Long> map = groupPermission.get(group);
+				
 				int n = 0;
-
-				if(configPermission.endsWith("*"))
+				
+				if(permission.endsWith("*"))
 				{
 					ConfigurationSection section = groupConfig.getConfigurationSection("permission");
 	
@@ -590,12 +541,45 @@ public class Permission implements TabExecutor, Listener
 			return;
 		}
 		
-		File folder = CommonsConfig.getFile(Type.USERS_FOLDER, true);
+		long time = System.currentTimeMillis();
+
+		File file = CommonsConfig.getFile(Type.PERMISSIONS, true);
 		
-//		for(File file : folder.listFiles())
+		try(FileOutputStream fileOut = new FileOutputStream(file);
+				ByteArrayOutputStream stream = new ByteArrayOutputStream();
+				ObjectOutputStream out = new ObjectOutputStream(stream);)
+		{
+			out.writeObject(groupPermission);
+			out.writeObject(groupUser);
+			out.writeObject(userPermission);
+			fileOut.write(stream.toByteArray());
+			
+			time = System.currentTimeMillis() - time;
+			
+			Bukkit.broadcastMessage(ChatColor.GREEN + "Time elapsed: " + time + "ms");
+			
+			DecimalFormat df = new DecimalFormat();
+			df.setGroupingSize(3);
+			df.setGroupingUsed(true);
+			
+			Bukkit.broadcastMessage("Bytes: " + df.format(stream.toByteArray().length));
+
+		}
+		catch(IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		
+//		File folder = CommonsConfig.getFile(Type.USERS_FOLDER, true);
+//		
+//		Arrays.stream(folder.listFiles())
+//				.filter(x -> !USER_PERMISSION.containsKey(UUID.fromString(FilenameUtils.removeExtension(x.getName()))))
+//				.forEach(x -> x.delete());
+//		
+//		for(Entry<UUID, Map<String, Long>> entry : USER_PERMISSION.entrySet())
 //		{
-//			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-//			config.getRoot().set
+//			File file = 
+//			YamlConfiguration config = YamlConfiguration.loadConfiguration();
 //		}
 	}
 	

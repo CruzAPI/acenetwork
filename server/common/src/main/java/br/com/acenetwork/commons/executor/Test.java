@@ -5,8 +5,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
@@ -47,29 +50,19 @@ public class Test implements TabExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command arg1, String arg2, String[] args)
 	{
-		Player p = (Player) sender;
+//		Player p = (Player) sender;
+		
+		Map<String, Long> map = new HashMap<>();
+		map.put("test", 0L);
 		
 		long time = System.currentTimeMillis();
 		
 		if(args.length == 0)
 		{
-			File file = CommonsConfig.getFile(Type.GROUP, false, "owner");
-			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-			
-			config.set("", null);
-			try
+			for(int i = 0; i < 5000000; i++)
 			{
-				config.save(file);
-				Bukkit.broadcastMessage("SAVED");
+				Permission.userPermission.put(UUID.randomUUID(), map);
 			}
-			catch(IOException e)
-			{
-				e.printStackTrace();
-			}
-//			for(int i = 0; i < 1000000; i++)
-//			{
-//				
-//			}
 		}
 		else
 		{

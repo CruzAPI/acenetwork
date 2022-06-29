@@ -22,7 +22,8 @@ public class CommonsConfig
 		WHITELISTED_IP,
 		CLANS_JSON, MESSAGE, GROUP, USER, 
 		PLAYER, 
-		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP,
+		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, 
+		PERMISSIONS
 		;
 	}
 
@@ -74,6 +75,9 @@ public class CommonsConfig
 			break;
 		case USER:
 			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".yml");
+			break;
+		case PERMISSIONS:
+			file = new File(Common.getPlugin().getConfigFolder(), "permissions.dat");
 			break;
 		case USERS_FOLDER:
 			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users");
