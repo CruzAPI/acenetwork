@@ -264,7 +264,7 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void a(BlockFromToEvent e)
 	{
-		e.setCancelled(false);
+		e.setCancelled(true);
 	}
 	
 	@EventHandler
