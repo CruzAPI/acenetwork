@@ -13,6 +13,8 @@ public class CommonsConfig
 {
 	public enum Type
 	{
+		GROUPS_FOLDER,
+		USERS_FOLDER,
 		BLOCK_DATA,
 		SIGN_DATA,
 		ITEM_INFO_FOLDER,
@@ -67,8 +69,14 @@ public class CommonsConfig
 		case GROUP:
 			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/groups", args[0] + ".yml");
 			break;
+		case GROUPS_FOLDER:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/groups");
+			break;
 		case USER:
 			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".yml");
+			break;
+		case USERS_FOLDER:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users");
 			break;
 		case PLAYER:
 			file = new File(Common.getPlugin().getConfigFolder() + "/players", args[0] + ".yml");

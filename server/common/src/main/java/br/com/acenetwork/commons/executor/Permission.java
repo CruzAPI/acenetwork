@@ -3,18 +3,29 @@ package br.com.acenetwork.commons.executor;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.Main;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.WorldSaveEvent;
+import org.bukkit.util.FileUtil;
 
+import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
@@ -24,8 +35,95 @@ import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
-public class Permission implements TabExecutor
+public class Permission implements TabExecutor, Listener
 {
+	private static final Map<String, Map<String, Long>> GROUP_PERMISSION = new HashMap<>();
+	private static final Map<String, Map<UUID, Long>> GROUP_USER = new HashMap<>();
+	private static final Map<UUID, Map<String, Long>> USER_PERMISSION = new HashMap<>();
+	
+	public Permission()
+	{
+		Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+		{
+			File folder;
+			
+			folder = CommonsConfig.getFile(Type.GROUPS_FOLDER, true);
+			
+			for(File file : folder.listFiles())
+			{
+				YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+				String groupName = FilenameUtils.removeExtension(file.getName());
+				
+				ConfigurationSection section;
+				Map<String, Long> map = new HashMap<>();
+				
+				if((section = config.getConfigurationSection("permission")) != null)
+				{
+					for(String key : section.getKeys(true))
+					{
+						if(config.isConfigurationSection("permission." + key))
+						{
+							continue;
+						}
+						
+						map.put(key, config.getLong("permission." + key));
+					}
+				}
+				
+				GROUP_PERMISSION.put(groupName, map);
+				
+				Map<UUID, Long> userMap = new HashMap<>();
+				
+				if((section = config.getConfigurationSection("user")) != null)
+				{
+					for(String key : section.getKeys(true))
+					{
+						if(config.isConfigurationSection("user." + key))
+						{
+							continue;
+						}
+						
+						userMap.put(UUID.fromString(key), config.getLong("user." + key));
+					}
+				}
+				
+				GROUP_USER.put(groupName, userMap);
+			}
+			
+			folder = CommonsConfig.getFile(Type.USERS_FOLDER, true);
+			
+			for(File file : folder.listFiles())
+			{
+				YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+				UUID uuid = UUID.fromString(FilenameUtils.removeExtension(file.getName()));
+				
+				ConfigurationSection section;
+				Map<String, Long> permissionMap = new HashMap<>();
+				
+				if((section = config.getConfigurationSection("permission")) != null)
+				{
+					for(String key : section.getKeys(true))
+					{
+						if(config.isConfigurationSection("permission." + key))
+						{
+							continue;
+						}
+						
+						permissionMap.put(key, config.getLong("permission." + key));
+					}
+				}
+				
+				USER_PERMISSION.put(uuid, permissionMap);
+			}
+			
+			Bukkit.broadcastMessage(GROUP_PERMISSION.toString());
+			Bukkit.broadcastMessage(GROUP_USER.toString());
+			Bukkit.broadcastMessage(USER_PERMISSION.toString());
+		}, 20L);
+		
+		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
+	}
+	
 	private enum Key
 	{
 		PERMISSION("permission", null), GROUP("group", Type.GROUP), USER("user", Type.USER);
@@ -88,7 +186,7 @@ public class Permission implements TabExecutor
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-group-syntax"));
 					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 					return true;	
 				}
 
@@ -96,15 +194,17 @@ public class Permission implements TabExecutor
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-permission-syntax"));
 					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 					return true;
 				}
-
-				File groupFile = CommonsConfig.getFile(Type.GROUP, true, group);
-				YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-
-				groupConfig.set("permission." + configPermission, 0L);
-				groupConfig.save(groupFile);
+				
+				if(!GROUP_PERMISSION.containsKey(group))
+				{
+					GROUP_PERMISSION.put(group, new HashMap<>());
+				}
+				
+				Map<String, Long> MAP = GROUP_PERMISSION.get(group);
+				MAP.put(permission, 0L);
 				
 				TextComponent[] extra = new TextComponent[2];
 				
@@ -116,7 +216,7 @@ public class Permission implements TabExecutor
 
 				TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.permission-added-to-group"), extra);
 				text.setColor(ChatColor.GREEN);
-							CommonsUtil.sendMessage(sender, text);
+				CommonsUtil.sendMessage(sender, text);
 			}
 			else if(args.length == 4 && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) 
 				&& args[2].equalsIgnoreCase("remove"))
@@ -132,7 +232,7 @@ public class Permission implements TabExecutor
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.group-not-found"));
 					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 					return true;
 				}
 
@@ -481,7 +581,24 @@ public class Permission implements TabExecutor
 
 		return false;
 	}
-
+	
+	@EventHandler
+	public void a(WorldSaveEvent e)
+	{
+		if(!e.getWorld().getName().equals("world"))
+		{
+			return;
+		}
+		
+		File folder = CommonsConfig.getFile(Type.USERS_FOLDER, true);
+		
+//		for(File file : folder.listFiles())
+//		{
+//			YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+//			config.getRoot().set
+//		}
+	}
+	
 //	private void printList(CommonPlayer cp, Key key, OfflinePlayer op, Key listOf, String pageArgs) throws IOException
 //	{
 //		int page;
