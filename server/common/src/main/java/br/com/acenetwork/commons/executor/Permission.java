@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,14 +30,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldSaveEvent;
 
 import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.manager.Message;
-import br.com.acenetwork.commons.manager.ObjectField;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
@@ -51,6 +47,10 @@ public class Permission implements TabExecutor, Listener
 	private final Map<String, Map<String, Long>> groupPermission;
 	private final Map<String, Map<UUID, Long>> groupUser;
 	public final Map<UUID, Map<String, Long>> userPermission;
+	
+	public static final String TAG = "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "("
+			+ ChatColor.DARK_RED + ChatColor.BOLD + "PEX"
+			+ ChatColor.DARK_GRAY + ChatColor.BOLD + ")" + ChatColor.RESET;
 	
 	@SuppressWarnings("unchecked")
 	public Permission() throws RuntimeException
@@ -109,7 +109,7 @@ public class Permission implements TabExecutor, Listener
 		
 		try
 		{
-			if(args.length == 4 && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) 
+			if((args.length == 4 || args.length == 5) && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) 
 					&& args[2].equalsIgnoreCase("add"))
 			{
 				final String group = args[1].toLowerCase();
@@ -132,8 +132,25 @@ public class Permission implements TabExecutor, Listener
 					groupPermission.put(group, new HashMap<>());
 				}
 				
-				Map<String, Long> MAP = groupPermission.get(group);
-				MAP.put(permission, 0L);
+				Map<String, Long> map = groupPermission.get(group);
+				
+				Long value = map.get(permission);
+				
+				long currentTime = value == null || value != 0 && value < System.currentTimeMillis() 
+						? System.currentTimeMillis()
+						: value;
+				
+				long seconds = args.length == 5 
+						? args[4].startsWith("+") ? Integer.valueOf(args[4].substring(1)) : Integer.valueOf(args[4]) 
+						: 0L;
+				
+				long newTime = args.length == 5 
+						? args[4].startsWith("+") 
+						? currentTime == 0L ? 0L : currentTime + seconds * 1000L
+						: System.currentTimeMillis() + seconds * 1000L
+						: 0L;
+				
+				map.put(permission, newTime);
 				
 				TextComponent[] extra = new TextComponent[2];
 				
@@ -153,34 +170,20 @@ public class Permission implements TabExecutor, Listener
 				final String group = args[1].toLowerCase();
 				final String permission = args[3].toLowerCase();
 				
-				if(!groupPermission.containsKey(group))
-				{
-					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.group-not-found"));
-					return true;
-				}
-				
 				Map<String, Long> map = groupPermission.get(group);
-				
-				final ObjectField<Integer> of = new ObjectField<>();
-				
-				if(permission.endsWith("*"))
-				{
-					map.keySet().stream().filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
-							.forEach(x -> 
-							{
-								if(map.remove(x) != null)
-								{
-									of.object++;
-								}
-							});
-				}
-				else if(map.remove(permission) != null)
-				{
-					of.object++;
-				}
 
-				if(of.object > 0)
+				if(map != null 
+						&& (permission.endsWith("*") 
+						? map.keySet().removeAll(map.keySet().stream()
+						.filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
+						.collect(Collectors.toSet()))
+						: map.remove(permission) != null))
 				{
+					if(map.isEmpty())
+					{
+						groupPermission.remove(group);
+					}
+					
 					TextComponent[] extra = new TextComponent[2];
 					
 					extra[0] = new TextComponent(permission);
@@ -200,7 +203,7 @@ public class Permission implements TabExecutor, Listener
 					CommonsUtil.sendMessage(sender, text);
 				}
 			}
-			else if(args.length == 5 && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
+			else if((args.length == 5 || args.length == 6) && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
 				(args[2].equalsIgnoreCase("user") || args[2].equalsIgnoreCase("u")) &&
 				 args[3].equalsIgnoreCase("add"))
 			{
@@ -228,7 +231,23 @@ public class Permission implements TabExecutor, Listener
 				
 				Map<UUID, Long> map = groupUser.get(group);
 				
-				map.put(op.getUniqueId(), 0L);
+				Long value = map.get(op.getUniqueId());
+				
+				long currentTime = value == null || value != 0 && value < System.currentTimeMillis() 
+						? System.currentTimeMillis()
+						: value;
+				
+				long seconds = args.length == 6 
+						? args[5].startsWith("+") ? Integer.valueOf(args[5].substring(1)) : Integer.valueOf(args[5]) 
+						: 0L;
+				
+				long newTime = args.length == 6 
+						? args[5].startsWith("+") 
+						? currentTime == 0L ? 0L : currentTime + seconds * 1000L
+						: System.currentTimeMillis() + seconds * 1000L
+						: 0L;
+				
+				map.put(op.getUniqueId(), newTime);
 				
 				TextComponent[] extra = new TextComponent[2];
 				
@@ -284,12 +303,11 @@ public class Permission implements TabExecutor, Listener
 					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.user-not-found-in-group"));
 				}
 			}
-			else if(args.length == 4 && (args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
+			else if((args.length == 4 || args.length == 5) && (args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
 					args[2].equalsIgnoreCase("add"))
 			{
 				final String user = args[1];
 				final String permission = args[3].toLowerCase();
-
 				OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
@@ -311,7 +329,23 @@ public class Permission implements TabExecutor, Listener
 				
 				Map<String, Long> map = userPermission.get(op.getUniqueId());
 				
-				map.put(permission, 0L);
+				Long value = map.get(permission);
+				
+				long currentTime = value == null || value != 0 && value < System.currentTimeMillis() 
+						? System.currentTimeMillis()
+						: value;
+				
+				long seconds = args.length == 5 
+						? args[4].startsWith("+") ? Integer.valueOf(args[4].substring(1)) : Integer.valueOf(args[4]) 
+						: 0L;
+				
+				long newTime = args.length == 5 
+						? args[4].startsWith("+") 
+						? currentTime == 0L ? 0L : currentTime + seconds * 1000L
+						: System.currentTimeMillis() + seconds * 1000L
+						: 0L;
+				
+				map.put(permission, newTime);
 				
 				TextComponent[] extra = new TextComponent[2];
 				
@@ -339,31 +373,20 @@ public class Permission implements TabExecutor, Listener
 					return true;
 				}
 				
-				final ObjectField<Integer> of = new ObjectField<>();
+				Map<String, Long> map = userPermission.get(op.getUniqueId());
 				
-				if(userPermission.containsKey(op.getUniqueId()))
+				if(map != null
+						&& (permission.endsWith("*") 
+						? map.keySet().removeAll(map.keySet().stream()
+						.filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
+						.collect(Collectors.toSet()))
+						: map.remove(permission) != null))
 				{
-					Map<String, Long> map = userPermission.get(op.getUniqueId());
+					if(map.isEmpty())
+					{
+						userPermission.remove(op.getUniqueId());
+					}
 					
-					if(permission.endsWith("*"))
-					{
-						map.keySet().stream().filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
-								.forEach(x -> 
-								{
-									if(map.remove(x) != null)
-									{
-										of.object++;
-									}
-								});
-					}
-					else if(map.remove(permission) != null)
-					{
-						of.object++;
-					}
-				}
-
-				if(of.object > 0)
-				{
 					TextComponent[] extra = new TextComponent[2];
 					
 					extra[0] = new TextComponent(permission);
@@ -380,6 +403,32 @@ public class Permission implements TabExecutor, Listener
 				{
 					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.permission-not-found"));
 				}
+			}
+			else if((args.length == 3 || args.length == 4) &&
+					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
+					 args[2].equalsIgnoreCase("list"))
+			{
+				final int page = args.length == 4 ? Integer.valueOf(args[3]) : 1;
+				final String group = args[1].toLowerCase();
+				
+				Map<String, Long> map = groupPermission.containsKey(group)
+						? groupPermission.get(group)
+						: new HashMap<>();
+				
+				map = map.entrySet().stream().filter(x -> 
+						{
+							Long value = x.getValue();
+							return value != null && (value == 0L || value >= System.currentTimeMillis());
+						}).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+				
+				String commandLine = "/" + cmd.getName();
+				
+				for(int i = 0; i < args.length && i < 3; i++)
+				{
+					commandLine += " " + args[i];
+				}
+				
+//				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 2 || args.length == 3) &&
 					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
@@ -399,33 +448,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-				printList(cp, map, commandLine, page);
-			}
-			else if((args.length == 3 || args.length == 4) &&
-					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
-					 args[2].equalsIgnoreCase("list"))
-			{
-				final int page = args.length == 4 ? Integer.valueOf(args[3]) : 1;
-				final String group = args[1].toLowerCase();
-				
-				Map<String, Long> map = groupPermission.containsKey(group)
-						? groupPermission.get(group)
-						: new HashMap<>();
-				
-				map = map.entrySet().stream().filter(x -> 
-						{
-							Long value = x.getValue();
-							return value != null && value < System.currentTimeMillis();
-						}).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
-				
-				String commandLine = "/" + cmd.getName();
-				
-				for(int i = 0; i < args.length && i < 3; i++)
-				{
-					commandLine += " " + args[i];
-				}
-				
-				printList(cp, map, commandLine, page);
+//				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 4 || args.length == 5) && 
 					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
@@ -444,7 +467,7 @@ public class Permission implements TabExecutor, Listener
 				Map<String, Long> convertedMap = map.entrySet().stream().filter(x -> 
 						{
 							Long value = x.getValue();
-							return value != null && value < System.currentTimeMillis();
+							return value != null && (value == 0L || value >= System.currentTimeMillis());
 						}).collect(Collectors.toMap(x -> Bukkit.getOfflinePlayer(x.getKey()).getName(), x -> x.getValue()));	
 				
 				for(int i = 0; i < args.length && i < 4; i++)
@@ -452,7 +475,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-				printList(cp, convertedMap, commandLine, page);
+//				printList(cp, convertedMap, commandLine, page);
 			}
 			else if((args.length == 3 || args.length == 4) &&
 					(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) && 
@@ -476,7 +499,7 @@ public class Permission implements TabExecutor, Listener
 				map = map.entrySet().stream().filter(x -> 
 						{
 							Long value = x.getValue();
-							return value != null && value < System.currentTimeMillis();
+							return value != null && (value == 0L || value >= System.currentTimeMillis());
 						}).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
 				
 				String commandLine = "/" + cmd.getName();
@@ -486,7 +509,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-				printList(cp, map, commandLine, page);
+//				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 4 || args.length == 5) && 
 					(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
@@ -509,7 +532,7 @@ public class Permission implements TabExecutor, Listener
 						{
 							Map<UUID, Long> userMap = x.getValue();
 							Long value = userMap.get(op.getUniqueId());
-							return value != null && value < System.currentTimeMillis();
+							return value != null && (value == 0L || value >= System.currentTimeMillis());
 						}).collect(Collectors.toMap(Entry::getKey, x -> x.getValue().get(op.getUniqueId())));
 				
 				String commandLine = "/" + cmd.getName();
@@ -519,7 +542,20 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-				printList(cp, map, commandLine, page);
+				TextComponent[] extra = new TextComponent[2];
+				
+				String displayName = op.isOnline() ? op.getPlayer().getDisplayName() : ChatColor.YELLOW + op.getName();
+				
+				extra[0] = new TextComponent(displayName);
+//				extra[1] = new TextComponent(group);
+				extra[1].setColor(ChatColor.YELLOW);
+				
+				TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.user-group-list"), extra);
+				text.setColor(ChatColor.GREEN);
+				
+				String title = TAG + " " + text.toLegacyText();
+				String empty = ChatColor.RED + bundle.getString("commons.cmd.permission.group-list-empty");
+//				printList(cp, map, commandLine, page);
 			}
 			else
 			{
@@ -551,13 +587,13 @@ public class Permission implements TabExecutor, Listener
 		save();
 	}
 	
-	private void printList(CommonPlayer cp, Map<String, Long> map, String commandLine, int page)
+	private void printList(CommonPlayer cp, String title, String empty, Map<String, Long> map, String commandLine, int page)
 	{
 		Player p = cp.getPlayer();
 		
 		if(map.isEmpty())
 		{
-			p.sendMessage("map is empty");
+			p.sendMessage(empty);
 			return;
 		}
 		
@@ -569,16 +605,54 @@ public class Permission implements TabExecutor, Listener
 		if(list.size() > (page - 1) * pageSize && page > 0)
 		{
 			final int maxPage = list.size() / pageSize + (list.size() % pageSize == 0 ? 0 : 1);
-			p.sendMessage("List [" + page + "/" + maxPage + "]");
+//			p.sendMessage("(PEX) List [" + page + "/" + maxPage + "]");
+			p.sendMessage(title);
 			
 			for(int i = (page - 1) * pageSize; i < page * pageSize && i < list.size(); i++)
 			{
 				Entry<String, Long> entry = list.get(i);
 				
 				String key = entry.getKey();
-				long value = entry.getValue();
+				long time = entry.getValue();
 				
-				p.sendMessage(key + " " + value);
+				TextComponent text = new TextComponent(" - ");
+				text.setColor(ChatColor.DARK_GRAY);
+				
+				TextComponent extra0 = new TextComponent(key);
+				TextComponent extra1 = new TextComponent(" ");
+				
+				if(time == 0L)
+				{
+					extra0.setColor(ChatColor.GREEN);
+				}
+				else if((time -= System.currentTimeMillis()) < 0L)
+				{
+					extra0.setColor(ChatColor.RED);
+				}
+				else
+				{
+					extra0.setColor(ChatColor.GREEN);
+					
+					extra1.setItalic(true);
+					extra1.setColor(ChatColor.GRAY);
+					
+					long seconds = time / 1000L % 60;
+					long minutes = time / (60L * 1000L) % 60;
+					long hours = time / (60L * 60L * 1000L) % 24;
+					long days = time / (24L * 60L * 60L * 1000L);
+					
+					String timestamp = days != 0 ? days + "d " + hours + "h " + minutes + "m " + seconds + "s"
+							: hours != 0 ? hours + "h " + minutes + "m " + seconds + "s"
+									: minutes != 0 ? minutes + "m " + seconds + "s"
+											: seconds + "s";
+					
+					extra1.addExtra(timestamp);
+				}
+				
+				text.addExtra(extra0);
+				text.addExtra(extra1);
+				
+				p.spigot().sendMessage(text);
 			}
 			
 			TextComponent text = new TextComponent("");
@@ -616,7 +690,7 @@ public class Permission implements TabExecutor, Listener
 		}
 		else
 		{
-			p.sendMessage("page not found");
+			p.sendMessage(ChatColor.RED + "commons.cmds.page-not-found");
 		}
 	}
 	
