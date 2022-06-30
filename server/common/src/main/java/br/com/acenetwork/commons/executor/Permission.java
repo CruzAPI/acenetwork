@@ -1,49 +1,49 @@
 package br.com.acenetwork.commons.executor;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Writer;
 import java.text.DecimalFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.MemorySection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldSaveEvent;
-import org.bukkit.util.FileUtil;
+
+import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.manager.Message;
+import br.com.acenetwork.commons.manager.ObjectField;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class Permission implements TabExecutor, Listener
@@ -53,14 +53,14 @@ public class Permission implements TabExecutor, Listener
 	public final Map<UUID, Map<String, Long>> userPermission;
 	
 	@SuppressWarnings("unchecked")
-	public Permission() throws Exception
+	public Permission() throws RuntimeException
 	{
 		File file = CommonsConfig.getFile(Type.PERMISSIONS, false);
 		
 		if(file.exists())
 		{
 			try(FileInputStream fileIn = new FileInputStream(file);
-					ByteArrayInputStream stream = new ByteArrayInputStream(fileIn.readAllBytes());
+					ByteArrayInputStream stream = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					ObjectInputStream in = new ObjectInputStream(stream))
 			{
 				groupPermission = (Map<String, Map<String, Long>>) in.readObject();
@@ -69,7 +69,7 @@ public class Permission implements TabExecutor, Listener
 			}
 			catch(ClassNotFoundException | IOException ex)
 			{
-				throw ex;
+				throw new RuntimeException(ex);
 			}
 		}
 		else
@@ -80,26 +80,6 @@ public class Permission implements TabExecutor, Listener
 		}
 		
 		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
-	}
-	
-	private enum Key
-	{
-		PERMISSION("permission", null), GROUP("group", Type.GROUP), USER("user", Type.USER);
-		
-		private String name;
-		private Type type;
-
-		Key(String name, Type type)
-		{
-			this.name = name;
-			this.type = type;
-		}
-
-		@Override
-		public String toString()
-		{
-			return name;
-		}
 	}
 
 	@Override
@@ -112,29 +92,25 @@ public class Permission implements TabExecutor, Listener
 	public boolean onCommand(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
 		CommonPlayer cp = null;
-		boolean hasPermission = true;
 		ResourceBundle bundle = ResourceBundle.getBundle("message");
 		
 		if(sender instanceof Player)
 		{
 			Player p = (Player) sender;
 			cp = CraftCommonPlayer.get(p);
-			hasPermission = cp.hasPermission("cmd.permission");
 			bundle = ResourceBundle.getBundle("message", cp.getLocale());
-		}
-		
-		if(!hasPermission)
-		{
-			TextComponent text = new TextComponent(bundle.getString("commons.cmds.permission"));
-			text.setColor(ChatColor.RED);
-						CommonsUtil.sendMessage(sender, text);
-			return true;
+			
+			if(!cp.hasPermission("cmd.permission"))
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
+				return true;
+			}
 		}
 		
 		try
 		{
 			if(args.length == 4 && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) 
-				&& args[2].equalsIgnoreCase("add"))
+					&& args[2].equalsIgnoreCase("add"))
 			{
 				final String group = args[1].toLowerCase();
 				final String permission = args[3].toLowerCase();
@@ -179,41 +155,31 @@ public class Permission implements TabExecutor, Listener
 				
 				if(!groupPermission.containsKey(group))
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.group-not-found"));
-					text.setColor(ChatColor.RED);
-					CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.group-not-found"));
 					return true;
 				}
 				
 				Map<String, Long> map = groupPermission.get(group);
 				
-				int n = 0;
+				final ObjectField<Integer> of = new ObjectField<>();
 				
 				if(permission.endsWith("*"))
 				{
-					ConfigurationSection section = groupConfig.getConfigurationSection("permission");
-	
-					if(section != null)
-					{
-						for(String key : section.getKeys(false))
-						{
-							if(key.startsWith(configPermission.substring(0, configPermission.length() - 1)))
+					map.keySet().stream().filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
+							.forEach(x -> 
 							{
-								groupConfig.set("permission." + key, null);
-								n++;
-							}
-						}
-					}
+								if(map.remove(x) != null)
+								{
+									of.object++;
+								}
+							});
 				}
-				else if(groupConfig.contains("permission." + configPermission))
+				else if(map.remove(permission) != null)
 				{
-					groupConfig.set("permission." + configPermission, null);
-					n++;
+					of.object++;
 				}
 
-				groupConfig.save(groupFile);
-				
-				if(n > 0)
+				if(of.object > 0)
 				{
 					TextComponent[] extra = new TextComponent[2];
 					
@@ -222,16 +188,16 @@ public class Permission implements TabExecutor, Listener
 					
 					extra[1] = new TextComponent(group);
 					extra[1].setColor(ChatColor.YELLOW);
-
+					
 					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.permission-removed-from-group"), extra);
 					text.setColor(ChatColor.GREEN);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 				}
 				else
 				{
 					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.permission-not-found"));
 					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 				}
 			}
 			else if(args.length == 5 && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
@@ -239,38 +205,31 @@ public class Permission implements TabExecutor, Listener
 				 args[3].equalsIgnoreCase("add"))
 			{
 				final String group = args[1].toLowerCase();
-				final String user = args[4].toLowerCase();
+				final String user = args[4];
 				
 				OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
-					text.setColor(ChatColor.RED);
-					CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.user-not-found"));
 					return true;	
 				}
 
 				if(!CommonsUtil.groupSyntaxIsValid(group))
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-group-syntax"));
-					text.setColor(ChatColor.RED);
-					CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.invalid-group-syntax"));
 					return true;	
 				}
-
-				File groupFile = CommonsConfig.getFile(Type.GROUP, true, group);
-				YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-
-				groupConfig.set("user." + op.getUniqueId(), 0L);
-				groupConfig.save(groupFile);
-
-				File userFile = CommonsConfig.getFile(Type.USER, true, op.getUniqueId());
-				YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
-
-				userConfig.set("group." + group, 0L);
-				userConfig.save(userFile);
-
+				
+				if(!groupUser.containsKey(group))
+				{
+					groupUser.put(group, new HashMap<>());
+				}
+				
+				Map<UUID, Long> map = groupUser.get(group);
+				
+				map.put(op.getUniqueId(), 0L);
+				
 				TextComponent[] extra = new TextComponent[2];
 				
 				extra[0] = new TextComponent(op.getName());
@@ -281,47 +240,33 @@ public class Permission implements TabExecutor, Listener
 
 				TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.user-added-to-group"), extra);
 				text.setColor(ChatColor.GREEN);
-							CommonsUtil.sendMessage(sender, text);
+				CommonsUtil.sendMessage(sender, text);
 			}
 			else if(args.length == 5 && (args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
 				(args[2].equalsIgnoreCase("user") || args[2].equalsIgnoreCase("u")) &&
 				 args[3].equalsIgnoreCase("remove"))
 			{
 				final String group = args[1].toLowerCase();
-				final String user = args[4].toLowerCase();
+				final String user = args[4];
 
-				OfflinePlayer op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-						x.getName().equalsIgnoreCase(user)).findAny().orElse(null);
+				OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 
 				if(op == null)
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.user-not-found"));
 					return true;	
 				}
-
-				File groupFile = CommonsConfig.getFile(Type.GROUP, false, group);
-				YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
 				
-				if(!groupFile.exists())
+				if(!groupUser.containsKey(group))
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.group-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.group-not-found"));
 					return true;
 				}
-
-				File userFile = CommonsConfig.getFile(Type.USER, true, op.getUniqueId());
-				YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
 				
-				if(groupConfig.contains("user." + op.getUniqueId()) || userConfig.contains("group." + group))
+				Map<UUID, Long> map = groupUser.get(group);
+				
+				if(map.remove(op.getUniqueId()) != null)
 				{
-					groupConfig.set("user." + op.getUniqueId(), null);
-					groupConfig.save(groupFile);
-					userConfig.set("group." + group, null);
-					userConfig.save(userFile);
-					
 					TextComponent[] extra = new TextComponent[2];
 					
 					extra[0] = new TextComponent(op.getName());
@@ -332,47 +277,42 @@ public class Permission implements TabExecutor, Listener
 
 					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.user-removed-from-group"), extra);
 					text.setColor(ChatColor.GREEN);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 				}
 				else
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.user-not-found-in-group"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.user-not-found-in-group"));
 				}
 			}
 			else if(args.length == 4 && (args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
-				args[2].equalsIgnoreCase("add"))
+					args[2].equalsIgnoreCase("add"))
 			{
-				final String user = args[1].toLowerCase();
+				final String user = args[1];
 				final String permission = args[3].toLowerCase();
-				final String configPermission = permission.replace('.', ':');
 
-				OfflinePlayer op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-						x.getName().equalsIgnoreCase(user)).findAny().orElse(null);
+				OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.user-not-found"));
 					return true;	
 				}
 
 				if(!CommonsUtil.permissionSyntaxIsValid(permission))
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.invalid-permission-syntax"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.invalid-permission-syntax"));
 					return true;
 				}
-
-				File userFile = CommonsConfig.getFile(Type.USER, true, op.getUniqueId());
-				YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
 				
-				userConfig.set("permission." + configPermission, 0L);
-				userConfig.save(userFile);
-
+				if(!userPermission.containsKey(op.getUniqueId()))
+				{
+					userPermission.put(op.getUniqueId(), new HashMap<>());
+				}
+				
+				Map<String, Long> map = userPermission.get(op.getUniqueId());
+				
+				map.put(permission, 0L);
+				
 				TextComponent[] extra = new TextComponent[2];
 				
 				extra[0] = new TextComponent(permission);
@@ -383,56 +323,46 @@ public class Permission implements TabExecutor, Listener
 
 				TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.permission-added-to-user"), extra);
 				text.setColor(ChatColor.GREEN);
-							CommonsUtil.sendMessage(sender, text);
+				CommonsUtil.sendMessage(sender, text);
 			}
 			else if(args.length == 4 && (args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
 				args[2].equalsIgnoreCase("remove"))
 			{
-				final String user = args[1].toLowerCase();
+				final String user = args[1];
 				final String permission = args[3].toLowerCase();
-				final String configPermission = permission.replace('.', ':');
 
-				OfflinePlayer op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-						x.getName().equalsIgnoreCase(user)).findAny().orElse(null);
+				OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
-					return true;	
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.user-not-found"));
+					return true;
 				}
-
-				File userFile = CommonsConfig.getFile(Type.USER, true, op.getUniqueId());
-				YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
 				
-				int n = 0;
-
-				if(configPermission.endsWith("*"))
+				final ObjectField<Integer> of = new ObjectField<>();
+				
+				if(userPermission.containsKey(op.getUniqueId()))
 				{
-					ConfigurationSection section = userConfig.getConfigurationSection("permission");
-	
-					if(section != null)
+					Map<String, Long> map = userPermission.get(op.getUniqueId());
+					
+					if(permission.endsWith("*"))
 					{
-						for(String key : section.getKeys(false))
-						{
-							if(key.startsWith(configPermission.substring(0, configPermission.length() - 1)))
-							{
-								userConfig.set("permission." + key, null);
-								n++;
-							}
-						}
+						map.keySet().stream().filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
+								.forEach(x -> 
+								{
+									if(map.remove(x) != null)
+									{
+										of.object++;
+									}
+								});
+					}
+					else if(map.remove(permission) != null)
+					{
+						of.object++;
 					}
 				}
-				else if(userConfig.contains("permission." + configPermission))
-				{
-					userConfig.set("permission." + configPermission, null);
-					n++;
-				}
 
-				userConfig.save(userFile);
-
-				if(n > 0)
+				if(of.object > 0)
 				{
 					TextComponent[] extra = new TextComponent[2];
 					
@@ -444,71 +374,152 @@ public class Permission implements TabExecutor, Listener
 
 					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.permission.permission-removed-from-user"), extra);
 					text.setColor(ChatColor.GREEN);
-								CommonsUtil.sendMessage(sender, text);
+					CommonsUtil.sendMessage(sender, text);
 				}
 				else
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmd.permission.permission-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.permission.permission-not-found"));
 				}
 			}
-			else if((args.length == 3 || args.length == 4) &&
-				(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
-				 args[2].equalsIgnoreCase("list"))
+			else if((args.length == 2 || args.length == 3) &&
+					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
+					 args[1].equalsIgnoreCase("list"))
 			{
-//				String page = args.length == 4 ? args[3] : "1";
-//				TODO
-//				printList(cp, Key.GROUP, args[1].toLowerCase(), Key.PERMISSION, page);
+				final int page = args.length == 3 ? Integer.valueOf(args[2]) : 1;
+				
+				Map<String, Long> map = new HashMap<>();
+				
+				groupUser.keySet().stream().forEach(x -> map.put(x, 0L));
+				groupPermission.keySet().stream().forEach(x -> map.put(x, 0L));
+				
+				String commandLine = "/" + cmd.getName();
+				
+				for(int i = 0; i < args.length && i < 2; i++)
+				{
+					commandLine += " " + args[i];
+				}
+				
+				printList(cp, map, commandLine, page);
+			}
+			else if((args.length == 3 || args.length == 4) &&
+					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
+					 args[2].equalsIgnoreCase("list"))
+			{
+				final int page = args.length == 4 ? Integer.valueOf(args[3]) : 1;
+				final String group = args[1].toLowerCase();
+				
+				Map<String, Long> map = groupPermission.containsKey(group)
+						? groupPermission.get(group)
+						: new HashMap<>();
+				
+				map = map.entrySet().stream().filter(x -> 
+						{
+							Long value = x.getValue();
+							return value != null && value < System.currentTimeMillis();
+						}).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+				
+				String commandLine = "/" + cmd.getName();
+				
+				for(int i = 0; i < args.length && i < 3; i++)
+				{
+					commandLine += " " + args[i];
+				}
+				
+				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 4 || args.length == 5) && 
-				(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
-				(args[2].equalsIgnoreCase("user") || args[2].equalsIgnoreCase("u")) &&
-				 args[3].equalsIgnoreCase("list"))
+					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
+					(args[2].equalsIgnoreCase("user") || args[2].equalsIgnoreCase("u")) &&
+					 args[3].equalsIgnoreCase("list"))
 			{
-//				String page = args.length == 5 ? args[4] : "1";
-//				printList(cp, Key.GROUP, args[1].toLowerCase(), Key.USER, page);
+				final int page = args.length == 5 ? Integer.valueOf(args[4]) : 1;
+				final String group = args[1].toLowerCase();
+				
+				String commandLine = "/" + cmd.getName();
+				
+				Map<UUID, Long> map = groupUser.containsKey(group) 
+						? groupUser.get(group) 
+						: new HashMap<>();
+				
+				Map<String, Long> convertedMap = map.entrySet().stream().filter(x -> 
+						{
+							Long value = x.getValue();
+							return value != null && value < System.currentTimeMillis();
+						}).collect(Collectors.toMap(x -> Bukkit.getOfflinePlayer(x.getKey()).getName(), x -> x.getValue()));	
+				
+				for(int i = 0; i < args.length && i < 4; i++)
+				{
+					commandLine += " " + args[i];
+				}
+				
+				printList(cp, convertedMap, commandLine, page);
 			}
 			else if((args.length == 3 || args.length == 4) &&
-				(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) && 
-				 args[2].equalsIgnoreCase("list"))
+					(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) && 
+					 args[2].equalsIgnoreCase("list"))
 			{
-				String page = args.length == 4 ? args[3] : "1";
-				String user = args[1].toLowerCase();
-
-				OfflinePlayer op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-						x.getName().equalsIgnoreCase(user)).findAny().orElse(null);
+				final int page = args.length == 4 ? Integer.valueOf(args[3]) : 1;
+				final String user = args[1];
+				
+				final OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.user-not-found"));
 					return true;	
 				}
-
-//				printList(cp, Key.USER, op, Key.PERMISSION, page);
+				
+				Map<String, Long> map = userPermission.containsKey(op.getUniqueId()) 
+						? userPermission.get(op.getUniqueId()) 
+						: new HashMap<>();
+				
+				map = map.entrySet().stream().filter(x -> 
+						{
+							Long value = x.getValue();
+							return value != null && value < System.currentTimeMillis();
+						}).collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+				
+				String commandLine = "/" + cmd.getName();
+				
+				for(int i = 0; i < args.length && i < 3; i++)
+				{
+					commandLine += " " + args[i];
+				}
+				
+				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 4 || args.length == 5) && 
-				(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
-				(args[2].equalsIgnoreCase("group") || args[2].equalsIgnoreCase("g")) &&
-				 args[3].equalsIgnoreCase("list"))
+					(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
+					(args[2].equalsIgnoreCase("group") || args[2].equalsIgnoreCase("g")) &&
+					 args[3].equalsIgnoreCase("list"))
 			{
-				String page = args.length == 5 ? args[4] : "1";
-				String user = args[1].toLowerCase();
+				final int page = args.length == 5 ? Integer.valueOf(args[4]) : 1;
+				final String user = args[1];
 
-				OfflinePlayer op = Arrays.stream(Bukkit.getOfflinePlayers()).filter(x -> 
-						x.getName().equalsIgnoreCase(user)).findAny().orElse(null);
+				final OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(user);
 				
 				if(op == null)
 				{
-					TextComponent text = new TextComponent(bundle.getString("commons.cmds.user-not-found"));
-					text.setColor(ChatColor.RED);
-								CommonsUtil.sendMessage(sender, text);
+					sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.user-not-found"));
 					return true;
 				}
-
-//				printList(cp, Key.USER, op, Key.GROUP, page);
+				
+				Map<String, Long> map = groupUser.entrySet().stream()
+						.filter(x -> 
+						{
+							Map<UUID, Long> userMap = x.getValue();
+							Long value = userMap.get(op.getUniqueId());
+							return value != null && value < System.currentTimeMillis();
+						}).collect(Collectors.toMap(Entry::getKey, x -> x.getValue().get(op.getUniqueId())));
+				
+				String commandLine = "/" + cmd.getName();
+				
+				for(int i = 0; i < args.length && i < 4; i++)
+				{
+					commandLine += " " + args[i];
+				}
+				
+				printList(cp, map, commandLine, page);
 			}
 			else
 			{
@@ -518,16 +529,12 @@ public class Permission implements TabExecutor, Listener
 				
 				TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
 				text.setColor(ChatColor.RED);
-							CommonsUtil.sendMessage(sender, text);
+				CommonsUtil.sendMessage(sender, text);
 			}
 		}
-		catch(IOException e)
+		catch(NumberFormatException e)
 		{
-			e.printStackTrace();
-			TextComponent text = new TextComponent(bundle.getString("commons.unexpected-error"));
-			text.setColor(ChatColor.RED);
-						CommonsUtil.sendMessage(sender, text);
-			return true;
+			sender.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.invalid-number-format"));
 		}
 
 		return false;
@@ -541,6 +548,80 @@ public class Permission implements TabExecutor, Listener
 			return;
 		}
 		
+		save();
+	}
+	
+	private void printList(CommonPlayer cp, Map<String, Long> map, String commandLine, int page)
+	{
+		Player p = cp.getPlayer();
+		
+		if(map.isEmpty())
+		{
+			p.sendMessage("map is empty");
+			return;
+		}
+		
+		final byte pageSize = 18;
+		
+		Map<String, Long> treeMap = new TreeMap<>(map);
+		List<Entry<String, Long>> list = new ArrayList<>(treeMap.entrySet());
+		
+		if(list.size() > (page - 1) * pageSize && page > 0)
+		{
+			final int maxPage = list.size() / pageSize + (list.size() % pageSize == 0 ? 0 : 1);
+			p.sendMessage("List [" + page + "/" + maxPage + "]");
+			
+			for(int i = (page - 1) * pageSize; i < page * pageSize && i < list.size(); i++)
+			{
+				Entry<String, Long> entry = list.get(i);
+				
+				String key = entry.getKey();
+				long value = entry.getValue();
+				
+				p.sendMessage(key + " " + value);
+			}
+			
+			TextComponent text = new TextComponent("");
+			text.setColor(ChatColor.DARK_GRAY);
+			
+			if(page <= 1)
+			{
+				text.addExtra(" -");
+			}
+			else
+			{
+				TextComponent extra = new TextComponent("<<");
+				extra.setColor(ChatColor.WHITE);
+				extra.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, commandLine + " " + (page - 1)));
+				
+				text.addExtra(extra);
+			}
+			
+			text.addExtra(" | ");
+			
+			if(maxPage > page)
+			{
+				TextComponent extra = new TextComponent(">>");
+				extra.setColor(ChatColor.WHITE);
+				extra.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, commandLine + " " + (page + 1)));
+				
+				text.addExtra(extra);
+			}
+			else
+			{
+				text.addExtra("-");
+			}
+			
+			p.spigot().sendMessage(text);
+		}
+		else
+		{
+			p.sendMessage("page not found");
+		}
+	}
+	
+	public void save()
+	{
 		long time = System.currentTimeMillis();
 
 		File file = CommonsConfig.getFile(Type.PERMISSIONS, true);
@@ -569,107 +650,5 @@ public class Permission implements TabExecutor, Listener
 		{
 			e1.printStackTrace();
 		}
-		
-//		File folder = CommonsConfig.getFile(Type.USERS_FOLDER, true);
-//		
-//		Arrays.stream(folder.listFiles())
-//				.filter(x -> !USER_PERMISSION.containsKey(UUID.fromString(FilenameUtils.removeExtension(x.getName()))))
-//				.forEach(x -> x.delete());
-//		
-//		for(Entry<UUID, Map<String, Long>> entry : USER_PERMISSION.entrySet())
-//		{
-//			File file = 
-//			YamlConfiguration config = YamlConfiguration.loadConfiguration();
-//		}
 	}
-	
-//	private void printList(CommonPlayer cp, Key key, OfflinePlayer op, Key listOf, String pageArgs) throws IOException
-//	{
-//		int page;
-//
-//		try
-//		{
-//			page = Integer.valueOf(pageArgs);
-//		}
-//		catch(NumberFormatException e)
-//		{
-//			cp.sendMessage("cmd.p.page-must-be-numeric");
-//			return;
-//		}
-//
-//		File file = CommonsConfig.getFile(key.type, false, op.getUniqueId());
-//		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-//		
-//		if(!file.exists())
-//		{
-//			cp.sendMessage("cmd.p." + key + "-not-found");
-//			return;
-//		}
-//
-//		ConfigurationSection section = config.getConfigurationSection(listOf.name);
-//
-//		int n = 0;
-//		int maxPages = 0;
-//
-//		List<String> list = new ArrayList<>();
-//
-//		if(section != null)
-//		{
-//			Set<String> set = section.getKeys(false);
-//			maxPages = set.size() / 10 + (set.size() % 10 == 0 ? 0 : 1);
-//			
-//			for(String line : set)
-//			{
-//				if(n < page * 10 - 10)
-//				{
-//					n++;
-//					continue;
-//				}
-//
-//				if(n >= page * 10)
-//				{
-//					break;
-//				}
-//
-//				if(listOf == Key.PERMISSION)
-//				{
-//					list.add(line.replace(':', '.'));
-//				}
-//				else if(listOf == Key.USER)
-//				{
-//					File playerFile = CommonsConfig.getFile(Type.PLAYER, false, line);
-//					YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-//
-//					list.add(playerConfig.contains("name") ? playerConfig.getString("name") : line);
-//				}
-//				else
-//				{
-//					list.add(line);
-//				}
-//
-//				n++;
-//			}
-//		}
-//
-//		if(list.isEmpty())
-//		{
-//			if(page == 1)
-//			{
-//				cp.sendMessage("cmd.p." + listOf.name + "-list-empty");
-//			}
-//			else
-//			{
-//				cp.sendMessage("cmd.p.page-not-found");
-//			}
-//		}
-//		else
-//		{
-//			cp.sendMessage("cmd.p." + key + "-" + listOf + "-list", op.getName(), "[" + page + "/" + maxPages + "]");
-//
-//			for(String line : list)
-//			{
-//				cp.getPlayer().sendMessage("§c- " + line);
-//			}
-//		}
-//	}
 }

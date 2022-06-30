@@ -76,7 +76,8 @@ public class Common extends JavaPlugin
 	private static Common instance;
 	private static boolean restarting;
 	public static final boolean TEST = !new File(System.getProperty("user.dir")).getParentFile().getName().equals("acenetwork");
-
+	
+	private Permission permission;
 	//
 	public void onEnable()
 	{
@@ -106,7 +107,9 @@ public class Common extends JavaPlugin
 		Bukkit.getPluginManager().registerEvents(new PlayerLogin(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
 		Bukkit.getPluginManager().registerEvents(new SocketListener(), this);
-
+		
+		permission = new Permission();
+		
 		registerCommand(new AdminCMD(), "admin");
 		registerCommand(new Balance(), "balance", "bal", "points", "coins");
 		registerCommand(new BanCMD(), "ban");
@@ -124,7 +127,7 @@ public class Common extends JavaPlugin
 		registerCommand(new Mutebroadcast(), "mutebroadcast");
 		registerCommand(new MuteCMD(), "mute");
 		registerCommand(new Pardon(), "pardon");
-		registerCommand(new Permission(), "permission", "pex", "perm");
+		registerCommand(permission, "permission", "pex", "perm");
 		registerCommand(new Ping(), "ping");
 		registerCommand(new Reply(), "reply", "r");
 		registerCommand(new Specs(), "specs");
@@ -184,6 +187,12 @@ public class Common extends JavaPlugin
 				}
 			}
 		}).start();
+	}
+	
+	@Override
+	public void onDisable()
+	{
+		permission.save();
 	}
 	
 	public static int getSocketPort()

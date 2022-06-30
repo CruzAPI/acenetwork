@@ -61,7 +61,7 @@ public class Test implements TabExecutor
 		{
 			for(int i = 0; i < 5000000; i++)
 			{
-				Permission.userPermission.put(UUID.randomUUID(), map);
+//				Permission.userPermission.put(UUID.randomUUID(), map);
 			}
 		}
 		else
