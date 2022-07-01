@@ -57,16 +57,18 @@ public class Test implements TabExecutor
 		
 		long time = System.currentTimeMillis();
 		
-		if(args.length == 0)
+		if(args.length == 1)
 		{
-			for(int i = 0; i < 5000000; i++)
+			Bukkit.broadcastMessage("putting 500,000 random uuids in userPermission Map...");
+			for(int i = 0; i < 500000; i++)
 			{
-//				Permission.userPermission.put(UUID.randomUUID(), map);
+				Permission.getInstance().userPermission.put(UUID.randomUUID(), map);
 			}
+			Bukkit.broadcastMessage("Done! Time elapsed: " + (System.currentTimeMillis() - time) + "ms");
 		}
 		else
 		{
-			
+			Bukkit.broadcastMessage("userPermission.map.size() = " + Permission.getInstance().userPermission.size());
 		}
 		
 		time = System.currentTimeMillis() - time;

@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,20 +53,46 @@ public class Permission implements TabExecutor, Listener
 			+ ChatColor.DARK_RED + ChatColor.BOLD + "PEX"
 			+ ChatColor.DARK_GRAY + ChatColor.BOLD + ")" + ChatColor.RESET;
 	
+	private static Permission instance;
+	
 	@SuppressWarnings("unchecked")
 	public Permission() throws RuntimeException
 	{
-		File file = CommonsConfig.getFile(Type.PERMISSIONS, false);
+		instance = this;
 		
-		if(file.exists())
+		File groupsFile = CommonsConfig.getFile(Type.GROUPS_DAT, false);
+		File usersFile = CommonsConfig.getFile(Type.USERS_DAT, false);
+		
+		userPermission = new HashMap<>();
+		
+		if(usersFile.exists())
 		{
-			try(FileInputStream fileIn = new FileInputStream(file);
+			try(FileInputStream fileIn = new FileInputStream(usersFile);
+					ByteArrayInputStream stream = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					ObjectInputStream in = new ObjectInputStream(stream))
+			{
+				Map<UUID, Map<String, Long>> map = (Map<UUID, Map<String, Long>>) in.readObject();
+				
+				Bukkit.getOnlinePlayers().stream().forEach(x -> 
+				{
+					Map<String, Long> map1 = map.containsKey(x.getUniqueId()) ? map.get(x.getUniqueId()) : new HashMap<>();
+					userPermission.put(x.getUniqueId(), map1);
+				});
+			}
+			catch(ClassNotFoundException | IOException ex)
+			{
+				throw new RuntimeException(ex);
+			}
+		}
+		
+		if(groupsFile.exists())
+		{
+			try(FileInputStream fileIn = new FileInputStream(groupsFile);
 					ByteArrayInputStream stream = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					ObjectInputStream in = new ObjectInputStream(stream))
 			{
 				groupPermission = (Map<String, Map<String, Long>>) in.readObject();
 				groupUser = (Map<String, Map<UUID, Long>>) in.readObject();
-				userPermission = (Map<UUID, Map<String, Long>>) in.readObject();
 			}
 			catch(ClassNotFoundException | IOException ex)
 			{
@@ -76,7 +103,6 @@ public class Permission implements TabExecutor, Listener
 		{
 			groupPermission = new HashMap<>();
 			groupUser = new HashMap<>();
-			userPermission = new HashMap<>();
 		}
 		
 		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
@@ -322,10 +348,7 @@ public class Permission implements TabExecutor, Listener
 					return true;
 				}
 				
-				if(!userPermission.containsKey(op.getUniqueId()))
-				{
-					userPermission.put(op.getUniqueId(), new HashMap<>());
-				}
+				loadUser(op.getUniqueId());
 				
 				Map<String, Long> map = userPermission.get(op.getUniqueId());
 				
@@ -373,20 +396,17 @@ public class Permission implements TabExecutor, Listener
 					return true;
 				}
 				
+				loadUser(op.getUniqueId());
+				
 				Map<String, Long> map = userPermission.get(op.getUniqueId());
 				
-				if(map != null
+				if(!map.isEmpty()
 						&& (permission.endsWith("*") 
 						? map.keySet().removeAll(map.keySet().stream()
 						.filter(x -> x.startsWith(permission.substring(0, permission.length() - 1)))
 						.collect(Collectors.toSet()))
 						: map.remove(permission) != null))
 				{
-					if(map.isEmpty())
-					{
-						userPermission.remove(op.getUniqueId());
-					}
-					
 					TextComponent[] extra = new TextComponent[2];
 					
 					extra[0] = new TextComponent(permission);
@@ -428,7 +448,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-//				printList(cp, map, commandLine, page);
+				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 2 || args.length == 3) &&
 					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) && 
@@ -448,7 +468,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-//				printList(cp, map, commandLine, page);
+				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 4 || args.length == 5) && 
 					(args[0].equalsIgnoreCase("group") || args[0].equalsIgnoreCase("g")) &&
@@ -475,7 +495,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-//				printList(cp, convertedMap, commandLine, page);
+				printList(cp, convertedMap, commandLine, page);
 			}
 			else if((args.length == 3 || args.length == 4) &&
 					(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) && 
@@ -509,7 +529,7 @@ public class Permission implements TabExecutor, Listener
 					commandLine += " " + args[i];
 				}
 				
-//				printList(cp, map, commandLine, page);
+				printList(cp, map, commandLine, page);
 			}
 			else if((args.length == 4 || args.length == 5) && 
 					(args[0].equalsIgnoreCase("user") || args[0].equalsIgnoreCase("u")) &&
@@ -555,7 +575,7 @@ public class Permission implements TabExecutor, Listener
 				
 				String title = TAG + " " + text.toLegacyText();
 				String empty = ChatColor.RED + bundle.getString("commons.cmd.permission.group-list-empty");
-//				printList(cp, map, commandLine, page);
+				printList(cp, map, commandLine, page);
 			}
 			else
 			{
@@ -587,6 +607,10 @@ public class Permission implements TabExecutor, Listener
 		save();
 	}
 	
+	private void printList(CommonPlayer cp, Map<String, Long> map, String commandLine, int page)
+	{
+		printList(cp, "List ...", "Empty list", map, commandLine, page);
+	}
 	private void printList(CommonPlayer cp, String title, String empty, Map<String, Long> map, String commandLine, int page)
 	{
 		Player p = cp.getPlayer();
@@ -694,11 +718,129 @@ public class Permission implements TabExecutor, Listener
 		}
 	}
 	
+	public void loadUser(UUID uuid) throws RuntimeException
+	{
+		Bukkit.broadcastMessage("Loading user... (synchronized)");
+		
+		if(userPermission.containsKey(uuid))
+		{
+			Bukkit.broadcastMessage("Already loaded!");
+			return;
+		}
+
+		
+		File file = CommonsConfig.getFile(Type.USER_DAT, false, uuid);
+		
+		long time = System.currentTimeMillis();
+		
+		if(!file.exists())
+		{
+			Bukkit.broadcastMessage("File not exists! Loading empty map.");
+			userPermission.put(uuid, new HashMap<>());
+			return;
+		}
+		
+		try(FileInputStream fileIn = new FileInputStream(file);
+				ByteArrayInputStream stream = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+				ObjectInputStream in = new ObjectInputStream(stream))
+		{
+			@SuppressWarnings("unchecked")
+			Map<String, Long> map = (Map<String, Long>) in.readObject();
+			userPermission.put(uuid, map);
+			Bukkit.broadcastMessage("User loaded!");
+			Bukkit.broadcastMessage("TIME ELAPSED: " + (System.currentTimeMillis() - time) + "ms");
+		}
+		catch(ClassNotFoundException | IOException ex)
+		{
+			Bukkit.broadcastMessage("ERROR!");
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
 	public void save()
 	{
+		Bukkit.broadcastMessage("Saving permissions...");
 		long time = System.currentTimeMillis();
-
-		File file = CommonsConfig.getFile(Type.PERMISSIONS, true);
+		
+		File file;
+		
+		file = CommonsConfig.getFile(Type.USERS_DAT, true);
+		
+		try(FileOutputStream fileOut = new FileOutputStream(file);
+				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+				ObjectOutputStream out = new ObjectOutputStream(outStream);)
+		{
+			Map<UUID, Map<String, Long>> map = new HashMap<>();
+			
+			if(file.length() > 0L)
+			{
+				try(FileInputStream fileIn = new FileInputStream(file);
+						ByteArrayInputStream inStream = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+						ObjectInputStream in = new ObjectInputStream(inStream))
+				{
+					map = (Map<UUID, Map<String, Long>>) in.readObject();
+				}
+				catch(IOException ex)
+				{
+					throw ex;
+				}
+			}
+			
+			Map<UUID, Map<String, Long>> userPermissionClone = new HashMap<>(userPermission);
+			
+			Iterator<Entry<UUID, Map<String, Long>>> iterator1 = userPermission.entrySet().iterator();
+			
+			while(iterator1.hasNext())
+			{
+				Entry<UUID, Map<String, Long>> entry = iterator1.next();
+				
+				if(!Bukkit.getOfflinePlayer(entry.getKey()).isOnline())
+				{
+					iterator1.remove();
+				}
+			}
+			
+			Iterator<Entry<UUID, Map<String, Long>>> iterator = userPermissionClone.entrySet().iterator();
+			
+			while(iterator.hasNext())
+			{
+				Entry<UUID, Map<String, Long>> entry = iterator.next();
+				boolean isEmpty = entry.getValue().isEmpty();
+				File file1 = CommonsConfig.getFile(Type.USER_DAT, !isEmpty, entry.getKey());
+				
+				try(FileOutputStream fileOut1 = new FileOutputStream(file1);
+						ByteArrayOutputStream outStream1 = new ByteArrayOutputStream();
+						ObjectOutputStream out1 = new ObjectOutputStream(outStream1))
+				{
+					if(isEmpty)
+					{
+						file1.delete();
+						iterator.remove();
+						map.remove(entry.getKey());
+					}
+					else
+					{
+						out1.writeObject(entry.getValue());
+						fileOut1.write(outStream1.toByteArray());
+					}
+				}
+				catch(IOException e)
+				{
+					throw e;
+				}
+			}
+			
+			map.putAll(userPermissionClone);
+			out.writeObject(map);
+			fileOut.write(outStream.toByteArray());
+		}
+		catch(ClassNotFoundException | IOException e1)
+		{
+			e1.printStackTrace();
+		}
+		
+		file = CommonsConfig.getFile(Type.GROUPS_DAT, true);
 		
 		try(FileOutputStream fileOut = new FileOutputStream(file);
 				ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -706,23 +848,18 @@ public class Permission implements TabExecutor, Listener
 		{
 			out.writeObject(groupPermission);
 			out.writeObject(groupUser);
-			out.writeObject(userPermission);
 			fileOut.write(stream.toByteArray());
-			
-			time = System.currentTimeMillis() - time;
-			
-			Bukkit.broadcastMessage(ChatColor.GREEN + "Time elapsed: " + time + "ms");
-			
-			DecimalFormat df = new DecimalFormat();
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			Bukkit.broadcastMessage("Bytes: " + df.format(stream.toByteArray().length));
-
 		}
 		catch(IOException e1)
 		{
 			e1.printStackTrace();
 		}
+		
+		Bukkit.broadcastMessage("Saved! Time elapsed: " + (System.currentTimeMillis() - time) + "ms");
+	}
+	
+	public static Permission getInstance()
+	{
+		return instance;
 	}
 }

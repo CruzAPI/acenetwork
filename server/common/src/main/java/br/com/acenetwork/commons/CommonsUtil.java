@@ -1452,63 +1452,64 @@ public class CommonsUtil
 	
 	public static boolean hasPermission(UUID uuid, String perm)
 	{
-		perm = perm.replace('.', ':');
-
-		File userFile = CommonsConfig.getFile(Type.USER, true, uuid);
-		YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
-
-		ConfigurationSection userPermissions = userConfig.getConfigurationSection("permission");
-
-		if(userPermissions != null)
-		{
-			for(String key : userPermissions.getKeys(false))
-			{
-				long value = userConfig.getLong("permission." + key);
-				boolean valid = value == 0 || value > System.currentTimeMillis();
-
-				if(valid && (key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)) || 
-					perm.equals(key)))
-				{
-					return true;
-				}
-			}
-		}
-		
-		ConfigurationSection userGroups = userConfig.getConfigurationSection("group");
-		
-		if(userGroups != null)
-		{
-			for(String key : userGroups.getKeys(false))
-			{
-				long value = userConfig.getLong("group." + key);
-				boolean valid = value == 0 || value > System.currentTimeMillis();
-
-				if(valid)
-				{
-					File groupFile = CommonsConfig.getFile(Type.GROUP, true, key);
-					YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-
-					ConfigurationSection groupPermissions = groupConfig.getConfigurationSection("permission");
-
-					if(groupPermissions != null)
-					{
-						for(String key1 : groupPermissions.getKeys(false))
-						{
-							value = groupConfig.getLong("permisison." + key1);
-							valid = value == 0 || value > System.currentTimeMillis();
-							
-							if(valid && (key1.endsWith("*") && perm.startsWith(key1.substring(0, key1.length() - 1)) || 
-								perm.equals(key1)))
-							{
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
+		return true;
+//		perm = perm.replace('.', ':');
+//
+//		File userFile = CommonsConfig.getFile(Type.USER, true, uuid);
+//		YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
+//
+//		ConfigurationSection userPermissions = userConfig.getConfigurationSection("permission");
+//
+//		if(userPermissions != null)
+//		{
+//			for(String key : userPermissions.getKeys(false))
+//			{
+//				long value = userConfig.getLong("permission." + key);
+//				boolean valid = value == 0 || value > System.currentTimeMillis();
+//
+//				if(valid && (key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)) || 
+//					perm.equals(key)))
+//				{
+//					return true;
+//				}
+//			}
+//		}
+//		
+//		ConfigurationSection userGroups = userConfig.getConfigurationSection("group");
+//		
+//		if(userGroups != null)
+//		{
+//			for(String key : userGroups.getKeys(false))
+//			{
+//				long value = userConfig.getLong("group." + key);
+//				boolean valid = value == 0 || value > System.currentTimeMillis();
+//
+//				if(valid)
+//				{
+//					File groupFile = CommonsConfig.getFile(Type.GROUP, true, key);
+//					YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
+//
+//					ConfigurationSection groupPermissions = groupConfig.getConfigurationSection("permission");
+//
+//					if(groupPermissions != null)
+//					{
+//						for(String key1 : groupPermissions.getKeys(false))
+//						{
+//							value = groupConfig.getLong("permisison." + key1);
+//							valid = value == 0 || value > System.currentTimeMillis();
+//							
+//							if(valid && (key1.endsWith("*") && perm.startsWith(key1.substring(0, key1.length() - 1)) || 
+//								perm.equals(key1)))
+//							{
+//								return true;
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		return false;
 	}
 	
 	public static boolean permissionSyntaxIsValid(String perm)

@@ -13,17 +13,18 @@ public class CommonsConfig
 {
 	public enum Type
 	{
-		GROUPS_FOLDER,
+		GROUPS_DAT,
+		USERS_DAT,
+		USER_DAT,
 		USERS_FOLDER,
 		BLOCK_DATA,
 		SIGN_DATA,
 		ITEM_INFO_FOLDER,
 		ITEM_INFO,
 		WHITELISTED_IP,
-		CLANS_JSON, MESSAGE, GROUP, USER, 
+		CLANS_JSON, MESSAGE, 
 		PLAYER, 
 		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, 
-		PERMISSIONS
 		;
 	}
 
@@ -67,17 +68,14 @@ public class CommonsConfig
 		case BANNED_PLAYERS:
 			file = new File(Common.getPlugin().getConfigFolder() + "/banned-players", args[0] + ".yml");
 			break;
-		case GROUP:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/groups", args[0] + ".yml");
+		case GROUPS_DAT:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions", "groups.dat");
 			break;
-		case GROUPS_FOLDER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/groups");
+		case USERS_DAT:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions", "users.dat");
 			break;
-		case USER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".yml");
-			break;
-		case PERMISSIONS:
-			file = new File(Common.getPlugin().getConfigFolder(), "permissions.dat");
+		case USER_DAT:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".dat");
 			break;
 		case USERS_FOLDER:
 			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users");
