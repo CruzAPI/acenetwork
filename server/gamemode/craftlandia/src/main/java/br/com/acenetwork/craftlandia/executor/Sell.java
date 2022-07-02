@@ -26,6 +26,7 @@ import org.bukkit.inventory.ItemStack;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
+import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
@@ -92,12 +93,9 @@ public class Sell implements TabExecutor
 		
 		Player p = cp.getPlayer();
 
-		File playerFile = CommonsConfig.getFile(CommonsConfig.Type.PLAYER, true, p.getUniqueId());
-		YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
+		double balance = cp.getBalance();
 		
-		double balance = playerConfig.getDouble("balance");
-		
-		Map<String, AmountPrice> map = new HashMap<>();
+		Map<IdData, AmountPrice> map = new HashMap<>();
 		
 		List<ItemStack> itemsToSell = new ArrayList<>();
 		
@@ -140,9 +138,11 @@ public class Sell implements TabExecutor
 				
 				final int id = item.getTypeId();
 				final short data = item.getData().getData();
-				final String key = id + ":" + data;
 				
-				if(!Price.MAP.containsKey(key))
+				IdData idData = new IdData(id, data);
+				Map<IdData, CryptoInfo> priceMap = Price.getPriceMap();
+				
+				if(!priceMap.containsKey(idData))
 				{
 					if(sellType == SellType.HAND)
 					{
@@ -153,8 +153,7 @@ public class Sell implements TabExecutor
 					continue;
 				}
 				
-				CryptoInfo cryptoInfo = Price.MAP.get(key);
-				
+				CryptoInfo cryptoInfo = priceMap.get(idData);
 				
 				final double oldMarketCap = cryptoInfo.getMarketCap();
 				double marketCap = oldMarketCap;
@@ -185,87 +184,70 @@ public class Sell implements TabExecutor
 				cryptoInfo.setMarketCap(marketCap);
 				cryptoInfo.setCirculatingSupply(circulatingSupply);
 				
-				
-				access.seek(cryptoInfo.getPos() + 4L + 2L);
-				access.writeDouble(marketCap);
-				access.writeDouble(circulatingSupply);
-				
-				playerConfig.set("balance", balance += shards);
+				cp.setBalance(balance += shards);
 				
 				total += shards;
 				
-				AmountPrice ap = map.containsKey(key) ? map.get(key) : new AmountPrice();
+				AmountPrice ap = map.containsKey(idData) ? map.get(idData) : new AmountPrice();
 				
 				ap.amount += amountToSell;
 				ap.price += shards;
 				
-				map.put(key, ap);
+				map.put(idData, ap);
 				
-				events.add(new SellItemEvent(p, key, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
+				events.add(new SellItemEvent(p, idData, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
 			}
 		}
 		catch(IOException ex)
 		{
 			ex.printStackTrace();
 		}
-		try
+		
+		events.forEach(x -> Bukkit.getPluginManager().callEvent(x));
+		
+		if(map.isEmpty())
 		{
-			playerConfig.save(playerFile);
-			
-			events.forEach(x -> Bukkit.getPluginManager().callEvent(x));
-			
-			if(map.isEmpty())
-			{
-				TextComponent text = new TextComponent(bundle.getString("raid.cmd.sellall.no-items-to-sell"));
-				text.setColor(ChatColor.RED);
-				p.spigot().sendMessage(text);
-			}
-			else
-			{
-				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-				
-				df.setGroupingSize(3);
-				df.setGroupingUsed(true);
-				
-				for(Entry<String, AmountPrice> entry : map.entrySet())
-				{
-					String key = entry.getKey();
-					AmountPrice ap = entry.getValue();
-					
-					TextComponent[] extra = new TextComponent[2];
-					
-					extra[0] = new TextComponent(ap.amount + " ");
-					extra[0].addExtra(CommonsUtil.getTranslation(key, minecraftBundle));
-					extra[0].setColor(ChatColor.YELLOW);
-					
-					extra[1] = new TextComponent(df.format(ap.price));
-					extra[1].setColor(ChatColor.YELLOW);
-					
-					TextComponent text = Message.getTextComponent(bundle.getString("raid.cmd.sell.item-sold"), extra);
-					text.setColor(ChatColor.GREEN);
-					p.spigot().sendMessage(text);
-				}
-				
-				if(sellType == SellType.ALL)
-				{
-					TextComponent[] extra = new TextComponent[1];
-					
-					extra[0] = new TextComponent(df.format(total));
-					extra[0].setColor(ChatColor.YELLOW);
-					
-					TextComponent text = Message.getTextComponent(bundle.getString("raid.cmd.sellall.totalizing"), extra);
-					text.setColor(ChatColor.GREEN);
-					p.spigot().sendMessage(text);
-				}
-			}
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-			
-			TextComponent text = new TextComponent(bundle.getString("commons.unexpected-error"));
+			TextComponent text = new TextComponent(bundle.getString("raid.cmd.sellall.no-items-to-sell"));
 			text.setColor(ChatColor.RED);
 			p.spigot().sendMessage(text);
+		}
+		else
+		{
+			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+			
+			df.setGroupingSize(3);
+			df.setGroupingUsed(true);
+			
+			for(Entry<IdData, AmountPrice> entry : map.entrySet())
+			{
+				IdData idData = entry.getKey();
+				AmountPrice ap = entry.getValue();
+				
+				TextComponent[] extra = new TextComponent[2];
+				
+				extra[0] = new TextComponent(ap.amount + " ");
+				extra[0].addExtra(CommonsUtil.getTranslation(idData, minecraftBundle));
+				extra[0].setColor(ChatColor.YELLOW);
+				
+				extra[1] = new TextComponent(df.format(ap.price));
+				extra[1].setColor(ChatColor.YELLOW);
+				
+				TextComponent text = Message.getTextComponent(bundle.getString("raid.cmd.sell.item-sold"), extra);
+				text.setColor(ChatColor.GREEN);
+				p.spigot().sendMessage(text);
+			}
+			
+			if(sellType == SellType.ALL)
+			{
+				TextComponent[] extra = new TextComponent[1];
+				
+				extra[0] = new TextComponent(df.format(total));
+				extra[0].setColor(ChatColor.YELLOW);
+				
+				TextComponent text = Message.getTextComponent(bundle.getString("raid.cmd.sellall.totalizing"), extra);
+				text.setColor(ChatColor.GREEN);
+				p.spigot().sendMessage(text);
+			}
 		}
 	}
 }

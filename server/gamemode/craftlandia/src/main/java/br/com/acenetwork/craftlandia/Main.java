@@ -75,6 +75,7 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkPopulateEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
@@ -206,7 +207,24 @@ public class Main extends Common implements Listener
 		}
 	}
 	
-
+	@Override
+	public void onDisable()
+	{
+		super.onDisable();
+		
+		Price.getInstance().save();
+	}
+	
+	@EventHandler
+	public void a(WorldSaveEvent e)
+	{
+		if(!e.getWorld().getName().equals("world"))
+		{
+			return;
+		}
+		
+		Price.getInstance().save();
+	}
 	
 	@EventHandler
 	public void a(EntityExplodeEvent e)

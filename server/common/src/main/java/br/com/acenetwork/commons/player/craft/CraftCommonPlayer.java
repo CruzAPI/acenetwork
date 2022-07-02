@@ -47,6 +47,7 @@ import br.com.acenetwork.commons.executor.Balance;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.manager.CommonsConfig;
+import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import net.md_5.bungee.api.ChatColor;
@@ -71,6 +72,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	private Inventory vipChest;
 	public int taskRequest;
 	private boolean isJackpoting;
+	private PlayerData playerData;
 	
 	public CraftCommonPlayer(Player p)
 	{
@@ -82,9 +84,14 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		if(previous != null)	
 		{
+			playerData = previous.getPlayerData();
 			specs = previous.canSpecs();
 			commonsScoreboard = previous.getCommonsScoreboard();
 			previous.delete();
+		}
+		else
+		{
+			playerData = PlayerData.load(p.getUniqueId());
 		}
 		
 		reset();
@@ -726,5 +733,35 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	public void setWalletAddress(String address)
 	{
 		this.walletAddress = address;
+	}
+	
+	@Override
+	public double getBalance()
+	{
+		return playerData.getBalance();
+	}
+	
+	@Override
+	public void setBalance(double balance)
+	{
+		playerData.setBalance(balance);
+	}
+	
+	@Override
+	public double getBTA()
+	{
+		return playerData.getBTA();
+	}
+	
+	@Override
+	public void setBTA(double bta)
+	{
+		playerData.setBTA(bta);
+	}
+	
+	@Override
+	public PlayerData getPlayerData()
+	{
+		return playerData;
 	}
 }

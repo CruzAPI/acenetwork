@@ -68,6 +68,7 @@ import br.com.acenetwork.commons.listener.PlayerLogin;
 import br.com.acenetwork.commons.listener.PlayerQuit;
 import br.com.acenetwork.commons.listener.SocketListener;
 import br.com.acenetwork.commons.manager.Broadcast;
+import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 

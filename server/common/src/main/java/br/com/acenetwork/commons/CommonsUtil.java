@@ -1,5 +1,7 @@
 package br.com.acenetwork.commons;
 
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
+import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -60,6 +63,11 @@ public class CommonsUtil
 		{
 			return new Locale(split[0], split[1]);
 		}
+	}
+	
+	public static String getTranslation(IdData key, ResourceBundle bundle)
+	{
+		return getTranslation(Material.getMaterial(key.getId()), key.getData(), bundle);
 	}
 	
 	public static String getTranslation(String key, ResourceBundle bundle)

@@ -12,10 +12,16 @@ import br.com.acenetwork.commons.CommonsScoreboard;
 import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
+import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.inventory.GUI;
 
 public interface CommonPlayer extends Listener
 {
+	PlayerData getPlayerData();
+	double getBalance();
+	void setBalance(double balance);
+	double getBTA();
+	void setBTA(double bta);
 	void setVipChest(Inventory inv);
 	Inventory getVipChest();
 	void readVipChest() throws IOException;

@@ -13,6 +13,9 @@ public class CommonsConfig
 {
 	public enum Type
 	{
+		PLAYER_DATA,
+		PLAYERS_DATA,
+		PLAYER_PERMISSION,
 		GROUPS_DAT,
 		USERS_DAT,
 		USER_DAT,
@@ -35,6 +38,15 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case PLAYER_DATA:
+			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/users/" + args[0], "user.dat");
+			break;
+		case PLAYERS_DATA:
+			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/", "users.dat");
+			break;
+		case PLAYER_PERMISSION:
+			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/" + args[0], "permisison.dat");
+			break;
 		case CHEST_VIP:
 			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".txt");
 			break;

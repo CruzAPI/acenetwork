@@ -39,7 +39,7 @@ public class Config
 			file = new File(Main.getInstance().getDataFolder() + "/combatlog", args[0] + ".yml");
 			break;
 		case PRICE:
-			file = new File(Main.getInstance().getDataFolder(), "price.txt");
+			file = new File(Main.getInstance().getDataFolder(), "price.dat");
 			break;
 		default:
 			return null;
