@@ -1,9 +1,12 @@
 package br.com.acenetwork.commons.manager;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class IdData
+public class IdData implements Serializable
 {
+	private static final long serialVersionUID = 2886313873294489099L;
+	
 	private final int id;
 	private final short data;
 	

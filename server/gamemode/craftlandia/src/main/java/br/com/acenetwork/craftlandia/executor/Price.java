@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -53,6 +54,8 @@ public class Price implements TabExecutor
 			{
 				MAP.put(new IdData(price.id, price.data), new CryptoInfo(price.marketCap, price.circulatingSupply));
 			}
+			
+			PRICE.LIST = null;
 		}
 		else
 		{

@@ -211,8 +211,6 @@ public class Main extends Common implements Listener
 	public void onDisable()
 	{
 		super.onDisable();
-		
-		Price.getInstance().save();
 	}
 	
 	@EventHandler

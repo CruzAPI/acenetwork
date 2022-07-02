@@ -115,92 +115,83 @@ public class Sell implements TabExecutor
 		
 		List<SellItemEvent> events = new ArrayList<>();
 		
-		File file = Config.getFile(Type.PRICE, false);
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+		for(int i = 0; i < itemsToSell.size(); i++)
 		{
-			for(int i = 0; i < itemsToSell.size(); i++)
+			ItemStack item = itemsToSell.get(i);
+			
+			if(item == null || item.getType() == Material.AIR)
 			{
-				ItemStack item = itemsToSell.get(i);
-				
-				if(item == null || item.getType() == Material.AIR)
-				{
-					if(sellType == SellType.HAND)
-					{
-						TextComponent text = new TextComponent(bundle.getString("raid.cmd.sell.need-hoolding-item"));
-						text.setColor(ChatColor.RED);
-						p.spigot().sendMessage(text);
-						return;
-					}
-					
-					continue;
-				}
-				
-				final int id = item.getTypeId();
-				final short data = item.getData().getData();
-				
-				IdData idData = new IdData(id, data);
-				Map<IdData, CryptoInfo> priceMap = Price.getPriceMap();
-				
-				if(!priceMap.containsKey(idData))
-				{
-					if(sellType == SellType.HAND)
-					{
-						p.sendMessage(ChatColor.RED + bundle.getString("raid.cmd.sell.item-not-for-sale"));
-						return;
-					}
-					
-					continue;
-				}
-				
-				CryptoInfo cryptoInfo = priceMap.get(idData);
-				
-				final double oldMarketCap = cryptoInfo.getMarketCap();
-				double marketCap = oldMarketCap;
-				final double oldCirculatingSupply = cryptoInfo.getCirculatingSupply();
-				double circulatingSupply = oldCirculatingSupply;
-				
-				final int amountToSell = item.getAmount();
-				
 				if(sellType == SellType.HAND)
 				{
-					p.setItemInHand(null);
+					TextComponent text = new TextComponent(bundle.getString("raid.cmd.sell.need-hoolding-item"));
+					text.setColor(ChatColor.RED);
+					p.spigot().sendMessage(text);
+					return;
 				}
-				else
-				{
-					p.getInventory().setItem(i, null);
-				}
 				
-				double oldPrice = marketCap / circulatingSupply;
-				double newPrice = (marketCap - oldPrice * amountToSell) / (circulatingSupply + amountToSell);
-				
-				final double price = (oldPrice + newPrice) / 2.0D;
-				
-				double shards = price * amountToSell;
-				
-				marketCap -= shards;
-				circulatingSupply += amountToSell;
-				
-				cryptoInfo.setMarketCap(marketCap);
-				cryptoInfo.setCirculatingSupply(circulatingSupply);
-				
-				cp.setBalance(balance += shards);
-				
-				total += shards;
-				
-				AmountPrice ap = map.containsKey(idData) ? map.get(idData) : new AmountPrice();
-				
-				ap.amount += amountToSell;
-				ap.price += shards;
-				
-				map.put(idData, ap);
-				
-				events.add(new SellItemEvent(p, idData, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
+				continue;
 			}
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
+			
+			final int id = item.getTypeId();
+			final short data = item.getData().getData();
+			
+			IdData idData = new IdData(id, data);
+			Map<IdData, CryptoInfo> priceMap = Price.getPriceMap();
+			
+			if(!priceMap.containsKey(idData))
+			{
+				if(sellType == SellType.HAND)
+				{
+					p.sendMessage(ChatColor.RED + bundle.getString("raid.cmd.sell.item-not-for-sale"));
+					return;
+				}
+				
+				continue;
+			}
+			
+			CryptoInfo cryptoInfo = priceMap.get(idData);
+			
+			final double oldMarketCap = cryptoInfo.getMarketCap();
+			double marketCap = oldMarketCap;
+			final double oldCirculatingSupply = cryptoInfo.getCirculatingSupply();
+			double circulatingSupply = oldCirculatingSupply;
+			
+			final int amountToSell = item.getAmount();
+			
+			if(sellType == SellType.HAND)
+			{
+				p.setItemInHand(null);
+			}
+			else
+			{
+				p.getInventory().setItem(i, null);
+			}
+			
+			double oldPrice = marketCap / circulatingSupply;
+			double newPrice = (marketCap - oldPrice * amountToSell) / (circulatingSupply + amountToSell);
+			
+			final double price = (oldPrice + newPrice) / 2.0D;
+			
+			double shards = price * amountToSell;
+			
+			marketCap -= shards;
+			circulatingSupply += amountToSell;
+			
+			cryptoInfo.setMarketCap(marketCap);
+			cryptoInfo.setCirculatingSupply(circulatingSupply);
+			
+			cp.setBalance(balance += shards);
+			
+			total += shards;
+			
+			AmountPrice ap = map.containsKey(idData) ? map.get(idData) : new AmountPrice();
+			
+			ap.amount += amountToSell;
+			ap.price += shards;
+			
+			map.put(idData, ap);
+			
+			events.add(new SellItemEvent(p, idData, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
 		}
 		
 		events.forEach(x -> Bukkit.getPluginManager().callEvent(x));

@@ -1,7 +1,11 @@
 package br.com.acenetwork.craftlandia.manager;
 
-public class CryptoInfo
+import java.io.Serializable;
+
+public class CryptoInfo implements Serializable
 {
+	private static final long serialVersionUID = -3837932034737751633L;
+	
 	private double marketCap;
 	private double circulatingSupply;
 	

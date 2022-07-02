@@ -121,21 +121,23 @@ public class PlayerData implements Listener
 		}
 		
 		File file = CommonsConfig.getFile(Type.PLAYER_DATA, false, uuid);
+		PlayerData pd;
 		
 		if(!file.exists() || file.length() == 0L)
 		{
-			return MAP.put(uuid, new PlayerData());
+			MAP.put(uuid, pd = new PlayerData());
+			return pd;
 		}
 		
 		try(FileInputStream fileIn = new FileInputStream(file);
 				ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 				ObjectInputStream in = new ObjectInputStream(streamIn))
 		{
-			return MAP.put(uuid, (PlayerData) in.readObject());
+			MAP.put(uuid, pd = (PlayerData) in.readObject());
+			return pd;
 		}
 		catch(ClassNotFoundException | IOException e)
 		{
-			MAP.remove(uuid);
 			throw new RuntimeException(e);
 		}
 	}

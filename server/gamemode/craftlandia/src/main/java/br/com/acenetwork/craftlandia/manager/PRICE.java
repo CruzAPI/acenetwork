@@ -3,11 +3,9 @@ package br.com.acenetwork.craftlandia.manager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.Material;
-
 public class PRICE
 {
-	public static final List<PRICE> LIST = new ArrayList<>();
+	public static List<PRICE> LIST = new ArrayList<>();
 	
 	public int id;
 	public short data;
