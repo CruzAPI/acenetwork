@@ -63,7 +63,12 @@ public class BTA implements TabExecutor, Listener
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
 
 		if(args.length == 0)
-		{		
+		{
+			if(cp.isRequesting())
+			{
+				return true;
+			}
+			
 			try
 			{
 				Runtime.getRuntime().exec(String.format("node %s/reset/getbtabalance %s %s %s", System.getProperty("user.home"),

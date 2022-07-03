@@ -162,7 +162,6 @@ public class Deposit implements TabExecutor, Listener
 					PlayerData.save(map);
 					
 					pdMemory.setBTA(pdMemory.getBTA() + amount);
-					pdMemory.setDiskBTA(pdDisk.getBTA());
 					
 					TextComponent[] extra;
 					TextComponent text;

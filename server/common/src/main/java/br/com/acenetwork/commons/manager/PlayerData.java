@@ -146,13 +146,15 @@ public class PlayerData implements Listener, Serializable, Cloneable
 			Entry<UUID, PlayerData> entry = iterator.next();
 			
 			UUID uuid = entry.getKey();
+			PlayerData pd = entry.getValue();
 			file = CommonsConfig.getFile(Type.PLAYER_DATA, true, uuid);
 			
 			try(FileOutputStream fileOut = new FileOutputStream(file);
 					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 					ObjectOutputStream out = new ObjectOutputStream(streamOut))
 			{
-				out.writeObject(entry.getValue());
+				out.writeObject(pd);
+				pd.setDiskBTA(pd.getBTA());
 				fileOut.write(streamOut.toByteArray());
 				
 				if(!Bukkit.getOfflinePlayer(uuid).isOnline())

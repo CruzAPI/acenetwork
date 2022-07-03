@@ -36,11 +36,13 @@ public class Withdraw implements TabExecutor
 	
 	private class Order
 	{
+		private final UUID uuid;
 		private final int taskId;
 		private final double amount;
 		
 		public Order(int taskId, double amount)
 		{
+			this.uuid = UUID.randomUUID();
 			this.taskId = taskId;
 			this.amount = amount;
 		}
@@ -131,15 +133,27 @@ public class Withdraw implements TabExecutor
 				p.spigot().sendMessage(text);
 				p.sendMessage("");
 			}
-			else if(args.length == 1 && args[0].equalsIgnoreCase("confirm"))
+			else if(args.length == 2 && args[0].equalsIgnoreCase("confirm"))
 			{
-				Order order = MAP.remove(p.getUniqueId());
+				Order order = MAP.get(p.getUniqueId());
+				UUID uuid;
 				
-				if(order == null)
+				try
+				{
+					uuid = UUID.fromString(args[1]);
+				}
+				catch(IllegalArgumentException e)
+				{
+					uuid = null;
+				}
+				
+				if(order == null || !order.uuid.equals(uuid))
 				{
 					p.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.withdraw.order-not-found-or-expired"));
 					return true;
 				}
+				
+				MAP.remove(p.getUniqueId());
 				
 				if(order.amount <= 0)
 				{
@@ -168,6 +182,8 @@ public class Withdraw implements TabExecutor
 					return true;
 				}
 				
+				final double finalAmount = order.amount - TAX;
+				
 				new Thread(() -> 
 				{
 					PlayerData cloneMemoryPD = null;
@@ -180,7 +196,6 @@ public class Withdraw implements TabExecutor
 						diskPD.setBTA(diskPD.getBTA() - order.amount);
 						
 						memoryPD.setBTA(memoryPD.getBTA() - order.amount);
-						memoryPD.setDiskBTA(diskPD.getBTA());
 						
 						Map<UUID, PlayerData> map = new HashMap<>();
 						map.put(p.getUniqueId(), diskPD);
@@ -191,7 +206,7 @@ public class Withdraw implements TabExecutor
 						
 						extra1 = new TextComponent[2];
 						extra1[0] = new TextComponent(p.getName());
-						extra1[1] = new TextComponent(df.format(order.amount) + " $BTA");
+						extra1[1] = new TextComponent(df.format(finalAmount) + " $BTA");
 						
 						ResourceBundle consoleBundle = ResourceBundle.getBundle("message");
 						text1 = Message.getTextComponent(consoleBundle.getString("commons.cmd.withdraw.log"), extra1);
@@ -201,15 +216,15 @@ public class Withdraw implements TabExecutor
 						{
 							Runtime.getRuntime().exec(String.format("node %s/reset/withdraw %s %s %s %s", System.getProperty("user.home"),
 									Common.getSocketPort(), 
-									cp.requestDatabase(), 
+									-1, 
 									p.getUniqueId(), 
-									order.amount));
+									finalAmount));
 							
 							df.setDecimalFormatSymbols(new DecimalFormatSymbols(bundle.getLocale()));
 							
 							extra1 = new TextComponent[1];
 							
-							extra1[0] = new TextComponent(df.format(order.amount) + " $BTA");
+							extra1[0] = new TextComponent(df.format(finalAmount) + " $BTA");
 							extra1[0].setColor(ChatColor.DARK_PURPLE);
 							
 							text1 = Message.getTextComponent(bundle.getString("commons.cmd.withdraw"), extra1);
@@ -317,7 +332,7 @@ public class Withdraw implements TabExecutor
 				TextComponent confirm = new TextComponent(bundle.getString("verb.confirm").toUpperCase());
 				confirm.setColor(ChatColor.DARK_GREEN);
 				confirm.setBold(true);
-				confirm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + aliases + " confirm"));
+				confirm.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/" + aliases + " confirm " + order.uuid));
 				confirm.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
 						new ComponentBuilder(StringUtils.capitalize(bundle.getString("commons.click-to-confirm")))
 						.color(ChatColor.GREEN).create()));
