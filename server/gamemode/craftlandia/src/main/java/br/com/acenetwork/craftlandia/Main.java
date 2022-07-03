@@ -222,6 +222,7 @@ public class Main extends Common implements Listener
 		}
 		
 		Price.getInstance().save();
+		Jackpot.getInstance().save();
 	}
 	
 	@EventHandler

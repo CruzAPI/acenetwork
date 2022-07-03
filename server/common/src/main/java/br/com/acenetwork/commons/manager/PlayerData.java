@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,12 +22,50 @@ import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 
-public class PlayerData implements Listener
+public class PlayerData implements Listener, Serializable, Cloneable
 {
+	private static final long serialVersionUID = 5240858812052753505L;
+
 	public static final Map<UUID, PlayerData> MAP = new HashMap<>();
 	
 	private double balance;
 	private double bta;
+	private transient double diskBalance;
+	private transient double diskBTA;
+	
+	public PlayerData()
+	{
+		
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException
+	{
+		return super.clone();
+	}
+	
+	public PlayerData(PlayerData pd)
+	{
+		this(pd.diskBalance , pd.diskBTA);
+	}
+	
+	public PlayerData(double balance, double bta)
+	{
+		this.balance = balance;
+		this.bta = bta;
+		this.diskBalance = balance;
+		this.diskBTA = bta;
+	}
+	
+	public double getDiskBalance()
+	{
+		return diskBalance;
+	}
+	
+	public void setDiskBTA(double diskBTA)
+	{
+		this.diskBTA = diskBTA;
+	}
 	
 	public double getBalance()
 	{
@@ -38,6 +77,11 @@ public class PlayerData implements Listener
 		this.balance = balance;
 	}
 	
+	public double getDiskBTA()
+	{
+		return diskBTA;
+	}
+	
 	public double getBTA()
 	{
 		return bta;
@@ -45,15 +89,25 @@ public class PlayerData implements Listener
 	
 	public void setBTA(double bta)
 	{
+		if(bta < 0.0D)
+		{
+			throw new RuntimeException("can't set negative value");
+		}
+		
 		this.bta = bta;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static void save()
+	{
+		save(MAP);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void save(Map<UUID, PlayerData> toSave)
 	{
 		File file = CommonsConfig.getFile(Type.PLAYERS_DATA, true);
 		
-		Map<UUID, PlayerData> map;
+		Map<UUID, PlayerData> diskMap;
 		
 		if(file.length() > 0L)
 		{
@@ -61,7 +115,7 @@ public class PlayerData implements Listener
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					ObjectInputStream in = new ObjectInputStream(streamIn);)
 			{
-				map = (Map<UUID, PlayerData>) in.readObject();
+				diskMap = (Map<UUID, PlayerData>) in.readObject();
 			}
 			catch(ClassNotFoundException | IOException ex)
 			{
@@ -70,22 +124,22 @@ public class PlayerData implements Listener
 		}
 		else
 		{
-			map = new HashMap<>();
+			diskMap = new HashMap<>();
 		}
 		
 		try(FileOutputStream fileOut = new FileOutputStream(file);
 				ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 				ObjectOutputStream out = new ObjectOutputStream(streamOut))
 		{
-			map.putAll(MAP);
-			out.writeObject(map);
+			diskMap.putAll(toSave);
+			out.writeObject(diskMap);
 		}
 		catch(IOException ex)
 		{
 			throw new RuntimeException(ex);
 		}
 		
-		Iterator<Entry<UUID, PlayerData>> iterator = MAP.entrySet().iterator();
+		Iterator<Entry<UUID, PlayerData>> iterator = toSave.entrySet().iterator();
 		
 		while(iterator.hasNext())
 		{
@@ -113,7 +167,7 @@ public class PlayerData implements Listener
 		}
 	}
 	
-	public static PlayerData load(UUID uuid)
+	public static PlayerData load(UUID uuid) throws RuntimeException
 	{
 		if(MAP.containsKey(uuid))
 		{
@@ -121,24 +175,35 @@ public class PlayerData implements Listener
 		}
 		
 		File file = CommonsConfig.getFile(Type.PLAYER_DATA, false, uuid);
-		PlayerData pd;
+		PlayerData pd = null;
 		
-		if(!file.exists() || file.length() == 0L)
+		try
 		{
-			MAP.put(uuid, pd = new PlayerData());
-			return pd;
+			if(!file.exists() || file.length() == 0L)
+			{
+				MAP.put(uuid, pd = new PlayerData());
+				return pd;
+			}
+			
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					ObjectInputStream in = new ObjectInputStream(streamIn))
+			{
+				MAP.put(uuid, pd = (PlayerData) in.readObject());
+				return pd;
+			}
+			catch(ClassNotFoundException | IOException e)
+			{
+				throw new RuntimeException(e);
+			}
 		}
-		
-		try(FileInputStream fileIn = new FileInputStream(file);
-				ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
-				ObjectInputStream in = new ObjectInputStream(streamIn))
+		finally
 		{
-			MAP.put(uuid, pd = (PlayerData) in.readObject());
-			return pd;
-		}
-		catch(ClassNotFoundException | IOException e)
-		{
-			throw new RuntimeException(e);
+			if(pd != null)
+			{
+				pd.diskBalance = pd.balance;
+				pd.diskBTA = pd.bta;
+			}
 		}
 	}
 }

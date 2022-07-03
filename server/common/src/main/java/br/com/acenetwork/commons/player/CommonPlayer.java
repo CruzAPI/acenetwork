@@ -17,6 +17,8 @@ import br.com.acenetwork.commons.inventory.GUI;
 
 public interface CommonPlayer extends Listener
 {
+	double getWithdrawableBTA();
+	double getDiskBTA();
 	PlayerData getPlayerData();
 	double getBalance();
 	void setBalance(double balance);
@@ -63,4 +65,5 @@ public interface CommonPlayer extends Listener
 	int requestDatabase();
 	int requestDatabase(long timeout);
 	int getPing();
+	void setPlayerData(PlayerData cloneMemoryPD);
 }

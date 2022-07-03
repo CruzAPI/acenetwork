@@ -764,4 +764,22 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	{
 		return playerData;
 	}
+	
+	@Override
+	public double getDiskBTA()
+	{
+		return playerData.getDiskBTA();
+	}
+	
+	@Override
+	public double getWithdrawableBTA()
+	{
+		return Math.min(getBTA(), getDiskBTA());
+	}
+	
+	@Override
+	public void setPlayerData(PlayerData playerData)
+	{
+		this.playerData = playerData;
+	}
 }

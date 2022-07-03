@@ -1,30 +1,21 @@
 package br.com.acenetwork.commons;
 
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketImpl;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
-import java.util.Random;
-import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.generator.ChunkGenerator.BiomeGrid;
-import org.bukkit.generator.ChunkGenerator.ChunkData;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -59,6 +50,7 @@ import br.com.acenetwork.commons.executor.Unmute;
 import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.executor.Wallet;
 import br.com.acenetwork.commons.executor.WatchCMD;
+import br.com.acenetwork.commons.executor.Withdraw;
 import br.com.acenetwork.commons.listener.EntitySpawn;
 import br.com.acenetwork.commons.listener.InventoryClose;
 import br.com.acenetwork.commons.listener.PlayerChat;
@@ -67,8 +59,7 @@ import br.com.acenetwork.commons.listener.PlayerJoin;
 import br.com.acenetwork.commons.listener.PlayerLogin;
 import br.com.acenetwork.commons.listener.PlayerQuit;
 import br.com.acenetwork.commons.listener.SocketListener;
-import br.com.acenetwork.commons.manager.Broadcast;
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.listener.WorldSave;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 
@@ -108,6 +99,7 @@ public class Common extends JavaPlugin
 		Bukkit.getPluginManager().registerEvents(new PlayerLogin(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
 		Bukkit.getPluginManager().registerEvents(new SocketListener(), this);
+		Bukkit.getPluginManager().registerEvents(new WorldSave(), this);
 		
 		permission = new Permission();
 		
@@ -141,6 +133,7 @@ public class Common extends JavaPlugin
 		registerCommand(new VipChest(), "vipchest");
 		registerCommand(new WatchCMD(), "watch");
 		registerCommand(new Wallet(), "wallet");
+		registerCommand(new Withdraw(), "withdraw");
 		
 		for(Player all : Bukkit.getOnlinePlayers())
 		{
