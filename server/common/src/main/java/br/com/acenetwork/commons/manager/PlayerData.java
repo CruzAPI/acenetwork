@@ -66,9 +66,9 @@ public class PlayerData implements Listener, Serializable, Cloneable
 		return invincibility;
 	}
 	
-	public void setInvincibility(boolean invincibility)
+	public boolean setInvincibility(boolean invincibility)
 	{
-		this.invincibility = invincibility;
+		return this.invincibility != (this.invincibility = invincibility);
 	}	
 	
 	public double getDiskBalance()

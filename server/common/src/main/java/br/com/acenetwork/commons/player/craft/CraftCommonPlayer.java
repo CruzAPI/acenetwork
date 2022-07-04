@@ -42,6 +42,7 @@ import br.com.acenetwork.commons.CommonsHotbar;
 import br.com.acenetwork.commons.CommonsScoreboard;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Tag;
+import br.com.acenetwork.commons.event.PlayerInvincibilityChangeEvent;
 import br.com.acenetwork.commons.event.PlayerModeChangeEvent;
 import br.com.acenetwork.commons.executor.Balance;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
@@ -829,7 +830,10 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	@Override
 	public void setInvincibility(boolean value)
 	{
-		playerData.setInvincibility(value);
+		if(playerData.setInvincibility(value))
+		{
+			Bukkit.getPluginManager().callEvent(new PlayerInvincibilityChangeEvent(this));
+		}
 	}
 	
 	@Override

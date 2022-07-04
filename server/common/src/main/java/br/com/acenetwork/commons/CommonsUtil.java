@@ -1743,6 +1743,18 @@ public class CommonsUtil
 		list.addAll(newList);
 	}
 	
+	public static List<String> getHiddenUUIDs(ItemStack item)
+	{
+		List<String> list = new ArrayList<>();
+		
+		if(!item.hasItemMeta() || !item.getItemMeta().hasDisplayName())
+		{
+			return list;
+		}
+		
+		return list;
+	}
+	
 	public static boolean compareUUID(ItemStack i1, ItemStack i2)
 	{
 		if(!i1.hasItemMeta() || !i2.hasItemMeta())
@@ -1787,7 +1799,7 @@ public class CommonsUtil
 			return false;
 		}
 		
-		return i.getItemMeta().getDisplayName().endsWith(hiddenData);
+		return i.getItemMeta().getDisplayName().contains(hiddenData);
 	}
 	
 	public static String getRandomItemUUID()
@@ -1802,6 +1814,18 @@ public class CommonsUtil
 		return hiddenData;
 	}
 
+	public static String hideNumberData(long number)
+	{
+		String hiddenData = "";
+		
+		for(char c : String.valueOf(number).toCharArray())
+		{
+			hiddenData += ChatColor.COLOR_CHAR + "" + c;
+		}
+		
+		return hiddenData;
+	}
+	
 	public static boolean isDispensable(Material type)
 	{
 		return isDispensable(type, (short) 0);
