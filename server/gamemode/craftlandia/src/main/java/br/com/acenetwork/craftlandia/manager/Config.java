@@ -11,6 +11,7 @@ public class Config
 {
 	public enum Type
 	{
+		WRAPPED_BTA_UUID,
 		JACKPOT,
 		BOT, 
 		COMBATLOG, 
@@ -26,6 +27,9 @@ public class Config
 
 		switch(type)
 		{
+		case WRAPPED_BTA_UUID:
+			file = new File(Main.getInstance().getDataFolder() + "/wrapped_bta", "uuid.dat");
+			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");
 			break;

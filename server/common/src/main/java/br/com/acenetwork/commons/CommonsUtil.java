@@ -1743,13 +1743,26 @@ public class CommonsUtil
 		list.addAll(newList);
 	}
 	
-	public static List<String> getHiddenUUIDs(ItemStack item)
+	public static List<UUID> getHiddenUUIDs(ItemStack item)
 	{
-		List<String> list = new ArrayList<>();
+		List<UUID> list = new ArrayList<>();
 		
 		if(!item.hasItemMeta() || !item.getItemMeta().hasDisplayName())
 		{
 			return list;
+		}
+		String displayName = item.getItemMeta().getDisplayName();
+		
+		for(int i = 0; ; i += 66)
+		{
+			try
+			{
+				list.add(convertHiddenUUID(displayName.substring(i, i + 64)));
+			}
+			catch(Exception e)
+			{
+				break;
+			}
 		}
 		
 		return list;
@@ -1789,6 +1802,11 @@ public class CommonsUtil
 	
 	public static boolean compareUUID(ItemStack i, String hiddenData)
 	{
+		if(i == null || hiddenData == null)
+		{
+			return false;
+		}
+		
 		if(!i.hasItemMeta())
 		{
 			return false;
@@ -1821,9 +1839,14 @@ public class CommonsUtil
 	
 	public static String getRandomItemUUID()
 	{
+		return hideUUID(UUID.randomUUID());
+	}
+	
+	public static String hideUUID(UUID uuid)
+	{
 		String hiddenData = "";
 		
-		for(char c : UUID.randomUUID().toString().replace("-", "").toCharArray())
+		for(char c : uuid.toString().replace("-", "").toCharArray())
 		{
 			hiddenData += ChatColor.COLOR_CHAR + "" + c;
 		}

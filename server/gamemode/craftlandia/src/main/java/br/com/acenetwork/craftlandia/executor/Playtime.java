@@ -1,5 +1,12 @@
 package br.com.acenetwork.craftlandia.executor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +18,10 @@ import java.util.function.Supplier;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.ContainerBlock;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -18,21 +29,28 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.google.common.io.ByteStreams;
+
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.PlayerInvincibilityChangeEvent;
 import br.com.acenetwork.commons.event.PlayerModeChangeEvent;
+import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.manager.Config;
+import br.com.acenetwork.craftlandia.manager.Config.Type;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -42,37 +60,63 @@ public class Playtime implements TabExecutor, Listener
 	public static final Map<UUID, Time> MAP = new HashMap<>();
 	private static final String WBTA_DISPLAY_NAME = ChatColor.DARK_GREEN + "Wrapped $BTA";
 	private static final int SEMI_LENGTH = CommonsUtil.getRandomItemUUID().length() + WBTA_DISPLAY_NAME.length();
-	private final 
-	public static final Supplier<ItemStack> WRAPPED_BTA_SUPPLIER = () ->
-	{
-		ItemStack wbta = new ItemStack(Material.EMERALD);
-		ItemMeta meta = wbta.getItemMeta();
-		meta.setDisplayName(CommonsUtil.getRandomItemUUID() + WBTA_DISPLAY_NAME + CommonsUtil.hideNumberData(System.currentTimeMillis()));
-		meta.addEnchant(Enchantment.DURABILITY, 1, true);
-		meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		wbta.setItemMeta(meta);
-		
-		return null;
-	};
+	private final UUID wbtaUUID;
+	
+	private static final long BTA_PER_SECONDS = 10L;
+	
+	public final Supplier<ItemStack> wbtaSupplier;
 	
 	public Playtime()
 	{
+		File file = Config.getFile(Type.WRAPPED_BTA_UUID, false);
+		
+		if(file.exists() && file.length() > 0L)
+		{
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					ObjectInputStream in = new ObjectInputStream(streamIn))
+			{
+				wbtaUUID = (UUID) in.readObject();
+			}
+			catch(ClassNotFoundException | IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		else
+		{
+			wbtaUUID = UUID.randomUUID();
+		}
+		
+		wbtaSupplier = () ->
+		{
+			ItemStack wbta = new ItemStack(Material.EMERALD);
+			ItemMeta meta = wbta.getItemMeta();
+			meta.setDisplayName(CommonsUtil.hideUUID(wbtaUUID) + ChatColor.RESET + CommonsUtil.getRandomItemUUID() + WBTA_DISPLAY_NAME + CommonsUtil.hideNumberData(System.currentTimeMillis()));
+			meta.addEnchant(Enchantment.DURABILITY, 1, true);
+			meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+			wbta.setItemMeta(meta);
+			
+			return wbta;
+		};
+		
 		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
 	}
 	
 	private class Time
 	{
 		private int taskId;
-		private long seconds = 30L;
+		private long seconds = BTA_PER_SECONDS;
 //		private long seconds = 2L * 60L * 60L;
 		
-		public Time()
+		public Time(Player p)
 		{
 			this.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
 			{
 				if(--seconds <= 0L)
 				{
-					Bukkit.getScheduler().cancelTask(taskId);
+					seconds = BTA_PER_SECONDS;
+					p.getInventory().addItem(wbtaSupplier.get());
 				}
 			}, 20L, 20L);
 		}		
@@ -131,7 +175,7 @@ public class Playtime implements TabExecutor, Listener
 			
 			if(!MAP.containsKey(p.getUniqueId()))
 			{
-				put(p.getUniqueId());
+				put(p);
 			}
 			
 			long time = MAP.get(p.getUniqueId()).seconds;
@@ -202,13 +246,13 @@ public class Playtime implements TabExecutor, Listener
 		}
 		else
 		{
-			put(p.getUniqueId());
+			put(p);
 		}
 	}
 	
-	private void put(UUID uuid)
+	private void put(Player p)
 	{
-		Time time = MAP.put(uuid, new Time());
+		Time time = MAP.put(p.getUniqueId(), new Time(p));
 		
 		if(time != null)
 		{
@@ -234,7 +278,7 @@ public class Playtime implements TabExecutor, Listener
 		
 		if(cp instanceof SurvivalPlayer)
 		{
-			put(p.getUniqueId());
+			put(p);
 		}
 		else
 		{
@@ -264,7 +308,7 @@ public class Playtime implements TabExecutor, Listener
 		
 		if(validTo)
 		{
-			put(p.getUniqueId());
+			put(p);
 		}
 		else
 		{
@@ -285,7 +329,65 @@ public class Playtime implements TabExecutor, Listener
 		Player p = e.getPlayer();
 		ItemStack item = e.getItem();
 		
-		CommonsUtil.compareUUID(item, WBTA_MAINUUID);
+		if(CommonsUtil.compareUUID(item, CommonsUtil.hideUUID(wbtaUUID)))
+		{
+			p.sendMessage("is a $BTA");
+		}
+		else
+		{
+			Block b = e.getClickedBlock();
+			
+			if(b != null && b.getState() instanceof ContainerBlock)
+			{
+				Bukkit.broadcastMessage("a");
+				ContainerBlock container = (ContainerBlock) b.getState();
+				
+				InventoryHolder holder = container.getInventory().getHolder();
+				
+				if(holder instanceof BlockState)
+				{
+					BlockState bs = (BlockState) holder;
+					bs.getLocation();
+					Bukkit.broadcastMessage(bs.getLocation().toString());
+				}
+				else if(holder instanceof DoubleChest)
+				{
+					DoubleChest dc = (DoubleChest) holder;
+					Bukkit.broadcastMessage(dc.getLocation().toString());
+				}
+//				Bukkit.getWorld("").geten
+				
+				try(ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+						ObjectOutputStream out = new ObjectOutputStream(streamOut);)
+				{
+					out.writeObject(wbtaSupplier.get());
+					
+					try(ByteArrayInputStream streamIn = new ByteArrayInputStream(streamOut.toByteArray());
+							ObjectInputStream in = new ObjectInputStream(streamIn);)
+					{
+						Bukkit.broadcastMessage("" + (in.readObject() instanceof InventoryHolder));
+					}
+					catch(ClassNotFoundException | IOException ex)
+					{
+						ex.printStackTrace();
+					}
+					
+				}
+				catch(IOException ex)
+				{
+					ex.printStackTrace();
+				}
+				
+				
+				
+			}
+		}
+	}
+	
+	@EventHandler
+	public void a(InventoryPickupItemEvent e)
+	{
+		
 	}
 	
 	private boolean isValidWorld(World w)
