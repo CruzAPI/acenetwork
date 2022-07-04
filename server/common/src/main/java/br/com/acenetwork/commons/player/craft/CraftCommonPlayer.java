@@ -44,6 +44,7 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.event.PlayerModeChangeEvent;
 import br.com.acenetwork.commons.executor.Balance;
+import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.manager.CommonsConfig;
@@ -641,13 +642,10 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		writeVipChest();
 		
-		String path = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId()).toPath().toString();
-		
-		Runtime.getRuntime().exec(String.format("node %s/reset/vip %s %s %s %s", System.getProperty("user.home"),
+		Runtime.getRuntime().exec(String.format("node %s/reset/vip %s %s %s", System.getProperty("user.home"),
 				Common.getSocketPort(), 
 				requestDatabase(), 
-				p.getUniqueId(), 
-				path));
+				p.getUniqueId()));
 	}
 	
 	@Override
@@ -655,27 +653,16 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	{
 		if(vipChest == null)
 		{
-			Bukkit.broadcastMessage("return ");
 			return;
 		}
 		
 		File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
+		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+		try
 		{
-			for(int i = 0; i < vipChest.getSize(); i++)
-			{
-				ItemStack item = vipChest.getItem(i);
-				
-				if(item != null && VipChestGUI.getVipItem().isSimilar(item))
-				{
-					access.writeByte(item.getAmount());
-				}
-				else
-				{
-					access.writeByte(0);
-				}
-			}
+			config.set("inventory", vipChest.getContents());
+			config.save(file);
 		}
 		catch(IOException ex)
 		{
@@ -693,10 +680,14 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		ItemStack item = e.getItem();
 		
-		if(!VipChestGUI.getVipItem().isSimilar(item))
+		if(!VipChestGUI.isItemStackVIP(item))
 		{
 			return;
 		}
+		
+		ItemStack clone = item.clone();
+		
+		boolean isValid = VipChestGUI.isValidItemStackVIP(item);
 		
 		e.setCancelled(true);
 		
@@ -714,38 +705,60 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		item.setAmount(--amount);
 		
-		if(amount <= 0)
+		if(amount <= 0 || !isValid)
 		{
 			p.setItemInHand(null);
 		}
 		
-		Bukkit.broadcastMessage(" Um Troxa (" + p.getDisplayName() + ChatColor.WHITE + ")  ativou VIP");
-		
-		p.setFallDistance(-9999.9F);
-		p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20 * 5, 5));
-		p.getWorld().createExplosion(p.getLocation(), 6.0F);
-		
-		Firework f = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
-		FireworkMeta meta = f.getFireworkMeta();
-		
-		meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.GRAY).build());
-		meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE).withColor(Color.AQUA).build());
-		meta.setPower(1);
-		
-		ItemStack[] armor = new ItemStack[] 
+		if(!isValid)
 		{
-			new ItemStack(Material.DIAMOND_HELMET),
-			new ItemStack(Material.DIAMOND_CHESTPLATE),
-			new ItemStack(Material.DIAMOND_LEGGINGS),
-			new ItemStack(Material.DIAMOND_BOOTS)
-		};
-		
-		for(ItemStack values : p.getInventory().addItem(armor).values())
-		{
-			p.getWorld().dropItemNaturally(p.getLocation(), values);
+			p.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "INVALID VIP ITEM");
+			return;
 		}
 		
-		f.setFireworkMeta(meta);
+		File file = CommonsConfig.getFile(Type.ACTIVATED_VIPS, true);
+		
+		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
+		{
+			UUID vipUUID = CommonsUtil.convertHiddenUUID(CommonsUtil.getHiddenLastUUID(clone));
+			access.seek(access.length());
+			access.writeChars(vipUUID.toString());
+			
+			VipChest.ACTIVATED_VIPS.add(vipUUID);
+			Bukkit.getWorlds().forEach(x -> x.save());
+			
+			Bukkit.broadcastMessage(" Um Troxa (" + p.getDisplayName() + ChatColor.WHITE + ")  ativou VIP");
+			
+			p.setFallDistance(-9999.9F);
+			p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20 * 5, 5));
+			p.getWorld().createExplosion(p.getLocation(), 6.0F);
+			
+			Firework f = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+			FireworkMeta meta = f.getFireworkMeta();
+			
+			meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.GRAY).build());
+			meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE).withColor(Color.AQUA).build());
+			meta.setPower(1);
+			
+			ItemStack[] armor = new ItemStack[] 
+			{
+				new ItemStack(Material.DIAMOND_HELMET),
+				new ItemStack(Material.DIAMOND_CHESTPLATE),
+				new ItemStack(Material.DIAMOND_LEGGINGS),
+				new ItemStack(Material.DIAMOND_BOOTS)
+			};
+			
+			for(ItemStack values : p.getInventory().addItem(armor).values())
+			{
+				p.getWorld().dropItemNaturally(p.getLocation(), values);
+			}
+			
+			f.setFireworkMeta(meta);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 	
 	@Override

@@ -50,31 +50,7 @@ public class Test implements TabExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command arg1, String arg2, String[] args)
 	{
-//		Player p = (Player) sender;
-		
-		Map<String, Long> map = new HashMap<>();
-		map.put("test", 0L);
-		
-		long time = System.currentTimeMillis();
-		
-		if(args.length == 1)
-		{
-			Bukkit.broadcastMessage("putting 500,000 random uuids in userPermission Map...");
-			for(int i = 0; i < 500000; i++)
-			{
-				Permission.getInstance().userPermission.put(UUID.randomUUID(), map);
-			}
-			Bukkit.broadcastMessage("Done! Time elapsed: " + (System.currentTimeMillis() - time) + "ms");
-		}
-		else
-		{
-			Bukkit.broadcastMessage("userPermission.map.size() = " + Permission.getInstance().userPermission.size());
-		}
-		
-		time = System.currentTimeMillis() - time;
-		
-		Bukkit.broadcastMessage("Time elapsed: " + time + "ms");
-		
+
 //		ItemStack item = p.getItemInHand();
 //		
 //		

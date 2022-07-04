@@ -27,7 +27,7 @@ public class CommonsConfig
 		WHITELISTED_IP,
 		CLANS_JSON, MESSAGE, 
 		PLAYER, 
-		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, 
+		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, ACTIVATED_VIPS, CONFIG,
 		;
 	}
 
@@ -46,9 +46,14 @@ public class CommonsConfig
 			break;
 		case PLAYER_PERMISSION:
 			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/" + args[0], "permisison.dat");
+		case CONFIG:
+			file = new File(Common.getPlugin().getConfigFolder(), "config.yml");
 			break;
 		case CHEST_VIP:
-			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".txt");
+			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".yml");
+			break;
+		case ACTIVATED_VIPS:
+			file = new File(Common.getPlugin().getConfigFolder(), "activated_vips.txt");
 			break;
 		case SIGN_DATA:
 			file = new File(Common.getPlugin().getConfigFolder() + "/sign_data", args[0] + ".txt");
@@ -112,31 +117,6 @@ public class CommonsConfig
 			try
 			{
 				file.createNewFile();
-				
-				if(!file.getName().endsWith(".txt"))
-				{
-					switch(type)
-					{
-					case CHEST_VIP:
-//						try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-//						{
-//							for(int i = 0; i < 9 * 3; i++)
-//							{
-//								access.writeByte(0);
-//							}
-//							
-//							break;
-//						}
-//						catch(IOException ex)
-//						{
-//							throw ex;
-//						}
-					default:
-						break;
-					}
-					
-					return file;
-				}
 				
 				if(!file.getName().endsWith(".yml"))
 				{
