@@ -51,6 +51,7 @@ import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.executor.Wallet;
 import br.com.acenetwork.commons.executor.WatchCMD;
 import br.com.acenetwork.commons.executor.Withdraw;
+import br.com.acenetwork.commons.listener.CustomListener;
 import br.com.acenetwork.commons.listener.EntitySpawn;
 import br.com.acenetwork.commons.listener.InventoryClose;
 import br.com.acenetwork.commons.listener.PlayerChat;
@@ -91,6 +92,7 @@ public class Common extends JavaPlugin
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, "commons:commons", new PluginMessage());
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "commons:commons");
 		
+		Bukkit.getPluginManager().registerEvents(new CustomListener(), this);
 		Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
 		Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerChat(), this);

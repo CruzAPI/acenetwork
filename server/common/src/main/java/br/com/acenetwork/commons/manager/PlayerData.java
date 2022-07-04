@@ -30,8 +30,10 @@ public class PlayerData implements Listener, Serializable, Cloneable
 	
 	private double balance;
 	private double bta;
+	private boolean invincibility;
 	private transient double diskBalance;
 	private transient double diskBTA;
+	private transient boolean diskInvincibility;
 	
 	public PlayerData()
 	{
@@ -46,16 +48,28 @@ public class PlayerData implements Listener, Serializable, Cloneable
 	
 	public PlayerData(PlayerData pd)
 	{
-		this(pd.diskBalance , pd.diskBTA);
+		this(pd.diskBalance , pd.diskBTA, pd.diskInvincibility);
 	}
 	
-	public PlayerData(double balance, double bta)
+	public PlayerData(double balance, double bta, boolean invincibility)
 	{
 		this.balance = balance;
 		this.bta = bta;
+		this.invincibility = invincibility;
 		this.diskBalance = balance;
 		this.diskBTA = bta;
+		this.diskInvincibility = invincibility;
 	}
+	
+	public boolean hasInvincibility()
+	{
+		return invincibility;
+	}
+	
+	public void setInvincibility(boolean invincibility)
+	{
+		this.invincibility = invincibility;
+	}	
 	
 	public double getDiskBalance()
 	{

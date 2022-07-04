@@ -73,6 +73,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	public int taskRequest;
 	private boolean isJackpoting;
 	private PlayerData playerData;
+	private boolean pvpInvincibility;
 	
 	public CraftCommonPlayer(Player p)
 	{
@@ -87,6 +88,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 			playerData = previous.getPlayerData();
 			specs = previous.canSpecs();
 			commonsScoreboard = previous.getCommonsScoreboard();
+			pvpInvincibility = previous.hasPVPInvincibility();
 			previous.delete();
 		}
 		else
@@ -286,6 +288,41 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		setCommonsHotbar(null);
 		setCommonsScoreboard(null);
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void asdasd(EntityDamageEvent e)
+	{
+		if(e.getEntity() != p)
+		{
+			return;
+		}
+		
+		if(hasInvincibility())
+		{
+			e.setCancelled(true);
+			return;
+		}
+		
+		if(pvpInvincibility)
+		{
+			if(e instanceof EntityDamageByEntityEvent)
+			{
+				EntityDamageByEntityEvent ee = (EntityDamageByEntityEvent) e;
+				
+				if(ee.getDamager() instanceof Player)
+				{
+					e.setCancelled(true);
+					return;
+				}
+				
+				if(ee.getDamager() instanceof Projectile && ((Projectile) ee.getDamager()).getShooter() instanceof Player)
+				{
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -781,5 +818,29 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	public void setPlayerData(PlayerData playerData)
 	{
 		this.playerData = playerData;
+	}
+	
+	@Override
+	public boolean hasInvincibility()
+	{
+		return playerData.hasInvincibility();
+	}
+	
+	@Override
+	public void setInvincibility(boolean value)
+	{
+		playerData.setInvincibility(value);
+	}
+	
+	@Override
+	public boolean hasPVPInvincibility()
+	{
+		return pvpInvincibility;
+	}
+	
+	@Override
+	public void setPVPInvincibility(boolean value)
+	{
+		pvpInvincibility = value;
 	}
 }

@@ -1801,4 +1801,102 @@ public class CommonsUtil
 		
 		return hiddenData;
 	}
+
+	public static boolean isDispensable(Material type)
+	{
+		return isDispensable(type, (short) 0);
+	}
+	
+	public static boolean isInteractable(Material type)
+	{
+		return isInteractable(type, (short) 0);
+	}
+	
+	public static boolean isInteractable(Material type, short data)
+	{
+		switch(type)
+		{
+		case CHEST:
+		case WORKBENCH:
+		case FURNACE:
+		case BURNING_FURNACE:
+		case JUKEBOX:
+		case ENCHANTMENT_TABLE:
+		case ENDER_CHEST:
+		case ANVIL:
+		case TRAPPED_CHEST:
+		case BED_BLOCK:
+		case FLOWER_POT:
+		case DISPENSER:
+		case NOTE_BLOCK:
+		case LEVER:
+		case GOLD_PLATE:
+		case IRON_PLATE:
+		case STONE_PLATE:
+		case WOOD_PLATE:
+		case STONE_BUTTON:
+		case WOOD_BUTTON:
+		case DAYLIGHT_DETECTOR:
+		case DAYLIGHT_DETECTOR_INVERTED:
+		case TRAP_DOOR:
+		case IRON_TRAPDOOR:
+		case IRON_DOOR_BLOCK:
+		case ACACIA_DOOR:
+		case BIRCH_DOOR:
+		case DARK_OAK_DOOR:
+		case IRON_DOOR:
+		case JUNGLE_DOOR:
+		case WOOD_DOOR:
+		case SPRUCE_DOOR:
+		case WOODEN_DOOR:
+		case ACACIA_FENCE_GATE:
+		case BIRCH_FENCE_GATE:
+		case DARK_OAK_FENCE_GATE:
+		case FENCE_GATE:
+		case JUNGLE_FENCE_GATE:
+		case SPRUCE_FENCE_GATE:
+		case ACACIA_FENCE:
+		case FENCE:
+		case BIRCH_FENCE:
+		case DARK_OAK_FENCE:
+		case JUNGLE_FENCE:
+		case NETHER_FENCE:
+		case SPRUCE_FENCE:
+		default:
+			return false;
+		}
+	}
+	
+	public static boolean isDispensable(Material type, short data)
+	{
+		switch(type)
+		{
+		case WATER_BUCKET:
+		case LAVA_BUCKET:
+		case BUCKET:
+		case ARMOR_STAND:
+		case BOAT:
+		case MINECART:
+		case POWERED_MINECART:
+		case STORAGE_MINECART:
+		case COMMAND_MINECART:
+		case EXPLOSIVE_MINECART:
+		case HOPPER_MINECART:
+		case FLINT_AND_STEEL:
+		case TNT:
+		case SHEARS:
+		case GLASS_BOTTLE:
+		case POTION:
+			return true;
+		case INK_SACK:
+			if(data != 15)
+			{
+				return false;
+			}
+			
+			return true;
+		default:
+			return false;
+		}
+	}
 }

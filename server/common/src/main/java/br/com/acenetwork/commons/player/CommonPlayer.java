@@ -17,6 +17,10 @@ import br.com.acenetwork.commons.inventory.GUI;
 
 public interface CommonPlayer extends Listener
 {
+	boolean hasInvincibility();
+	void setInvincibility(boolean value);
+	boolean hasPVPInvincibility();
+	void setPVPInvincibility(boolean value);
 	double getWithdrawableBTA();
 	double getDiskBTA();
 	PlayerData getPlayerData();

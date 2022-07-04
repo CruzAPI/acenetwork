@@ -57,129 +57,11 @@ public class Farm extends Warp
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void a(PlayerInteractEvent e)
-	{
-		Player p = e.getPlayer();
-		
-		if(p.getWorld() != w)
-		{
-			return;
-		}
-		
-		ItemStack item = e.getItem();
-		
-		if(item != null && item.getType() == Material.BOAT)
-		{
-			e.setCancelled(true);
-		}
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void a(PlayerInteractEntityEvent e)
-	{
-		Entity entity = e.getRightClicked();
-		
-		if(entity.getWorld() != w)
-		{
-			return;
-		}
-		
-		if(entity instanceof ItemFrame)
-		{
-			e.setCancelled(true);
-		}
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void a(EntityDamageEvent e)
-	{
-		Entity entity = e.getEntity();
-		
-		if(entity.getWorld() != w)
-		{
-			return;
-		}
-		
-		if(entity instanceof ItemFrame)
-		{
-			e.setCancelled(true);
-		}
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void a(HangingBreakEvent e)
-	{
-		if(e.getEntity().getWorld() != w)
-		{
-			return;
-		}
-		
-		e.setCancelled(true);
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void a(HangingPlaceEvent e)
-	{
-		if(e.getEntity().getWorld() != w)
-		{
-			return;
-		}
-		
-		e.setCancelled(true);
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void b(PlayerBucketFillEvent e)
-	{
-		Block b = e.getBlockClicked();
-		
-		if(b.getWorld() != w)
-		{
-			return;
-		}
-		
-		e.setCancelled(true);
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void b(PlayerBucketEmptyEvent e)
-	{
-		Block b = e.getBlockClicked();
-		
-		if(b.getWorld() != w)
-		{
-			return;
-		}
-		
-		e.setCancelled(true);
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void b(BlockBreakEvent e)
-	{
-		if(e.getBlock().getWorld() != w)
-		{
-			return;
-		}
-		
-		e.setCancelled(true);
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void b(BlockPlaceEvent e)
-	{
-		if(e.getBlock().getWorld() != w)
-		{
-			return;
-		}
-		
-		e.setCancelled(true);
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
 	public void b(CreatureSpawnEvent e)
 	{
-		if(e.getLocation().getWorld() != w)
+		Location l = e.getLocation();
+		
+		if(!l.getWorld().getName().equals(worldName))
 		{
 			return;
 		}
@@ -227,7 +109,7 @@ public class Farm extends Warp
 	@EventHandler
 	public void a(ChunkUnloadEvent e)
 	{
-		if(e.getWorld() != w)
+		if(!e.getWorld().getName().equals(worldName))
 		{
 			return;
 		}
@@ -244,7 +126,7 @@ public class Farm extends Warp
 	@EventHandler
 	public void a(ChunkLoadEvent e)
 	{
-		if(e.getWorld() != w)
+		if(!e.getWorld().getName().equals(worldName))
 		{
 			return;
 		}
@@ -290,41 +172,5 @@ public class Farm extends Warp
 		
 		e.getEntity().setMetadata("spawner", new FixedMetadataValue(Main.getInstance(), e.getSpawner().getLocation()));
 		e.getEntity().setMetadata("spawn", new FixedMetadataValue(Main.getInstance(), e.getLocation()));
-	}
-	
-	@EventHandler
-	public void b(EntityChangeBlockEvent e)
-	{
-		if(e.getBlock().getWorld() != w)
-		{
-			return;
-		}
-		
-		if(e.getEntity().getType() == EntityType.ENDERMAN)
-		{
-			e.setCancelled(true);
-		}
-	}
-	
-	@EventHandler
-	public void b(EntityExplodeEvent e)
-	{
-		if(e.getLocation().getWorld() != w)
-		{
-			return;
-		}
-		
-		e.blockList().clear();
-	}
-	
-	@EventHandler
-	public void b(BlockExplodeEvent e)
-	{
-		if(e.getBlock().getWorld() != w)
-		{
-			return;
-		}
-		
-		e.blockList().clear();
 	}
 }
