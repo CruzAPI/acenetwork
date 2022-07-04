@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
+import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -42,7 +43,7 @@ public class Balance implements TabExecutor
 			for(Player all : Bukkit.getOnlinePlayers())
 			{
 				if(all.getName().toLowerCase().startsWith(args[0].toLowerCase()) && 
-					(p == null || p.canSee(all)))
+						(p == null || p.canSee(all)))
 				{
 					list.add(all.getName());
 				}
@@ -106,10 +107,9 @@ public class Balance implements TabExecutor
 			return true;
 		}
 		
-		File file = CommonsConfig.getFile(CommonsConfig.Type.PLAYER, true, op.getUniqueId());
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		PlayerData pd = PlayerData.load(op.getUniqueId());
 		
-		double balance = config.getDouble("balance");
+		double balance = pd.getBalance();
 		
 		DecimalFormat df = new DecimalFormat("#,###.##", new DecimalFormatSymbols(bundle.getLocale()));
 		

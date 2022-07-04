@@ -1,5 +1,7 @@
 package br.com.acenetwork.commons;
 
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
+import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -60,6 +63,11 @@ public class CommonsUtil
 		{
 			return new Locale(split[0], split[1]);
 		}
+	}
+	
+	public static String getTranslation(IdData key, ResourceBundle bundle)
+	{
+		return getTranslation(Material.getMaterial(key.getId()), key.getData(), bundle);
 	}
 	
 	public static String getTranslation(String key, ResourceBundle bundle)
@@ -1452,63 +1460,64 @@ public class CommonsUtil
 	
 	public static boolean hasPermission(UUID uuid, String perm)
 	{
-		perm = perm.replace('.', ':');
-
-		File userFile = CommonsConfig.getFile(Type.USER, true, uuid);
-		YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
-
-		ConfigurationSection userPermissions = userConfig.getConfigurationSection("permission");
-
-		if(userPermissions != null)
-		{
-			for(String key : userPermissions.getKeys(false))
-			{
-				long value = userConfig.getLong("permission." + key);
-				boolean valid = value == 0 || value > System.currentTimeMillis();
-
-				if(valid && (key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)) || 
-					perm.equals(key)))
-				{
-					return true;
-				}
-			}
-		}
-		
-		ConfigurationSection userGroups = userConfig.getConfigurationSection("group");
-		
-		if(userGroups != null)
-		{
-			for(String key : userGroups.getKeys(false))
-			{
-				long value = userConfig.getLong("group." + key);
-				boolean valid = value == 0 || value > System.currentTimeMillis();
-
-				if(valid)
-				{
-					File groupFile = CommonsConfig.getFile(Type.GROUP, true, key);
-					YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-
-					ConfigurationSection groupPermissions = groupConfig.getConfigurationSection("permission");
-
-					if(groupPermissions != null)
-					{
-						for(String key1 : groupPermissions.getKeys(false))
-						{
-							value = groupConfig.getLong("permisison." + key1);
-							valid = value == 0 || value > System.currentTimeMillis();
-							
-							if(valid && (key1.endsWith("*") && perm.startsWith(key1.substring(0, key1.length() - 1)) || 
-								perm.equals(key1)))
-							{
-								return true;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		return false;
+		return true;
+//		perm = perm.replace('.', ':');
+//
+//		File userFile = CommonsConfig.getFile(Type.USER, true, uuid);
+//		YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
+//
+//		ConfigurationSection userPermissions = userConfig.getConfigurationSection("permission");
+//
+//		if(userPermissions != null)
+//		{
+//			for(String key : userPermissions.getKeys(false))
+//			{
+//				long value = userConfig.getLong("permission." + key);
+//				boolean valid = value == 0 || value > System.currentTimeMillis();
+//
+//				if(valid && (key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)) || 
+//					perm.equals(key)))
+//				{
+//					return true;
+//				}
+//			}
+//		}
+//		
+//		ConfigurationSection userGroups = userConfig.getConfigurationSection("group");
+//		
+//		if(userGroups != null)
+//		{
+//			for(String key : userGroups.getKeys(false))
+//			{
+//				long value = userConfig.getLong("group." + key);
+//				boolean valid = value == 0 || value > System.currentTimeMillis();
+//
+//				if(valid)
+//				{
+//					File groupFile = CommonsConfig.getFile(Type.GROUP, true, key);
+//					YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
+//
+//					ConfigurationSection groupPermissions = groupConfig.getConfigurationSection("permission");
+//
+//					if(groupPermissions != null)
+//					{
+//						for(String key1 : groupPermissions.getKeys(false))
+//						{
+//							value = groupConfig.getLong("permisison." + key1);
+//							valid = value == 0 || value > System.currentTimeMillis();
+//							
+//							if(valid && (key1.endsWith("*") && perm.startsWith(key1.substring(0, key1.length() - 1)) || 
+//								perm.equals(key1)))
+//							{
+//								return true;
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		return false;
 	}
 	
 	public static boolean permissionSyntaxIsValid(String perm)
@@ -1791,5 +1800,103 @@ public class CommonsUtil
 		}
 		
 		return hiddenData;
+	}
+
+	public static boolean isDispensable(Material type)
+	{
+		return isDispensable(type, (short) 0);
+	}
+	
+	public static boolean isInteractable(Material type)
+	{
+		return isInteractable(type, (short) 0);
+	}
+	
+	public static boolean isInteractable(Material type, short data)
+	{
+		switch(type)
+		{
+		case CHEST:
+		case WORKBENCH:
+		case FURNACE:
+		case BURNING_FURNACE:
+		case JUKEBOX:
+		case ENCHANTMENT_TABLE:
+		case ENDER_CHEST:
+		case ANVIL:
+		case TRAPPED_CHEST:
+		case BED_BLOCK:
+		case FLOWER_POT:
+		case DISPENSER:
+		case NOTE_BLOCK:
+		case LEVER:
+		case GOLD_PLATE:
+		case IRON_PLATE:
+		case STONE_PLATE:
+		case WOOD_PLATE:
+		case STONE_BUTTON:
+		case WOOD_BUTTON:
+		case DAYLIGHT_DETECTOR:
+		case DAYLIGHT_DETECTOR_INVERTED:
+		case TRAP_DOOR:
+		case IRON_TRAPDOOR:
+		case IRON_DOOR_BLOCK:
+		case ACACIA_DOOR:
+		case BIRCH_DOOR:
+		case DARK_OAK_DOOR:
+		case IRON_DOOR:
+		case JUNGLE_DOOR:
+		case WOOD_DOOR:
+		case SPRUCE_DOOR:
+		case WOODEN_DOOR:
+		case ACACIA_FENCE_GATE:
+		case BIRCH_FENCE_GATE:
+		case DARK_OAK_FENCE_GATE:
+		case FENCE_GATE:
+		case JUNGLE_FENCE_GATE:
+		case SPRUCE_FENCE_GATE:
+		case ACACIA_FENCE:
+		case FENCE:
+		case BIRCH_FENCE:
+		case DARK_OAK_FENCE:
+		case JUNGLE_FENCE:
+		case NETHER_FENCE:
+		case SPRUCE_FENCE:
+		default:
+			return false;
+		}
+	}
+	
+	public static boolean isDispensable(Material type, short data)
+	{
+		switch(type)
+		{
+		case WATER_BUCKET:
+		case LAVA_BUCKET:
+		case BUCKET:
+		case ARMOR_STAND:
+		case BOAT:
+		case MINECART:
+		case POWERED_MINECART:
+		case STORAGE_MINECART:
+		case COMMAND_MINECART:
+		case EXPLOSIVE_MINECART:
+		case HOPPER_MINECART:
+		case FLINT_AND_STEEL:
+		case TNT:
+		case SHEARS:
+		case GLASS_BOTTLE:
+		case POTION:
+			return true;
+		case INK_SACK:
+			if(data != 15)
+			{
+				return false;
+			}
+			
+			return true;
+		default:
+			return false;
+		}
 	}
 }

@@ -63,7 +63,12 @@ public class BTA implements TabExecutor, Listener
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
 
 		if(args.length == 0)
-		{		
+		{
+			if(cp.isRequesting())
+			{
+				return true;
+			}
+			
 			try
 			{
 				Runtime.getRuntime().exec(String.format("node %s/reset/getbtabalance %s %s %s", System.getProperty("user.home"),
@@ -114,6 +119,7 @@ public class BTA implements TabExecutor, Listener
 				df.setGroupingSize(3);
 				df.setGroupingUsed(true);
 				
+				p.sendMessage("");
 				p.sendMessage(ChatColor.LIGHT_PURPLE + "Beta ACE " + ChatColor.DARK_PURPLE + "(BTA)");
 				p.sendMessage(ChatColor.WHITE + "$" + df.format(price));
 				p.sendMessage(" ");
@@ -122,19 +128,33 @@ public class BTA implements TabExecutor, Listener
 				
 				try
 				{
-					double balance = Double.valueOf(args[4]);
+					double btaOnMinecraft = cp.getBTA();
+					double btaOnSite = Double.valueOf(args[4]);
 					
-					extra[0] = new TextComponent(df.format(balance) + " $BTA ");
+					extra[0] = new TextComponent(df.format(btaOnMinecraft) + " $BTA ");
 					extra[0].setColor(ChatColor.DARK_PURPLE);
 					
-					TextComponent aprox = new TextComponent("(≈" + df.format(balance * price) + " USD)");
+					TextComponent aprox = new TextComponent("(≈" + df.format(btaOnMinecraft * price) + " USD)");
 					aprox.setColor(ChatColor.GRAY);
 					
 					extra[0].addExtra(aprox);
 					
-					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.bta.show-balance"), extra);
+					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.bta.on-minecraft"), extra);
 					text.setColor(ChatColor.LIGHT_PURPLE);
 					p.spigot().sendMessage(text);
+					
+					extra[0] = new TextComponent(df.format(btaOnSite) + " $BTA ");
+					extra[0].setColor(ChatColor.DARK_PURPLE);
+					
+					aprox = new TextComponent("(≈" + df.format(btaOnSite * price) + " USD)");
+					aprox.setColor(ChatColor.GRAY);
+					
+					extra[0].addExtra(aprox);
+					
+					text = Message.getTextComponent(bundle.getString("commons.cmd.bta.on-site"), extra);
+					text.setColor(ChatColor.LIGHT_PURPLE);
+					p.spigot().sendMessage(text);
+					p.sendMessage("");
 				}
 				catch(NumberFormatException ex)
 				{

@@ -27,7 +27,7 @@ public class Config
 		switch(type)
 		{
 		case JACKPOT:
-			file = new File(Main.getInstance().getDataFolder(), "jackpot.yml");
+			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");
 			break;
 		case PLAYER_INFO:
 			file = new File(Main.getInstance().getDataFolder() + "/player_info", args[0] + ".yml");
@@ -39,7 +39,7 @@ public class Config
 			file = new File(Main.getInstance().getDataFolder() + "/combatlog", args[0] + ".yml");
 			break;
 		case PRICE:
-			file = new File(Main.getInstance().getDataFolder(), "price.txt");
+			file = new File(Main.getInstance().getDataFolder(), "price.dat");
 			break;
 		default:
 			return null;

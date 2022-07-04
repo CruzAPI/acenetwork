@@ -36,6 +36,7 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Currency;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
+import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
@@ -716,14 +717,24 @@ public class Shop implements TabExecutor, Listener
 				return;
 			}
 			
-			File ownerFile = CommonsConfig.getFile(Type.PLAYER, true, owner); 
-			YamlConfiguration ownerConfig = YamlConfiguration.loadConfiguration(ownerFile);
+			PlayerData ownerPD = PlayerData.load(owner);
+			double playerBalance;
+			double ownerBalance;
 			
-			File playerFile = CommonsConfig.getFile(Type.PLAYER, true, p.getUniqueId()); 
-			YamlConfiguration playerConfig = YamlConfiguration.loadConfiguration(playerFile);
-			
-			double playerBalance = playerConfig.getDouble(currency.getYamlKey());
-			double ownerBalance = ownerConfig.getDouble(currency.getYamlKey());
+			if(currency == Currency.SHARDS)
+			{
+				playerBalance = cp.getBalance();
+				ownerBalance = ownerPD.getBalance();
+			}
+			else if(currency == Currency.$BTA)
+			{
+				playerBalance = cp.getBTA();
+				ownerBalance = ownerPD.getBTA();
+			}
+			else
+			{
+				throw new RuntimeException();
+			}
 			
 			playerBalance += value;
 			ownerBalance -= value;
@@ -762,12 +773,21 @@ public class Shop implements TabExecutor, Listener
 				return;
 			}
 			
-			playerConfig.set(currency.getYamlKey(), playerBalance);
-			ownerConfig.set(currency.getYamlKey(), ownerBalance);
-		
-		
-			playerConfig.save(playerFile);
-			ownerConfig.save(ownerFile);
+			
+			if(currency == Currency.SHARDS)
+			{
+				cp.setBalance(playerBalance);
+				ownerPD.setBalance(ownerBalance);
+			}
+			else if(currency == Currency.$BTA)
+			{
+				cp.setBTA(playerBalance);
+				ownerPD.setBTA(ownerBalance);
+			}
+			else
+			{
+				throw new RuntimeException();
+			}
 			
 			Player t = Bukkit.getPlayer(owner);
 			CommonPlayer ct = CraftCommonPlayer.get(t);

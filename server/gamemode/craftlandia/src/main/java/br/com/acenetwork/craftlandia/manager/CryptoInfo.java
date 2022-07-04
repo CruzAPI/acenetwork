@@ -1,16 +1,18 @@
 package br.com.acenetwork.craftlandia.manager;
 
-public class CryptoInfo
+import java.io.Serializable;
+
+public class CryptoInfo implements Serializable
 {
+	private static final long serialVersionUID = -3837932034737751633L;
+	
 	private double marketCap;
 	private double circulatingSupply;
-	private final long pos;
 	
-	public CryptoInfo(double marketCap, double circulatingSupply, long pos)
+	public CryptoInfo(double marketCap, double circulatingSupply)
 	{
 		this.marketCap = marketCap;
 		this.circulatingSupply = circulatingSupply;
-		this.pos = pos;
 	}
 	
 	public double getMarketCap()
@@ -31,10 +33,5 @@ public class CryptoInfo
 	public void setCirculatingSupply(double circulatingSupply)
 	{
 		this.circulatingSupply = circulatingSupply;
-	}
-	
-	public long getPos()
-	{
-		return pos;
 	}
 }

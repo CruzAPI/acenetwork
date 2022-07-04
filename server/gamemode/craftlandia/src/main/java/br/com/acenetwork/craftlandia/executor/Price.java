@@ -1,15 +1,18 @@
 package br.com.acenetwork.craftlandia.executor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -19,8 +22,11 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.google.common.io.ByteStreams;
+
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.executor.Balance;
+import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.manager.Config;
@@ -29,64 +35,57 @@ import br.com.acenetwork.craftlandia.manager.CryptoInfo;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.TranslatableComponent;
 
 public class Price implements TabExecutor
 {
-	public static final Map<String, CryptoInfo> MAP = new HashMap<>();
+	private Map<IdData, CryptoInfo> MAP = new HashMap<>();
+	private static Price instance;
 	
+	@SuppressWarnings("unchecked")
 	public Price()
 	{
+		instance = this;
+		
 		File file = Config.getFile(Type.PRICE, false);
 		
-		if(!file.exists())
+		if(!file.exists() || file.length() == 0L)
 		{
-			file.toPath().getParent().toFile().mkdirs();
+			for(PRICE price : PRICE.LIST)
+			{
+				MAP.put(new IdData(price.id, price.data), new CryptoInfo(price.marketCap, price.circulatingSupply));
+			}
 			
-			try
+			PRICE.LIST = null;
+		}
+		else
+		{
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					ObjectInputStream in = new ObjectInputStream(streamIn))
 			{
-				if(file.createNewFile())
-				{
-					try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-					{
-						for(PRICE price : PRICE.LIST)
-						{
-							access.writeInt(price.id);
-							access.writeShort(price.data);
-							access.writeDouble(price.marketCap);
-							access.writeDouble(price.circulatingSupply);
-						}
-					}
-					catch(IOException ex)
-					{
-						throw ex;
-					}
-				}
+				MAP = (Map<IdData, CryptoInfo>) in.readObject();
 			}
-			catch(IOException ex)
+			catch(ClassNotFoundException | IOException e)
 			{
-				ex.printStackTrace();
-				return;
+				throw new RuntimeException(e);
 			}
 		}
+	}
+	
+	public void save()
+	{
+		File file = Config.getFile(Type.PRICE, true);
 		
-		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
+		try(FileOutputStream fileOut = new FileOutputStream(file);
+				ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+				ObjectOutputStream out = new ObjectOutputStream(streamOut))
 		{
-			while(access.getFilePointer() < access.length())
-			{
-				final long pos = access.getFilePointer();
-				final int id = access.readInt();
-				final short data = access.readShort();
-				final double marketCap = access.readDouble();
-				final double circulatingSupply = access.readDouble();
-				
-				MAP.put(id + ":" + data, new CryptoInfo(marketCap, circulatingSupply, pos));
-			}
+			out.writeObject(MAP);
+			fileOut.write(streamOut.toByteArray());
 		}
-		catch(IOException ex)
+		catch(IOException e)
 		{
-			ex.printStackTrace();
-			return;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -97,21 +96,11 @@ public class Price implements TabExecutor
 		
 		if(args.length == 1)
 		{
-			Set<Material> typeSet = new HashSet<>();
-			
-			for(String key : Price.MAP.keySet())
+			for(IdData key : MAP.keySet())
 			{
-				Material type = Material.getMaterial(Integer.valueOf(key.split(":")[0]));
+				Material type = Material.getMaterial(key.getId());
 				
-				if(type != null)
-				{
-					typeSet.add(type);
-				}
-			}
-			
-			for(Material type : typeSet)
-			{
-				if(type.name().toUpperCase().startsWith(args[0].toUpperCase()))
+				if(type != null && !list.contains(type.name()) && type.name().toUpperCase().startsWith(args[0].toUpperCase()))
 				{
 					list.add(type.name());
 				}
@@ -205,15 +194,15 @@ public class Price implements TabExecutor
 			return true;
 		}
 
-		String key = type.getId() + ":" + data;
+		IdData key = new IdData(type.getId(), data);
 
-		if(!Price.MAP.containsKey(key))
+		if(!MAP.containsKey(key))
 		{
 			sender.sendMessage(ChatColor.RED + bundle.getString("raid.cmd.sell.item-not-for-sale"));
 			return true;
 		}
 		
-		CryptoInfo cryptoInfo = Price.MAP.get(key);
+		CryptoInfo cryptoInfo = MAP.get(key);
 		double marketCap = cryptoInfo.getMarketCap();
 		double circulatingSupply = cryptoInfo.getCirculatingSupply();
 		
@@ -230,5 +219,15 @@ public class Price implements TabExecutor
 		CommonsUtil.sendMessage(sender, text);
 
 		return false;
+	}
+	
+	public static Map<IdData, CryptoInfo> getPriceMap()
+	{
+		return instance.MAP;
+	}
+	
+	public static Price getInstance()
+	{
+		return instance;
 	}
 }

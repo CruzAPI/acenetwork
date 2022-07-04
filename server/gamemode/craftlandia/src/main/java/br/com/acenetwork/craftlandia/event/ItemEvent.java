@@ -3,20 +3,22 @@ package br.com.acenetwork.craftlandia.event;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 
+import br.com.acenetwork.commons.manager.IdData;
+
 public abstract class ItemEvent extends Event
 {
 	final CommandSender sender;
-	final String key;
+	final IdData idData;
 	final int amount;
 	final double oldMarketCap;
 	final double newMarketCap;
 	final double oldCirculatingSupply;
 	final double newCirculatingSupply;
 	
-	public ItemEvent(CommandSender sender, String key, int amount, double oldMarketCap, double newMarketCap, double oldCirculatingSupply, double newCirculatingSupply)
+	public ItemEvent(CommandSender sender, IdData idData, int amount, double oldMarketCap, double newMarketCap, double oldCirculatingSupply, double newCirculatingSupply)
 	{
 		this.sender = sender;
-		this.key = key;
+		this.idData = idData;
 		this.amount = amount;
 		this.oldMarketCap = oldMarketCap;
 		this.newMarketCap = newMarketCap;
@@ -29,9 +31,9 @@ public abstract class ItemEvent extends Event
 		return sender;
 	}
 	
-	public String getKey()
+	public IdData getIdData()
 	{
-		return key;
+		return idData;
 	}
 	
 	public int getAmount()

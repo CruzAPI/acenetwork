@@ -1,6 +1,7 @@
 package br.com.acenetwork.craftlandia.inventory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -47,6 +48,7 @@ public class JackpotGUI extends GUI
 		});
 		
 		this.list = new ArrayList<>(list);
+		Collections.shuffle(this.list);
 		
 		Player p = cp.getPlayer();
 		
@@ -151,24 +153,28 @@ public class JackpotGUI extends GUI
 			inv.setItem(i, list.get(pos + i >= list.size() ? (pos + i) - list.size() : pos + i));
 		}
 		
+		double bet = 1000.0D;
+		
 		if(finish)
 		{
 			cp.setJackpoting(false);
 			ItemStack item = inv.getItem(13);
 			
+			Jackpot jackpot = Jackpot.getInstance();
+			
 			if(CommonsUtil.compareUUID(Jackpot.JACKPOT_ITEM, item))
 			{
-				int prize = Jackpot.getJackpot();
+				double prize = jackpot.getJackpot();
 				
-				if(prize <= 0)
+				if(prize <= 0.0D)
 				{
 					p.playSound(p.getLocation(), Sound.NOTE_BASS_GUITAR, 5.0F, 1.0F);
 					return;
 				}
 				
 				Bukkit.broadcastMessage("prize = " + prize);
-				Jackpot.setJackpot(0);
-				Bukkit.broadcastMessage("Jackpot = " + Jackpot.getJackpot());
+				jackpot.setJackpot(0.0D);
+				Bukkit.broadcastMessage("Jackpot = " + jackpot.getJackpot());
 				
 				taskB = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), new Runnable()
 				{
@@ -189,6 +195,13 @@ public class JackpotGUI extends GUI
 						times++;
 					}
 				}, 0L, 4L);
+			}
+			else if(CommonsUtil.compareUUID(item, Jackpot.$BTA_UUID))
+			{
+				double bta = bet * 0.001D * item.getAmount();
+				
+				jackpot.setJackpot(jackpot.getJackpot() - Jackpot.$BTA_TO_SHARDS * bta);
+				cp.setBTA(cp.getBTA() + bta);
 			}
 			else if(CommonsUtil.compareUUID(Jackpot.NONE_ITEM, item))
 			{
@@ -215,13 +228,13 @@ public class JackpotGUI extends GUI
 					return;
 				}
 				
-				int prize = (int) (1000 * item.getAmount() * multiplier);
+				double prize = bet * item.getAmount() * multiplier;
 				
 				Bukkit.broadcastMessage("prize = " + prize);
 				
-				Jackpot.setJackpot(Jackpot.getJackpot() - prize); 
-				
-				Bukkit.broadcastMessage("Jackpot = " + Jackpot.getJackpot());
+				jackpot.setJackpot(jackpot.getJackpot() - prize); 
+				cp.setBalance(cp.getBalance() + prize);
+				Bukkit.broadcastMessage("Jackpot = " + jackpot.getJackpot());
 			}
 			else
 			{

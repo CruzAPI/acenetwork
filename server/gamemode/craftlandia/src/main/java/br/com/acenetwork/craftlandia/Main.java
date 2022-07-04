@@ -37,7 +37,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
@@ -64,6 +63,7 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -83,7 +83,10 @@ import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
+import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.Farm;
+import br.com.acenetwork.craftlandia.warp.WarpJackpot;
+import br.com.acenetwork.craftlandia.warp.WarpLand;
 import net.md_5.bungee.api.ChatColor;
 
 public class Main extends Common implements Listener
@@ -117,7 +120,7 @@ public class Main extends Common implements Listener
 		wc = new WorldCreator("factions");
 		wc.environment(Environment.NORMAL);
 		wc.generateStructures(true);
-		wc.createWorld();
+		new Factions(wc.createWorld());
 		
 		wc = new WorldCreator("newbie");
 		wc.environment(Environment.NORMAL);
@@ -134,10 +137,10 @@ public class Main extends Common implements Listener
 		
 		wc = new WorldCreator("jackpot");
 		wc.environment(Environment.NORMAL);
-		wc.createWorld();
+		new WarpJackpot(wc.createWorld());
 		
 		wc = new WorldCreator("oldworld");
-		wc.createWorld();
+		new WarpLand(wc.createWorld());
 		
 		for(World w : Bukkit.getWorlds())
 		{
@@ -196,12 +199,27 @@ public class Main extends Common implements Listener
 		}
 	}
 	
-
+	@Override
+	public void onDisable()
+	{
+		super.onDisable();
+	}
+	
+	@EventHandler
+	public void a(WorldSaveEvent e)
+	{
+		if(!e.getWorld().getName().equals("world"))
+		{
+			return;
+		}
+		
+		Price.getInstance().save();
+		Jackpot.getInstance().save();
+	}
 	
 	@EventHandler
 	public void a(EntityExplodeEvent e)
 	{
-		e.blockList().clear();
 		Entity entity = e.getEntity();
 		
 		if(entity instanceof Creeper)
@@ -250,13 +268,6 @@ public class Main extends Common implements Listener
 		Util.writeBlock(b, Util.getByteArray(e.getItemInHand()));
 	}
 	
-	
-	@EventHandler
-	public void a(BlockFromToEvent e)
-	{
-		e.setCancelled(false);
-	}
-	
 	@EventHandler
 	public void a(BlockPistonExtendEvent e)
 	{
@@ -282,6 +293,7 @@ public class Main extends Common implements Listener
 		}
 	}
 	
+
 	@EventHandler
 	public void a(BlockPhysicsEvent e)
 	{

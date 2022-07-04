@@ -13,14 +13,21 @@ public class CommonsConfig
 {
 	public enum Type
 	{
+		PLAYER_DATA,
+		PLAYERS_DATA,
+		PLAYER_PERMISSION,
+		GROUPS_DAT,
+		USERS_DAT,
+		USER_DAT,
+		USERS_FOLDER,
 		BLOCK_DATA,
 		SIGN_DATA,
 		ITEM_INFO_FOLDER,
 		ITEM_INFO,
 		WHITELISTED_IP,
-		CLANS_JSON, MESSAGE, GROUP, USER, 
+		CLANS_JSON, MESSAGE, 
 		PLAYER, 
-		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP,
+		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, 
 		;
 	}
 
@@ -31,6 +38,15 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case PLAYER_DATA:
+			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/users/" + args[0], "user.dat");
+			break;
+		case PLAYERS_DATA:
+			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/", "users.dat");
+			break;
+		case PLAYER_PERMISSION:
+			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/" + args[0], "permisison.dat");
+			break;
 		case CHEST_VIP:
 			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".txt");
 			break;
@@ -64,11 +80,17 @@ public class CommonsConfig
 		case BANNED_PLAYERS:
 			file = new File(Common.getPlugin().getConfigFolder() + "/banned-players", args[0] + ".yml");
 			break;
-		case GROUP:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/groups", args[0] + ".yml");
+		case GROUPS_DAT:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions", "groups.dat");
 			break;
-		case USER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".yml");
+		case USERS_DAT:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions", "users.dat");
+			break;
+		case USER_DAT:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".dat");
+			break;
+		case USERS_FOLDER:
+			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users");
 			break;
 		case PLAYER:
 			file = new File(Common.getPlugin().getConfigFolder() + "/players", args[0] + ".yml");

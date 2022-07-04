@@ -47,7 +47,7 @@ public class JackpotPercentage extends GUI
 			ItemStack key = entry.getKey().clone();
 			int value = entry.getValue();
 			
-			int shards = Jackpot.getValueInShardsTheoretically(bet, key);
+			double shards = Jackpot.getValueInShardsTheoretically(bet, key);
 			
 			ItemMeta meta = key.getItemMeta();
 			

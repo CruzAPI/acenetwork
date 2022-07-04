@@ -47,6 +47,7 @@ import br.com.acenetwork.commons.executor.Balance;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.manager.CommonsConfig;
+import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import net.md_5.bungee.api.ChatColor;
@@ -71,6 +72,8 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	private Inventory vipChest;
 	public int taskRequest;
 	private boolean isJackpoting;
+	private PlayerData playerData;
+	private boolean pvpInvincibility;
 	
 	public CraftCommonPlayer(Player p)
 	{
@@ -82,9 +85,15 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		if(previous != null)	
 		{
+			playerData = previous.getPlayerData();
 			specs = previous.canSpecs();
 			commonsScoreboard = previous.getCommonsScoreboard();
+			pvpInvincibility = previous.hasPVPInvincibility();
 			previous.delete();
+		}
+		else
+		{
+			playerData = PlayerData.load(p.getUniqueId());
 		}
 		
 		reset();
@@ -279,6 +288,41 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		setCommonsHotbar(null);
 		setCommonsScoreboard(null);
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void asdasd(EntityDamageEvent e)
+	{
+		if(e.getEntity() != p)
+		{
+			return;
+		}
+		
+		if(hasInvincibility())
+		{
+			e.setCancelled(true);
+			return;
+		}
+		
+		if(pvpInvincibility)
+		{
+			if(e instanceof EntityDamageByEntityEvent)
+			{
+				EntityDamageByEntityEvent ee = (EntityDamageByEntityEvent) e;
+				
+				if(ee.getDamager() instanceof Player)
+				{
+					e.setCancelled(true);
+					return;
+				}
+				
+				if(ee.getDamager() instanceof Projectile && ((Projectile) ee.getDamager()).getShooter() instanceof Player)
+				{
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -726,5 +770,77 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	public void setWalletAddress(String address)
 	{
 		this.walletAddress = address;
+	}
+	
+	@Override
+	public double getBalance()
+	{
+		return playerData.getBalance();
+	}
+	
+	@Override
+	public void setBalance(double balance)
+	{
+		playerData.setBalance(balance);
+	}
+	
+	@Override
+	public double getBTA()
+	{
+		return playerData.getBTA();
+	}
+	
+	@Override
+	public void setBTA(double bta)
+	{
+		playerData.setBTA(bta);
+	}
+	
+	@Override
+	public PlayerData getPlayerData()
+	{
+		return playerData;
+	}
+	
+	@Override
+	public double getDiskBTA()
+	{
+		return playerData.getDiskBTA();
+	}
+	
+	@Override
+	public double getWithdrawableBTA()
+	{
+		return Math.min(getBTA(), getDiskBTA());
+	}
+	
+	@Override
+	public void setPlayerData(PlayerData playerData)
+	{
+		this.playerData = playerData;
+	}
+	
+	@Override
+	public boolean hasInvincibility()
+	{
+		return playerData.hasInvincibility();
+	}
+	
+	@Override
+	public void setInvincibility(boolean value)
+	{
+		playerData.setInvincibility(value);
+	}
+	
+	@Override
+	public boolean hasPVPInvincibility()
+	{
+		return pvpInvincibility;
+	}
+	
+	@Override
+	public void setPVPInvincibility(boolean value)
+	{
+		pvpInvincibility = value;
 	}
 }

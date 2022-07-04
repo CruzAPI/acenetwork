@@ -18,6 +18,8 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -56,6 +58,28 @@ public class CraftCommonAdmin extends CraftCommonPlayer implements CommonAdmin
 	public boolean canBuild()
 	{
 		return build;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(PlayerBucketEmptyEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		e.setCancelled(!build);
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(PlayerBucketFillEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		e.setCancelled(!build);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)

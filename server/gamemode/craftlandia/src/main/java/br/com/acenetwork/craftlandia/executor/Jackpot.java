@@ -1,7 +1,13 @@
 package br.com.acenetwork.craftlandia.executor;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,14 +19,14 @@ import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.player.CommonPlayer;
@@ -41,16 +47,37 @@ public class Jackpot implements TabExecutor
 	public static final String VIP_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
 	
-	private static int jackpot;
-	private static final int $BTA_TO_SHARDS = 200;
+	private double jackpot;
+	
+	private static Jackpot instance;
+	
+	public static final int $BTA_TO_SHARDS = 200;
 	
 	public static final Map<ItemStack, Integer> MAP = new LinkedHashMap<>();
 	
 	public Jackpot()
 	{
-		File file = Config.getFile(Type.JACKPOT, true);
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		setJackpot(config.getInt("jackpot"));
+		instance = this;
+		
+		File file = Config.getFile(Type.JACKPOT, false);
+		
+		if(file.exists() && file.length() < 0L)
+		{
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					ObjectInputStream in = new ObjectInputStream(streamIn))
+			{
+				setJackpot(in.readDouble());
+			}
+			catch(IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		else
+		{
+			setJackpot(0.0D);
+		}
 		
 		ItemMeta meta;
 		
@@ -269,9 +296,18 @@ public class Jackpot implements TabExecutor
 				return true;
 			}
 			
-			Collections.shuffle(PRIZE_LIST);
+			final double bet = 1000.0D;
 			
-			setJackpot(getJackpot() + 1000);
+			double newBalance = cp.getBalance() - bet;
+			
+			if(newBalance < 0.0D)
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.insufficient-balance"));
+				return true;
+			}
+			
+			cp.setBalance(newBalance);
+			setJackpot(getJackpot() + bet);
 			
 			Bukkit.broadcastMessage("jackpot = " + jackpot);
 			
@@ -293,16 +329,14 @@ public class Jackpot implements TabExecutor
 		return false;
 	}
 	
-	public static int getJackpot()	
+	public double getJackpot()	
 	{
 		return jackpot;
 	}
 	
-	public static void setJackpot(int jackpot)
+	public void setJackpot(double jackpot)
 	{
-		Jackpot.jackpot = jackpot;
-		File file = Config.getFile(Type.JACKPOT, true);
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+		this.jackpot = jackpot;
 		
 		DecimalFormat df = new DecimalFormat();
 		df.setGroupingSize(3);
@@ -310,7 +344,7 @@ public class Jackpot implements TabExecutor
 		
 		ItemMeta meta;
 		
-		if(jackpot > 0)
+		if(jackpot > 0.0D)
 		{
 			JACKPOT_ITEM.setType(Material.BEACON);
 			meta = JACKPOT_ITEM.getItemMeta();
@@ -322,24 +356,34 @@ public class Jackpot implements TabExecutor
 		{
 			CommonsUtil.setItemCopyOf(JACKPOT_ITEM, NONE_ITEM);
 		}
+	}
+	
+	public void save()
+	{
+		File file = Config.getFile(Type.JACKPOT, true);
 		
-		config.set("jackpot", jackpot);
-		
-		try
+		try(FileOutputStream fileOut = new FileOutputStream(file);
+				ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+				ObjectOutputStream out = new ObjectOutputStream(streamOut))
 		{
-			config.save(file);
+			out.writeDouble(jackpot);
 		}
-		catch(IOException e)
+		catch(IOException ex)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(ex);
 		}
 	}
 	
-	public static int getValueInShards(int bet, ItemStack item)
+	public static Jackpot getInstance()
+	{
+		return instance;
+	}
+	
+	public static double getValueInShards(int bet, ItemStack item)
 	{
 		if(CommonsUtil.compareUUID(item, Jackpot.JACKPOT_UUID))
 		{
-			return Math.max(0, jackpot);
+			return Math.max(0.0D, instance.getJackpot());
 		}
 		
 		if(CommonsUtil.compareUUID(item, Jackpot.SHARDS_UUID))
@@ -379,7 +423,7 @@ public class Jackpot implements TabExecutor
 		return 0;
 	}
 	
-	public static int getValueInShardsTheoretically(int bet, ItemStack item)
+	public static double getValueInShardsTheoretically(int bet, ItemStack item)
 	{
 		if(CommonsUtil.compareUUID(item, JACKPOT_UUID))
 		{
