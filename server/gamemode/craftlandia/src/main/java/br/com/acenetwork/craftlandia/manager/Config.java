@@ -11,6 +11,7 @@ public class Config
 {
 	public enum Type
 	{
+		REGION,
 		JACKPOT,
 		BOT, 
 		COMBATLOG, 
@@ -26,6 +27,9 @@ public class Config
 
 		switch(type)
 		{
+		case REGION:
+			file = new File(Main.getInstance().getDataFolder() + "/region/" + args[0], args[1] + ".dat");
+			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");
 			break;

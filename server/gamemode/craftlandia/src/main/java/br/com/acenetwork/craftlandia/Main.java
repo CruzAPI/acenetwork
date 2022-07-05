@@ -5,14 +5,26 @@ import static org.bukkit.block.BlockFace.NORTH;
 import static org.bukkit.block.BlockFace.SOUTH;
 import static org.bukkit.block.BlockFace.WEST;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -63,12 +75,15 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+
+import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
@@ -82,6 +97,9 @@ import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
+import br.com.acenetwork.craftlandia.manager.BlockData;
+import br.com.acenetwork.craftlandia.manager.ChunkLocation;
+import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.Farm;
 import br.com.acenetwork.craftlandia.warp.WarpJackpot;
@@ -92,11 +110,79 @@ public class Main extends Common implements Listener
 {
 	private static Main instance;
 	
+	public static final Map<ChunkLocation, Map<Short, Short>> MAP = new HashMap<>();
+	
+	@EventHandler
+	public void a(ChunkLoadEvent e)
+	{
+		Chunk c = e.getChunk();
+		
+		ChunkLocation cl = new ChunkLocation(c);
+		
+		if(MAP.containsKey(cl))
+		{
+			return;
+		}
+		
+		File file = Config.getFile(Config.Type.REGION, false, c.getWorld().getName(), c.getX() + "." + c.getZ());
+		
+		if(!file.exists() || file.length() == 0L)
+		{
+			return;
+		}
+		
+		try(FileInputStream fileIn = new FileInputStream(file);
+				ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+				ObjectInputStream in = new ObjectInputStream(streamIn))
+		{
+			MAP.put(cl, (Map<Short, Short>) in.readObject());
+		}
+		catch(ClassNotFoundException | IOException ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+	public void saveChunks()
+	{
+		long time = System.currentTimeMillis();
+		
+		Bukkit.broadcastMessage("SAVING CHUNKS...");
+		Iterator<Entry<ChunkLocation, Map<Short, Short>>> iterator = MAP.entrySet().iterator();
+		
+		while(iterator.hasNext())
+		{
+			Entry<ChunkLocation, Map<Short, Short>> entry = iterator.next();
+			ChunkLocation cl = entry.getKey();
+			Map<Short, Short> value = entry.getValue();
+			
+			File file = Config.getFile(Config.Type.REGION, true, cl.getW(), cl.getX() + "." + cl.getZ());
+			
+			try(FileOutputStream fileOut = new FileOutputStream(file);
+					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+					ObjectOutputStream out = new ObjectOutputStream(streamOut))
+			{
+				out.writeObject(value);
+				fileOut.write(streamOut.toByteArray());
+				
+				if(!cl.getChunk().isLoaded())
+				{
+					iterator.remove();
+				}
+			}
+			catch(IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		
+		Bukkit.broadcastMessage("TIME ELAPSED... " + (System.currentTimeMillis() - time) + "MS");
+	}
+	
 	@Override
 	public void onEnable()
 	{
 		instance = this;
-		
 		super.onEnable();
 		
 		registerCommand(new ItemInfo(), "iteminfo");
@@ -211,6 +297,8 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		saveChunks();
+		
 		Price.getInstance().save();
 		Jackpot.getInstance().save();
 	}
@@ -281,7 +369,7 @@ public class Main extends Common implements Listener
 			
 			if(i == 0)
 			{
-				Util.writeBlock(b, Util.emptyArray());
+				Util.writeBlock(b, null);
 			}
 		}
 		
@@ -329,7 +417,7 @@ public class Main extends Common implements Listener
 			meta.setLore(Util.getLore(b));
 			item.setItemMeta(meta);
 			
-			Util.writeBlock(b, Util.emptyArray());
+			Util.writeBlock(b, null);
 			
 			w.dropItemNaturally(b.getLocation(), item);
 		}
@@ -369,7 +457,7 @@ public class Main extends Common implements Listener
 			meta.setLore(Util.getLore(b));
 			item.setItemMeta(meta);
 			
-			Util.writeBlock(b, Util.emptyArray());
+			Util.writeBlock(b, null);
 			
 			w.dropItemNaturally(b.getLocation(), item);
 		}
@@ -410,7 +498,7 @@ public class Main extends Common implements Listener
 		ItemStack item = e.getItemStack();
 		
 		byte data = Util.readBlockRarity(b);
-		Util.writeBlock(b, Util.emptyArray());
+		Util.writeBlock(b, null);
 		
 		Rarity rarity = Rarity.getByDataOrWorld(data, b.getWorld());
 		
@@ -535,7 +623,7 @@ public class Main extends Common implements Listener
 			
 			if(i == 0)
 			{
-				Util.writeBlock(b, Util.emptyArray());
+				Util.writeBlock(b, null);
 			}
 		}
 		
@@ -561,7 +649,7 @@ public class Main extends Common implements Listener
 			byte[] data = Util.readBlock(b);
 			entity.setMetadata("data", new FixedMetadataValue(this, data));
 			
-			Util.writeBlock(b, Util.emptyArray());
+			Util.writeBlock(b, null);
 		}
 		else
 		{
@@ -687,19 +775,9 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
-		World w = b.getWorld();
-		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, w.getName());
+		byte[] bytes = Util.readBlock(b);
 		
-		Action action = e.getAction();
-		
-		if(action == Action.LEFT_CLICK_BLOCK)
-		{
-			
-		}
-		else if(action == Action.RIGHT_CLICK_BLOCK && b.hasMetadata("pos"))
-		{
-			
-		}
+		Bukkit.broadcastMessage("" + bytes[0] + " " + bytes[1]);
 	}
 	
 //	@EventHandler
@@ -767,14 +845,14 @@ public class Main extends Common implements Listener
 	{
 		Block b = e.getBlock();
 		
-		if(b.getType() == Material.BEDROCK)
-		{
-			e.setCancelled(true);
-			
-			World w = b.getWorld();
-			
-			w.spawnEntity(b.getLocation().add(0.5D, 1.0D, 0.5D), EntityType.ENDER_CRYSTAL);
-		}
+//		if(b.getType() == Material.BEDROCK)
+//		{
+//			e.setCancelled(true);
+//			
+//			World w = b.getWorld();
+//			
+//			w.spawnEntity(b.getLocation().add(0.5D, 1.0D, 0.5D), EntityType.ENDER_CRYSTAL);
+//		}
 	}
 	
 	@EventHandler

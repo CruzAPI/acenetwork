@@ -11,15 +11,18 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -32,6 +35,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
+import br.com.acenetwork.craftlandia.manager.ChunkLocation;
 
 public class Util
 {
@@ -48,6 +52,16 @@ public class Util
 		default:
 			return COMMON;
 		}
+	}
+	
+	public static byte[] toByteArray(short x)
+	{
+	    return new byte[] {(byte) (x >> 8), (byte) x};
+	}
+	
+	public static short toShort(byte[] a)
+	{
+		return (short) (a[0] << 8 | a[1] & 0xFF);
 	}
 	
 	public static Rarity getRarity(ItemStack item)
@@ -135,33 +149,77 @@ public class Util
 		return emptyArray;
 	}
 	
+	public static void writeBlock(Block b, byte[] bytes)
+	{
+		Chunk c = b.getChunk();
+		ChunkLocation cl = new ChunkLocation(c);
+		
+		if(!Main.MAP.containsKey(cl))
+		{
+			Main.MAP.put(cl, new HashMap<>());
+		}
+		
+		short coords = chunkCoordsToShort(b);
+		
+		Map<Short, Short> map = Main.MAP.get(cl);
+		
+		if(bytes == null)
+		{
+			map.remove(coords);
+		}
+		else
+		{
+			map.put(coords, toShort(bytes));
+		}
+	}
+	
 	public static byte[] readBlock(Block b)
 	{
-		if(!b.hasMetadata("pos"))
+		Chunk c = b.getChunk();
+		ChunkLocation cl = new ChunkLocation(c);
+		
+		if(!Main.MAP.containsKey(cl))
 		{
 			return emptyArray();
 		}
 		
-		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, b.getWorld().getName());
+		short coords = chunkCoordsToShort(b);
 		
-		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
+		Map<Short, Short> map = Main.MAP.get(cl);
+		
+		if(!map.containsKey(coords))
 		{
-			access.seek(b.getMetadata("pos").get(0).asLong() + 12L);
-			
-			byte[] bytes = new byte[getArrayLength()];
-			
-			for(int i = 0; i < bytes.length; i++)
-			{
-				bytes[i] = access.readByte();
-			}
-			
-			return bytes;
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
 			return emptyArray();
 		}
+		
+		return toByteArray(map.get(coords));
+	}
+	
+	private static short chunkCoordsToShort(Block b)
+	{
+		Chunk c = b.getChunk();
+		
+		byte x = (byte) Math.abs(c.getX() * 16 - b.getX());
+		byte y = (byte) (b.getY() - 128);
+		byte z = (byte) Math.abs(c.getZ() * 16 - b.getZ());
+		
+		return coordsToShort(new byte[] {x, y, z});
+	}
+	
+	private static byte[] getChunkBlockCoords(short s)
+	{
+		byte[] b = toByteArray(s);
+		
+		byte y = b[0];
+		byte x = (byte) (b[1] >> 4 & 0xF);
+		byte z = (byte) (b[1] & 0xF);
+		
+		return new byte[] {x, y, z};
+	}
+	
+	private static short coordsToShort(byte[] coords)
+	{
+		return (short) (coords[1] << 8 | coords[0] << 4 & 0xF0 | coords[2] & 0x0F);
 	}
 	
 	public static UUID readSign(Block b)
@@ -227,36 +285,6 @@ public class Util
 		}
 		
 		return bytes;
-	}
-	
-	public static void writeBlock(Block b, byte[] bytes)
-	{
-		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, b.getWorld().getName());
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-		{
-			long pos;
-			
-			if(b.hasMetadata("pos"))
-			{
-				pos = b.getMetadata("pos").get(0).asLong();
-			}
-			else
-			{
-				pos = access.length();
-				b.setMetadata("pos", new FixedMetadataValue(Main.getInstance(), pos));
-			}
-			
-			access.seek(pos);
-			access.writeInt(b.getX());
-			access.writeInt(b.getY());
-			access.writeInt(b.getZ());
-			access.write(bytes);
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
 	}
 	
 	public static void writeSign(Block b, UUID uuid)
