@@ -8,7 +8,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.manager.PRICE;
+import br.com.acenetwork.craftlandia.warp.Warp;
 
 public class Temp implements TabExecutor
 {
@@ -217,6 +219,8 @@ public class Temp implements TabExecutor
 	{
 		if(sender instanceof Player)
 		{
+			Player p = (Player) sender;
+			sender.sendMessage("" + p.getWorld().getName() + " chunks in memory = " + Warp.MAP.get(p.getWorld().getUID()).blockData.size());
 			sender.sendMessage("Unknown command. Type \"/help\" for help.");
 			return true;
 		}

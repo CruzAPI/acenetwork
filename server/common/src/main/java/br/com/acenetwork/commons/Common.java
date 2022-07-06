@@ -67,6 +67,7 @@ import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 public class Common extends JavaPlugin
 {
 	private static Common instance;
+	private static JavaPlugin plugin;
 	private static boolean restarting;
 	public static final boolean TEST = !new File(System.getProperty("user.dir")).getParentFile().getName().equals("acenetwork");
 	
@@ -210,7 +211,7 @@ public class Common extends JavaPlugin
 			Constructor<?> constructor = clazz.getDeclaredConstructor(String.class, Plugin.class);
 			constructor.setAccessible(true);
 			
-			PluginCommand command = (PluginCommand) constructor.newInstance(name, instance);
+			PluginCommand command = (PluginCommand) constructor.newInstance(name, this);
 			
 			command.setAliases(Arrays.asList(aliases));
 			command.register(commandMap);

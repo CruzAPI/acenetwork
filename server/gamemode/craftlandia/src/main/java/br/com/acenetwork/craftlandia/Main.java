@@ -26,6 +26,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -39,7 +40,9 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Wither;
 import org.bukkit.entity.WitherSkull;
@@ -62,6 +65,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -88,6 +92,7 @@ import com.google.common.io.ByteStreams;
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.Price;
@@ -105,84 +110,19 @@ import br.com.acenetwork.craftlandia.warp.Farm;
 import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.BlockMonsterEggs.EnumMonsterEggVarient;
 
 public class Main extends Common implements Listener
 {
 	private static Main instance;
 	
-	public static final Map<ChunkLocation, Map<Short, Short>> MAP = new HashMap<>();
-	
-	@EventHandler
-	public void a(ChunkLoadEvent e)
-	{
-		Chunk c = e.getChunk();
-		
-		ChunkLocation cl = new ChunkLocation(c);
-		
-		if(MAP.containsKey(cl))
-		{
-			return;
-		}
-		
-		File file = Config.getFile(Config.Type.REGION, false, c.getWorld().getName(), c.getX() + "." + c.getZ());
-		
-		if(!file.exists() || file.length() == 0L)
-		{
-			return;
-		}
-		
-		try(FileInputStream fileIn = new FileInputStream(file);
-				ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
-				ObjectInputStream in = new ObjectInputStream(streamIn))
-		{
-			MAP.put(cl, (Map<Short, Short>) in.readObject());
-		}
-		catch(ClassNotFoundException | IOException ex)
-		{
-			ex.printStackTrace();
-		}
-	}
-	
-	public void saveChunks()
-	{
-		long time = System.currentTimeMillis();
-		
-		Bukkit.broadcastMessage("SAVING CHUNKS...");
-		Iterator<Entry<ChunkLocation, Map<Short, Short>>> iterator = MAP.entrySet().iterator();
-		
-		while(iterator.hasNext())
-		{
-			Entry<ChunkLocation, Map<Short, Short>> entry = iterator.next();
-			ChunkLocation cl = entry.getKey();
-			Map<Short, Short> value = entry.getValue();
-			
-			File file = Config.getFile(Config.Type.REGION, true, cl.getW(), cl.getX() + "." + cl.getZ());
-			
-			try(FileOutputStream fileOut = new FileOutputStream(file);
-					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-					ObjectOutputStream out = new ObjectOutputStream(streamOut))
-			{
-				out.writeObject(value);
-				fileOut.write(streamOut.toByteArray());
-				
-				if(!cl.getChunk().isLoaded())
-				{
-					iterator.remove();
-				}
-			}
-			catch(IOException ex)
-			{
-				ex.printStackTrace();
-			}
-		}
-		
-		Bukkit.broadcastMessage("TIME ELAPSED... " + (System.currentTimeMillis() - time) + "MS");
-	}
-	
 	@Override
 	public void onEnable()
 	{
 		instance = this;
+		
+		registerCommand(new Give(), "give");
+		
 		super.onEnable();
 		
 		registerCommand(new ItemInfo(), "iteminfo");
@@ -296,8 +236,6 @@ public class Main extends Common implements Listener
 		{
 			return;
 		}
-		
-		saveChunks();
 		
 		Price.getInstance().save();
 		Jackpot.getInstance().save();
@@ -497,7 +435,7 @@ public class Main extends Common implements Listener
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
 		
-		byte data = Util.readBlockRarity(b);
+		byte data = Util.readBlock(b)[0];
 		Util.writeBlock(b, null);
 		
 		Rarity rarity = Rarity.getByDataOrWorld(data, b.getWorld());
@@ -539,33 +477,127 @@ public class Main extends Common implements Listener
 	{
 		Entity entity = e.getEntity();
 		
-		final byte data = entity.hasMetadata("rarity") 
-				? Rarity.getByDataOrWorld(entity.getMetadata("rarity").get(0).asByte(), entity.getWorld()).getData() 
-				: Util.getRarity(entity.getWorld()).getData();
-		
-		e.getDrops().forEach(x -> Util.setItemTag(x, Rarity.getByData(data)));
-	}
-	
-	@EventHandler
-	public void a(CreatureSpawnEvent e)
-	{
-		if(e.getSpawnReason() == SpawnReason.SPAWNER)
+		if(entity instanceof Player)
 		{
 			return;
 		}
 		
-		Entity entity = e.getEntity();
+		Rarity rarity = Rarity.valueOfToString(entity.getCustomName());
+		Rarity rarity1 = rarity == null ? Util.getRarity(entity.getWorld()) : rarity;
 		
-		byte data = Util.getRarity(entity.getWorld()).getData();
-		entity.setMetadata("rarity", new FixedMetadataValue(this, data));
+		e.getDrops().forEach(x -> Util.setCommodity(x, rarity1));
 	}
 	
 	@EventHandler
+	public void a(SlimeSplitEvent e)
+	{
+		Slime slime = e.getEntity();
+		
+		if(slime.getCustomName() != null)
+		{
+			e.setCancelled(true);
+			
+			World w = slime.getWorld();
+			
+			Random r = new Random();
+			
+			double slimeX = slime.getLocation().getX();
+			double slimeY = slime.getLocation().getY();
+			double slimeZ = slime.getLocation().getZ();
+			
+			int i = 0;
+			int count = 2 + r.nextInt(3);
+			
+			loop:for(double x = -0.25D; x <= 0.25D; x += 0.5D)
+			{
+				for(double z = -0.25D; z <= 0.25D; z += 0.5D)
+				{
+					if(i++ >= count)
+					{
+						break loop;
+					}
+					
+					Slime child = (Slime) w.spawnEntity(new Location(w, slimeX + x, slimeY + 0.5D, slimeZ + z, 0.0F, r.nextInt(360) + r.nextFloat()), slime.getType());
+					child.setSize(Math.max(1, slime.getSize() / 2));
+					child.setCustomName(slime.getCustomName());
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(PlayerInteractEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		ItemStack item = e.getItem();
+		Block b = e.getClickedBlock();
+		
+		if(b == null || item == null || item.getType() != Material.MONSTER_EGG)
+		{
+			return;
+		}
+		
+		Rarity rarity = Util.getRarity(item);
+		
+		if(rarity == null)
+		{
+			return;
+		}
+		
+		e.setCancelled(true);
+		
+		
+		Block relative = b.getRelative(e.getBlockFace());
+		
+		LivingEntity le = relative.getWorld().spawnCreature(relative.getLocation(), EntityType.fromId(item.getDurability()));
+		
+		if(!le.isValid())
+		{
+			le.remove();
+			return;
+		}
+		
+		le.setCustomName(rarity.toString());
+		
+		if(p.getGameMode() == GameMode.CREATIVE)
+		{
+			return;
+		}
+		
+		item.setAmount(item.getAmount() - 1);
+		
+		if(item.getAmount() <= 0)
+		{	
+			p.setItemInHand(null);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void ab(PlayerInteractEntityEvent e)
+	{
+		Entity entity = e.getRightClicked();
+		
+		if(entity.getCustomName() == null)
+		{
+			return;
+		}
+		
+		for(Rarity values : Rarity.values())
+		{
+			if(values.toString().equals(entity.getCustomName()))
+			{
+				e.setCancelled(true);
+				return;
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(SpawnerSpawnEvent e)
 	{
 		Entity entity = e.getEntity();
-		byte data = Rarity.getByDataOrWorld(Util.readBlockRarity(e.getSpawner().getBlock()), entity.getWorld()).getData();
-		entity.setMetadata("rarity", new FixedMetadataValue(this, data));
+		entity.setCustomName(Rarity.getByDataOrWorld(Util.readBlock(e.getSpawner().getBlock())[0], entity.getWorld()).toString());
 	}
 	
 	@EventHandler

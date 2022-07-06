@@ -1,4 +1,4 @@
-package br.com.acenetwork.commons.executor;
+package br.com.acenetwork.craftlandia.executor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,8 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
+import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.craftlandia.Util;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -115,6 +117,7 @@ public class Give implements TabExecutor
 				
 				int amount = args.length > 2 ? Integer.valueOf(args[2]) : 1;
 				short data = args.length > 3 ? Short.valueOf(args[3]) : 0;	
+				byte commodityData = args.length > 4 ? Byte.valueOf(args[4]) : 0;	
 				
 				if(amount < 0)
 				{
@@ -123,11 +126,16 @@ public class Give implements TabExecutor
 				
 				final int finalAmount = amount;
 				
+				ItemStack item = new ItemStack(type, 1, data);
+				
+				Util.setCommodity(item, Rarity.getByData(commodityData));
+				
 				while(amount > 0)
 				{
 					int itemAmount = Math.min(type.getMaxStackSize(), amount);
 					amount -= itemAmount;
-					t.getInventory().addItem(new ItemStack(type, itemAmount, data));
+					item.setAmount(itemAmount);
+					t.getInventory().addItem(item);
 				}
 				
 				TextComponent[] extra = new TextComponent[3];

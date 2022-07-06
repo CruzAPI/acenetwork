@@ -1,13 +1,26 @@
 package br.com.acenetwork.craftlandia.warp;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.core.net.Priority;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -51,20 +64,27 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Dispenser;
+
+import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.craftlandia.manager.ChunkLocation;
+import br.com.acenetwork.craftlandia.manager.Config;
 import net.md_5.bungee.api.ChatColor;
 
 public abstract class Warp implements Listener
 {
-	public static final Set<Warp> SET = new HashSet<>();
-	
+	public static final Map<UUID, Warp> MAP = new HashMap<>();
+	public final Map<ChunkLocation, Map<Short, Short>> blockData = new HashMap<>();
+
 	protected final World w;
 	protected final String worldName;
 	
@@ -73,7 +93,7 @@ public abstract class Warp implements Listener
 		this.w = w;
 		this.worldName = w.getName();
 		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
-		SET.add(this);
+		MAP.put(w.getUID(), this);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -85,6 +105,8 @@ public abstract class Warp implements Listener
 		{
 			return;
 		}
+		
+		Bukkit.broadcastMessage("chunksInMemory = " + blockData.size());
 		
 		ItemStack item = e.getItem();
 		Block b = e.getClickedBlock();
@@ -543,6 +565,121 @@ public abstract class Warp implements Listener
 		}
 		
 		e.setCancelled(isSpawnProtection(b.getLocation()));
+	}
+	
+	@EventHandler
+	public void a(WorldSaveEvent e)
+	{
+		if(e.getWorld() != w)
+		{
+			return;
+		}
+		
+		saveChunks();
+	}
+	
+	public byte[] readBlock(Block b)
+	{
+		Chunk c = b.getChunk();
+		Map<Short, Short> map = blockData.get(loadChunk(c.getX(), c.getZ()));
+		short coords = Util.chunkCoordsToShort(b);
+		
+		if(!map.containsKey(coords))
+		{
+			return Util.emptyArray();
+		}
+		
+		return Util.toByteArray(map.get(coords));
+	}
+	
+	public void writeBlock(Block b, byte[] bytes)
+	{
+		if(b.getWorld() != w)
+		{
+			return;
+		}
+		
+		Chunk c = b.getChunk();
+		Map<Short, Short> map = blockData.get(loadChunk(c.getX(), c.getZ()));
+		short coords = Util.chunkCoordsToShort(b);
+		
+		if(bytes == null)
+		{
+			map.remove(coords);
+		}
+		else
+		{
+			map.put(coords, Util.toShort(bytes));
+		}
+	}
+	
+	private void saveChunks()
+	{
+		long time = System.currentTimeMillis();
+		
+		Bukkit.broadcastMessage("SAVING CHUNKS...");
+		Iterator<Entry<ChunkLocation, Map<Short, Short>>> iterator = blockData.entrySet().iterator();
+		
+		while(iterator.hasNext())
+		{
+			Entry<ChunkLocation, Map<Short, Short>> entry = iterator.next();
+			ChunkLocation cl = entry.getKey();
+			Map<Short, Short> value = entry.getValue();
+			
+			File file = Config.getFile(Config.Type.REGION, true, w.getName(), cl.getX() + "." + cl.getZ());
+			
+			try(FileOutputStream fileOut = new FileOutputStream(file);
+					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+					ObjectOutputStream out = new ObjectOutputStream(streamOut))
+			{
+				out.writeObject(value);
+				fileOut.write(streamOut.toByteArray());
+				
+				if(!w.isChunkInUse(cl.getX(), cl.getZ()))
+				{
+					Bukkit.broadcastMessage("" + cl.getX() + " " + cl.getZ() + " isInUse() = false");
+					iterator.remove();
+				}
+			}
+			catch(IOException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		
+		Bukkit.broadcastMessage("TIME ELAPSED... " + (System.currentTimeMillis() - time) + "MS");
+	}
+	
+	private ChunkLocation loadChunk(int x, int z)
+	{
+		ChunkLocation cl = new ChunkLocation(x, z);
+		
+		if(blockData.containsKey(cl))
+		{
+			return cl;
+		}
+		
+		File file = Config.getFile(Config.Type.REGION, false, w.getName(), x + "." + z);
+		
+		if(!file.exists() || file.length() == 0L)
+		{
+			blockData.put(cl, new HashMap<>());
+			return cl;
+		}
+		
+		try(FileInputStream fileIn = new FileInputStream(file);
+				ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+				ObjectInputStream in = new ObjectInputStream(streamIn))
+		{
+			blockData.put(cl, (Map<Short, Short>) in.readObject());
+		}
+		catch(ClassNotFoundException | IOException ex)
+		{
+			blockData.put(cl, new HashMap<>());
+			ex.printStackTrace();
+		}
+		
+		return cl;
 	}
 	
 	public Set<CommonPlayer> getCommonPlayers()

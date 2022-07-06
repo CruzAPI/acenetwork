@@ -13,4 +13,10 @@ public class WarpLand extends Warp
 		
 		spawnLocation = new Location(w, 0.0D, 69.0D, 0.0D, 0.0F, 0.0F);
 	}
+	
+	@Override
+	public boolean isSpawnProtection(Location l)
+	{
+		return Math.abs(l.getBlockX()) < 190 && Math.abs(l.getBlockZ()) < 190;
+	}
 }

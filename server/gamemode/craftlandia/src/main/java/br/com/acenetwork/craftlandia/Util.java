@@ -27,6 +27,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Damageable;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
@@ -36,6 +37,7 @@ import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
+import br.com.acenetwork.craftlandia.warp.Warp;
 
 public class Util
 {
@@ -44,6 +46,7 @@ public class Util
 		switch(w.getName())
 		{
 		case "world":
+		case "oldworld":
 			return LEGENDARY;
 		case "factions":
 		case "factions_nether":
@@ -111,25 +114,14 @@ public class Util
 		return lore;
 	}
 	
-	public static byte readBlockRarity(Block b)
+	public static byte[] readBlock(Block b)
 	{
-		if(!b.hasMetadata("pos"))
-		{
-			return 0;
-		}
-		
-		File file = CommonsConfig.getFile(Type.BLOCK_DATA, true, b.getWorld().getName());
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
-		{
-			access.seek(b.getMetadata("pos").get(0).asLong() + 12L);
-			return access.readByte();
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-			return 0;
-		}
+		return Warp.MAP.get(b.getWorld().getUID()).readBlock(b);
+	}
+	
+	public static void writeBlock(Block b, byte[] data)
+	{
+		Warp.MAP.get(b.getWorld().getUID()).writeBlock(b, data);
 	}
 	
 	public static int getArrayLength()
@@ -149,53 +141,7 @@ public class Util
 		return emptyArray;
 	}
 	
-	public static void writeBlock(Block b, byte[] bytes)
-	{
-		Chunk c = b.getChunk();
-		ChunkLocation cl = new ChunkLocation(c);
-		
-		if(!Main.MAP.containsKey(cl))
-		{
-			Main.MAP.put(cl, new HashMap<>());
-		}
-		
-		short coords = chunkCoordsToShort(b);
-		
-		Map<Short, Short> map = Main.MAP.get(cl);
-		
-		if(bytes == null)
-		{
-			map.remove(coords);
-		}
-		else
-		{
-			map.put(coords, toShort(bytes));
-		}
-	}
-	
-	public static byte[] readBlock(Block b)
-	{
-		Chunk c = b.getChunk();
-		ChunkLocation cl = new ChunkLocation(c);
-		
-		if(!Main.MAP.containsKey(cl))
-		{
-			return emptyArray();
-		}
-		
-		short coords = chunkCoordsToShort(b);
-		
-		Map<Short, Short> map = Main.MAP.get(cl);
-		
-		if(!map.containsKey(coords))
-		{
-			return emptyArray();
-		}
-		
-		return toByteArray(map.get(coords));
-	}
-	
-	private static short chunkCoordsToShort(Block b)
+	public static short chunkCoordsToShort(Block b)
 	{
 		Chunk c = b.getChunk();
 		
@@ -315,6 +261,35 @@ public class Util
 		{
 			ex.printStackTrace();
 		}
+	}
+	
+	public static void setCommodity(ItemStack item, Rarity rarity)
+	{
+		ItemMeta meta = item.getItemMeta();
+		
+		List<String> lore = new ArrayList<>();
+		
+		if(meta.hasLore())
+		{
+			lore = meta.getLore();
+		}
+		
+		for(Rarity values : Rarity.values())
+		{
+			lore.remove(values.toString());
+		}
+		
+		List<String> newLore = new ArrayList<>();
+		
+		if(rarity != null)
+		{
+			newLore.add(rarity.toString());
+		}
+		
+		newLore.addAll(lore);
+		
+		meta.setLore(newLore);
+		item.setItemMeta(meta);
 	}
 	
 	public static void setItemTag(ItemStack itemStack, ItemTag itemTag)

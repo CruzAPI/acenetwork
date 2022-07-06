@@ -68,7 +68,6 @@ public enum Rarity implements ItemTag
 	public static Rarity getByDataOrWorld(byte data, World world)
 	{
 		Rarity rarity = getByData(data);
-		rarity = rarity == null ? Util.getRarity(world) : rarity;
-		return rarity;
+		return rarity == null ? Util.getRarity(world) : rarity;
 	}
 }

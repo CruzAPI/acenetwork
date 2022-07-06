@@ -37,6 +37,17 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public class CommonsUtil
 {
+	public static void shuffle(int[] array, Random r)
+	{
+		for(int i = 0; i < array.length; i++)
+		{
+			int j = r.nextInt(array.length - i) + i;
+			int temp = array[j];
+			array[j] = array[i];
+			array[i] = temp;
+		}
+	}
+	
 	public static void sendMessage(CommandSender sender, TextComponent text)
 	{
 		if(sender instanceof Player)

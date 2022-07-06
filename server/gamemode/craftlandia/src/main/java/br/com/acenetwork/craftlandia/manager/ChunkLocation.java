@@ -7,32 +7,19 @@ import org.bukkit.Chunk;
 
 public class ChunkLocation
 {
-	private final String w;
 	private final int x;
 	private final int z;
 	
-	public ChunkLocation(String w, int x, int z)
+	public ChunkLocation(int x, int z)
 	{
-		this.w = w;
 		this.x = x;
 		this.z = z;
 	}
 	
 	public ChunkLocation(Chunk c)
 	{
-		this.w = c.getWorld().getName();
 		this.x = c.getX();
 		this.z = c.getZ();
-	}
-	
-	public Chunk getChunk()
-	{
-		return Bukkit.getWorld(w).getChunkAt(x, z);
-	}
-	
-	public String getW()
-	{
-		return w;
 	}
 	
 	public int getX()
