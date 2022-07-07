@@ -8,6 +8,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
+import com.comphenix.protocol.ProtocolLibrary;
+
+import br.com.acenetwork.commons.player.CommonPlayer;
+import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import br.com.acenetwork.craftlandia.warp.Warp;
@@ -220,6 +224,8 @@ public class Temp implements TabExecutor
 		if(sender instanceof Player)
 		{
 			Player p = (Player) sender;
+			CommonPlayer cp = CraftCommonPlayer.get(p);
+			p.sendMessage("version = " + ProtocolLibrary.getProtocolManager().getProtocolVersion(p));
 			sender.sendMessage("" + p.getWorld().getName() + " chunks in memory = " + Warp.MAP.get(p.getWorld().getUID()).blockData.size());
 			sender.sendMessage("Unknown command. Type \"/help\" for help.");
 			return true;

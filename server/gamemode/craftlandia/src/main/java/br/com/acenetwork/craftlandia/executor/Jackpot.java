@@ -2,6 +2,8 @@ package br.com.acenetwork.craftlandia.executor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,14 +11,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -25,10 +28,13 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.manager.BundleSupplier;
+import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.inventory.JackpotGUI;
@@ -36,16 +42,16 @@ import br.com.acenetwork.craftlandia.inventory.JackpotPercentage;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Jackpot implements TabExecutor
 {
-	public static final List<ItemStack> PRIZE_LIST = new ArrayList<>();
-	public static final ItemStack JACKPOT_ITEM = new ItemStack(Material.BEACON);
-	private static final String JACKPOT_UUID = CommonsUtil.getRandomItemUUID();
-	public static final ItemStack NONE_ITEM = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
+	public static final String JACKPOT_UUID = CommonsUtil.getRandomItemUUID();
+	public static final String RANDOM_ITEM_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String SHARDS_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String VIP_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
+	public static final String NONE_UUID = CommonsUtil.getRandomItemUUID();
 	
 	private double jackpot;
 	
@@ -53,7 +59,533 @@ public class Jackpot implements TabExecutor
 	
 	public static final int $BTA_TO_SHARDS = 200;
 	
-	public static final Map<ItemStack, Integer> MAP = new LinkedHashMap<>();
+	public static final Map<Byte, Integer> COAL_MAP = new LinkedHashMap<>();
+
+	public static double getMultiplier(ItemStack item)
+	{
+		double multiplier;
+		
+		switch(item.getType())
+		{
+		case GOLD_BLOCK:
+			multiplier = 10.0D;
+			break;
+		case GOLD_INGOT:
+			multiplier = 1.0D;
+			break;
+		case GOLD_NUGGET:
+			multiplier = 0.1D;
+			break;
+		case NETHER_STAR:
+			multiplier = 0.001D;
+			break;
+		default:
+			return 0.0D;
+		}
+		
+		return multiplier * item.getAmount();
+	}
+	
+	public enum Item
+	{
+		
+		JACKPOT((byte) -1, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double prize = Jackpot.getInstance().getJackpot();
+				
+				if(prize > 0.0D)
+				{
+					DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+					df.setGroupingSize(3);
+					df.setGroupingUsed(true);
+					
+					ItemStack item = new ItemStack(Material.BEACON);
+					ItemMeta meta = item.getItemMeta();
+					meta.setDisplayName(JACKPOT_UUID + ChatColor.AQUA + ChatColor.BOLD + bundle.getString("noun.jackpot").toUpperCase());
+					meta.setLore(Arrays.asList(
+							ChatColor.GRAY + StringUtils.capitalize(bundle.getString("noun.prize")) + ": " 
+									+ ChatColor.WHITE + df.format(prize)));
+					item.setItemMeta(meta);
+					return item;
+				}
+				
+				return NONE.getItemSupplier().get(bundle);
+			}
+		}),
+		
+		NONE((byte) 0, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				ItemStack item = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(NONE_UUID + ChatColor.RED + ChatColor.BOLD + bundle.getString("inv.jackpot.none.item"));
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		NUGGET_1((byte) 1, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_NUGGET, 1);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		NUGGET_2((byte) 2, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_NUGGET, 2);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		NUGGET_3((byte) 3, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_NUGGET, 3);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		
+		NUGGET_4((byte) 4, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_NUGGET, 4);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		NUGGET_5((byte) 5, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_NUGGET, 5);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		INGOT_1((byte) 6, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		INGOT_2((byte) 7, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_INGOT, 2);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		INGOT_3((byte) 8, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_INGOT, 3);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		INGOT_4((byte) 9, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_INGOT, 4);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		INGOT_5((byte) 10, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_INGOT, 5);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		BLOCK_1((byte) 11, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_BLOCK, 1);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		BLOCK_2((byte) 12, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_BLOCK, 2);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		BLOCK_3((byte) 13, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_BLOCK, 3);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		BLOCK_4((byte) 14, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_BLOCK, 4);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		BLOCK_5((byte) 15, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.GOLD_BLOCK, 5);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName(SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		$BTA_1((byte) 16, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.NETHER_STAR, 1);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName($BTA_UUID + ChatColor.DARK_PURPLE + ChatColor.BOLD + df.format(prize) + " $BTA");
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		$BTA_3((byte) 17, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.NETHER_STAR, 3);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName($BTA_UUID + ChatColor.DARK_PURPLE + ChatColor.BOLD + df.format(prize) + " $BTA");
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		$BTA_5((byte) 18, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				double bet = (double) args[0];
+				
+				DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+				df.setGroupingSize(3);
+				df.setGroupingUsed(true);
+				
+				ItemStack item = new ItemStack(Material.NETHER_STAR, 5);
+				double prize = bet * getMultiplier(item);
+				ItemMeta meta = item.getItemMeta();
+				meta.setDisplayName($BTA_UUID + ChatColor.DARK_PURPLE + ChatColor.BOLD + df.format(prize) + " $BTA");
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		RANDOM_ITEM((byte) 19, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				int version = (int) args[1];
+				
+				ItemStack item;
+				ItemMeta meta;
+				
+				if(version > 5)
+				{
+					item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+					meta = item.getItemMeta();
+					CommonsUtil.setCustomSkull((SkullMeta) meta, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjViOTVkYTEyODE2NDJkYWE1ZDAyMmFkYmQzZTdjYjY5ZGMwOTQyYzgxY2Q2M2JlOWMzODU3ZDIyMmUxYzhkOSJ9fX0=");
+				}
+				else
+				{
+					item = new ItemStack(Material.CHEST);
+					meta = item.getItemMeta();
+				}
+				
+				meta.setDisplayName(RANDOM_ITEM_UUID + ChatColor.WHITE + ChatColor.BOLD + bundle.getString("inv.jackpot.random-item.item"));
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		VIP((byte) 20, new BundleSupplier<ItemStack>()
+		{
+			@Override
+			public ItemStack get(ResourceBundle bundle, Object... args)
+			{
+				int version = (int) args[1];
+				
+				ItemStack item;
+				ItemMeta meta;
+				
+				if(version > 5)
+				{
+					item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+					meta = item.getItemMeta();
+					CommonsUtil.setCustomSkull((SkullMeta) meta, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDVjNmRjMmJiZjUxYzM2Y2ZjNzcxNDU4NWE2YTU2ODNlZjJiMTRkNDdkOGZmNzE0NjU0YTg5M2Y1ZGE2MjIifX19");
+				}
+				else
+				{
+					item = new ItemStack(Material.WOOL, 1, (short) 5);
+					meta = item.getItemMeta();
+				}
+				
+				meta.setDisplayName(VIP_UUID + ChatColor.GREEN + ChatColor.BOLD + bundle.getString("abbreviation.vip"));
+				item.setItemMeta(meta);
+				return item;
+			}
+		}),
+		
+		;
+		
+		private final byte id;
+		private final BundleSupplier<ItemStack> itemSupplier;
+		
+		private Item(byte id, BundleSupplier<ItemStack> itemSupplier)
+		{
+			this.id = id;
+			this.itemSupplier = itemSupplier;
+		}
+		
+		private Item(byte id)
+		{
+			this(id, null);
+		}
+		
+		public byte getId()
+		{
+			return id;
+		}
+		
+		public BundleSupplier<ItemStack> getItemSupplier()
+		{
+			return itemSupplier;
+		}
+
+		public static Item getById(Byte id)
+		{
+			for(Item value : values())
+			{
+				if(value.id == id)
+				{
+					return value;
+				}
+			}
+			
+			return null;
+		}
+	}
+	
+
 	
 	public Jackpot()
 	{
@@ -61,11 +593,11 @@ public class Jackpot implements TabExecutor
 		
 		File file = Config.getFile(Type.JACKPOT, false);
 		
-		if(file.exists() && file.length() < 0L)
+		if(file.exists() && file.length() > 0L)
 		{
 			try(FileInputStream fileIn = new FileInputStream(file);
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
-					ObjectInputStream in = new ObjectInputStream(streamIn))
+					DataInputStream in = new DataInputStream(streamIn))
 			{
 				setJackpot(in.readDouble());
 			}
@@ -79,192 +611,31 @@ public class Jackpot implements TabExecutor
 			setJackpot(0.0D);
 		}
 		
-		ItemMeta meta;
+		int size = 0;
+		final int maxSize = 30000;
 		
-		PRIZE_LIST.addAll(Collections.nCopies(1, JACKPOT_ITEM));
-		MAP.put(JACKPOT_ITEM, 1);
-		
-		ItemStack randomItem = new ItemStack(Material.COBBLESTONE);
-		
-		meta = randomItem.getItemMeta();
-		meta.setDisplayName(ChatColor.WHITE + "Random Item");
-		randomItem.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(3000, randomItem.clone()));
-		MAP.put(randomItem.clone(), 3000);
-		
-		ItemStack vip = new ItemStack(Material.WOOL, 1, (short) 5);
-		
-		meta = vip.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GREEN + ChatColor.BOLD + "VIP" + VIP_UUID);
-		vip.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(30, vip.clone()));
-		MAP.put(vip.clone(), 30);
-		
-		ItemStack nugget = new ItemStack(Material.GOLD_NUGGET);
-		
-		nugget.setAmount(1);
-		meta = nugget.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "100 SHARDS" + SHARDS_UUID);
-		nugget.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
-		MAP.put(nugget.clone(), 1800);
-
-		nugget.setAmount(2);
-		meta = nugget.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "200 SHARDS" + SHARDS_UUID);
-		nugget.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
-		MAP.put(nugget.clone(), 1800);
-		
-		nugget.setAmount(3);
-		meta = nugget.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "300 SHARDS" + SHARDS_UUID);
-		nugget.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
-		MAP.put(nugget.clone(), 1800);
-		
-		nugget.setAmount(4);
-		meta = nugget.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "400 SHARDS" + SHARDS_UUID);
-		nugget.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
-		MAP.put(nugget.clone(), 1800);
-		
-		nugget.setAmount(5);
-		meta = nugget.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "500 SHARDS" + SHARDS_UUID);
-		nugget.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1800, nugget.clone()));
-		MAP.put(nugget.clone(), 1800);
-		
-		
-		
-		ItemStack ingot = new ItemStack(Material.GOLD_INGOT);
-		
-		ingot.setAmount(1);
-		meta = ingot.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "1,000 SHARDS" + SHARDS_UUID);
-		ingot.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1500, ingot.clone()));
-		MAP.put(ingot.clone(), 1500);
-		
-		ingot.setAmount(2);
-		meta = ingot.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "2,000 SHARDS" + SHARDS_UUID);
-		ingot.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(1200, ingot.clone()));
-		MAP.put(ingot.clone(), 1200);
-		
-		ingot.setAmount(3);
-		meta = ingot.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "3,000 SHARDS" + SHARDS_UUID);
-		ingot.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(900, ingot.clone()));
-		MAP.put(ingot.clone(), 900);
-		
-		ingot.setAmount(4);
-		meta = ingot.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "4,000 SHARDS" + SHARDS_UUID);
-		ingot.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(600, ingot.clone()));
-		MAP.put(ingot.clone(), 600);
-		
-		ingot.setAmount(5);
-		meta = ingot.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "5,000 SHARDS" + SHARDS_UUID);
-		ingot.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(300, ingot.clone()));
-		MAP.put(ingot.clone(), 300);
-		
-		
-		
-		ItemStack block = new ItemStack(Material.GOLD_BLOCK);
-		
-		block.setAmount(1);
-		meta = block.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "10,000 SHARDS" + SHARDS_UUID);
-		block.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(225, block.clone()));
-		MAP.put(block.clone(), 225);
-		
-		block.setAmount(2);
-		meta = block.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "20,000 SHARDS" + SHARDS_UUID);
-		block.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(30, block.clone()));
-		MAP.put(block.clone(), 30);
-		
-		block.setAmount(3);
-		meta = block.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "30,000 SHARDS" + SHARDS_UUID);
-		block.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(20, block.clone()));
-		MAP.put(block.clone(), 20);
-		
-		block.setAmount(4);
-		meta = block.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "40,000 SHARDS" + SHARDS_UUID);
-		block.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(15, block.clone()));
-		MAP.put(block.clone(), 15);
-		
-		block.setAmount(5);
-		meta = block.getItemMeta();
-		meta.setDisplayName("" + ChatColor.GOLD + ChatColor.BOLD + "50,000 SHARDS" + SHARDS_UUID);
-		block.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(10, block.clone()));
-		MAP.put(block.clone(), 10);
-		
-		ItemStack bta = new ItemStack(Material.NETHER_STAR);
-		
-		bta.setAmount(1);
-		meta = bta.getItemMeta();
-		meta.setDisplayName("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "1 $BTA" + $BTA_UUID);
-		bta.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(900, bta.clone()));
-		MAP.put(bta.clone(), 900);
-		
-		bta.setAmount(3);
-		meta = bta.getItemMeta();
-		meta.setDisplayName("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "3 $BTA" + $BTA_UUID);
-		bta.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(450, bta.clone()));
-		MAP.put(bta.clone(), 450);
-		
-		bta.setAmount(5);
-		meta = bta.getItemMeta();
-		meta.setDisplayName("" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "5 $BTA" + $BTA_UUID);
-		bta.setItemMeta(meta);
-		
-		PRIZE_LIST.addAll(Collections.nCopies(150, bta.clone()));
-		MAP.put(bta.clone(), 150);
-		
-		meta = NONE_ITEM.getItemMeta();
-		meta.setDisplayName("" + ChatColor.RED + "None" + CommonsUtil.getRandomItemUUID());
-		NONE_ITEM.setItemMeta(meta);
-		
-		int nCopies = Math.max(0, 30000 - PRIZE_LIST.size());
-		PRIZE_LIST.addAll(Collections.nCopies(nCopies, NONE_ITEM));
-		MAP.put(NONE_ITEM, nCopies);
+		COAL_MAP.put(Item.JACKPOT.getId(), -size + (size += 1));
+		COAL_MAP.put(Item.VIP.getId(), -size + (size += 30));
+		COAL_MAP.put(Item.RANDOM_ITEM.getId(), -size + (size += 3000));
+		COAL_MAP.put(Item.NUGGET_1.getId(), -size + (size += 1800));
+		COAL_MAP.put(Item.NUGGET_2.getId(), -size + (size += 1800));
+		COAL_MAP.put(Item.NUGGET_3.getId(), -size + (size += 1800));
+		COAL_MAP.put(Item.NUGGET_4.getId(), -size + (size += 1800));
+		COAL_MAP.put(Item.NUGGET_5.getId(), -size + (size += 1800));
+		COAL_MAP.put(Item.INGOT_1.getId(), -size + (size += 1500));
+		COAL_MAP.put(Item.INGOT_2.getId(), -size + (size += 1200));
+		COAL_MAP.put(Item.INGOT_3.getId(), -size + (size += 900));
+		COAL_MAP.put(Item.INGOT_4.getId(), -size + (size += 600));
+		COAL_MAP.put(Item.INGOT_5.getId(), -size + (size += 300));
+		COAL_MAP.put(Item.BLOCK_1.getId(), -size + (size += 225));
+		COAL_MAP.put(Item.BLOCK_2.getId(), -size + (size += 30));
+		COAL_MAP.put(Item.BLOCK_3.getId(), -size + (size += 20));
+		COAL_MAP.put(Item.BLOCK_4.getId(), -size + (size += 15));
+		COAL_MAP.put(Item.BLOCK_5.getId(), -size + (size += 10));
+		COAL_MAP.put(Item.$BTA_1.getId(), -size + (size += 900));
+		COAL_MAP.put(Item.$BTA_3.getId(), -size + (size += 400));
+		COAL_MAP.put(Item.$BTA_5.getId(), -size + (size += 200));
+		COAL_MAP.put(Item.NONE.getId(), -size + (size += Math.max(0, maxSize - size)));
 	}
 	
 	@Override
@@ -309,21 +680,22 @@ public class Jackpot implements TabExecutor
 			cp.setBalance(newBalance);
 			setJackpot(getJackpot() + bet);
 			
-			Bukkit.broadcastMessage("jackpot = " + jackpot);
-			
 			cp.setJackpoting(true);
-			new JackpotGUI(cp, PRIZE_LIST);
+			new JackpotGUI(cp, COAL_MAP);
+		}
+		else if(args.length == 1 && args[0].equalsIgnoreCase("%"))
+		{
+			new JackpotPercentage(cp, COAL_MAP);
 		}
 		else
 		{
-			new JackpotPercentage(cp);
-//			TextComponent[] extra = new TextComponent[1];
-//			
-//			extra[0] = new TextComponent("/" + aliases);
-//			
-//			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
-//			text.setColor(ChatColor.RED);
-//			p.spigot().sendMessage(text);
+			TextComponent[] extra = new TextComponent[1];
+			
+			extra[0] = new TextComponent("\n/" + aliases + "\n" + "/" + aliases + " %");
+			
+			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
+			text.setColor(ChatColor.RED);
+			p.spigot().sendMessage(text);
 		}
 
 		return false;
@@ -337,25 +709,6 @@ public class Jackpot implements TabExecutor
 	public void setJackpot(double jackpot)
 	{
 		this.jackpot = jackpot;
-		
-		DecimalFormat df = new DecimalFormat();
-		df.setGroupingSize(3);
-		df.setGroupingUsed(true);
-		
-		ItemMeta meta;
-		
-		if(jackpot > 0.0D)
-		{
-			JACKPOT_ITEM.setType(Material.BEACON);
-			meta = JACKPOT_ITEM.getItemMeta();
-			meta.setDisplayName("" + ChatColor.AQUA + ChatColor.BOLD + "JACKPOT" + JACKPOT_UUID);
-			meta.setLore(Arrays.asList(ChatColor.GRAY + "Prize: " + ChatColor.WHITE + df.format(jackpot) + " SHARDS"));
-			JACKPOT_ITEM.setItemMeta(meta);
-		}
-		else
-		{
-			CommonsUtil.setItemCopyOf(JACKPOT_ITEM, NONE_ITEM);
-		}
 	}
 	
 	public void save()
@@ -364,9 +717,10 @@ public class Jackpot implements TabExecutor
 		
 		try(FileOutputStream fileOut = new FileOutputStream(file);
 				ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-				ObjectOutputStream out = new ObjectOutputStream(streamOut))
+				DataOutputStream out = new DataOutputStream(streamOut))
 		{
 			out.writeDouble(jackpot);
+			fileOut.write(streamOut.toByteArray());
 		}
 		catch(IOException ex)
 		{
@@ -379,7 +733,7 @@ public class Jackpot implements TabExecutor
 		return instance;
 	}
 	
-	public static double getValueInShards(int bet, ItemStack item)
+	public static double getValueInShards(double bet, ItemStack item)
 	{
 		if(CommonsUtil.compareUUID(item, Jackpot.JACKPOT_UUID))
 		{
@@ -388,31 +742,12 @@ public class Jackpot implements TabExecutor
 		
 		if(CommonsUtil.compareUUID(item, Jackpot.SHARDS_UUID))
 		{
-			double multiplier;
-			
-			switch(item.getType())
-			{
-			case GOLD_NUGGET:
-				multiplier = 0.1D;
-				break;
-			case GOLD_INGOT:
-				multiplier = 1.0D;
-				break;
-			case GOLD_BLOCK:
-				multiplier = 10.0D;
-				break;
-			default:
-				return 0;
-			}
-			
-			return (int) (bet * item.getAmount() * multiplier);
+			return bet * getMultiplier(item);
 		}
 		
 		if(CommonsUtil.compareUUID(item, Jackpot.$BTA_UUID))
 		{
-			double multiplier = 0.001D;
-			
-			return (int) (bet * item.getAmount() * multiplier * $BTA_TO_SHARDS);
+			return bet * getMultiplier(item) * $BTA_TO_SHARDS;
 		}
 		
 		if(CommonsUtil.compareUUID(item, Jackpot.VIP_UUID))
@@ -423,7 +758,7 @@ public class Jackpot implements TabExecutor
 		return 0;
 	}
 	
-	public static double getValueInShardsTheoretically(int bet, ItemStack item)
+	public static double getValueInShardsTheoretically(double bet, ItemStack item)
 	{
 		if(CommonsUtil.compareUUID(item, JACKPOT_UUID))
 		{

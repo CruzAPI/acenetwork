@@ -3,6 +3,7 @@ package br.com.acenetwork.commons;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,9 +23,12 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.IdData;
@@ -37,12 +41,47 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public class CommonsUtil
 {
+	public static void setCustomSkull(SkullMeta skull, String url)
+	{
+		if(url.isEmpty())
+		{
+			return;
+		}
+		
+		try
+		{
+			GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+			
+			profile.getProperties().put("textures", new Property("textures", url));
+			
+			Field field = skull.getClass().getDeclaredField("profile");
+			
+			field.setAccessible(true);
+			field.set(skull, profile);
+		}
+		catch(IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	public static void shuffle(int[] array, Random r)
 	{
 		for(int i = 0; i < array.length; i++)
 		{
 			int j = r.nextInt(array.length - i) + i;
 			int temp = array[j];
+			array[j] = array[i];
+			array[i] = temp;
+		}
+	}
+	
+	public static void shuffle(byte[] array, Random r)
+	{
+		for(int i = 0; i < array.length; i++)
+		{
+			int j = r.nextInt(array.length - i) + i;
+			byte temp = array[j];
 			array[j] = array[i];
 			array[i] = temp;
 		}
@@ -1798,7 +1837,7 @@ public class CommonsUtil
 			return false;
 		}
 		
-		return i.getItemMeta().getDisplayName().endsWith(hiddenData);
+		return i.getItemMeta().getDisplayName().contains(hiddenData);
 	}
 	
 	public static UUID convertHiddenUUID(String hiddenUUID) throws Exception

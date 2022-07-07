@@ -11,6 +11,7 @@ public class Config
 {
 	public enum Type
 	{
+		RANDOM_ITEM_UUID,
 		REGION,
 		JACKPOT,
 		BOT, 
@@ -29,6 +30,9 @@ public class Config
 		{
 		case REGION:
 			file = new File(Main.getInstance().getDataFolder() + "/region/" + args[0], args[1] + ".dat");
+			break;
+		case RANDOM_ITEM_UUID:
+			file = new File(Main.getInstance().getDataFolder(), "random_item_uuid.dat");
 			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");
