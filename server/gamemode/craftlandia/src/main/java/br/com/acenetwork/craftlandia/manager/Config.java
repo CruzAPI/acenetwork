@@ -13,6 +13,7 @@ public class Config
 	{
 		RANDOM_ITEM_UUID,
 		REGION,
+		WRAPPED_BTA_UUID,
 		JACKPOT,
 		BOT, 
 		COMBATLOG, 
@@ -33,6 +34,9 @@ public class Config
 			break;
 		case RANDOM_ITEM_UUID:
 			file = new File(Main.getInstance().getDataFolder(), "random_item_uuid.dat");
+			break;
+		case WRAPPED_BTA_UUID:
+			file = new File(Main.getInstance().getDataFolder() + "/wrapped_bta", "uuid.dat");
 			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");
