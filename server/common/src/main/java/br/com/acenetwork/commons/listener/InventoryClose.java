@@ -13,11 +13,11 @@ public class InventoryClose implements Listener
 	@EventHandler
 	public void on(InventoryCloseEvent e)
 	{
-		CommonPlayer cp = CraftCommonPlayer.get((Player) e.getPlayer());
-		
-		if(cp != null)
-		{			
-			cp.setGUI(null);
-		}
+//		CommonPlayer cp = CraftCommonPlayer.get((Player) e.getPlayer());
+//		
+//		if(cp != null)
+//		{			
+//			cp.setGUI(null);
+//		}
 	}
 }

@@ -103,6 +103,7 @@ import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
+import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
 import br.com.acenetwork.craftlandia.manager.Config;
@@ -129,6 +130,7 @@ public class Main extends Common implements Listener
 		
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
+		getServer().getPluginManager().registerEvents(new RandomItem(), this);
 		
 		registerCommand(new Temp(), "temp");
 		

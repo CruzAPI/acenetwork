@@ -106,8 +106,6 @@ public abstract class Warp implements Listener
 			return;
 		}
 		
-		Bukkit.broadcastMessage("chunksInMemory = " + blockData.size());
-		
 		ItemStack item = e.getItem();
 		Block b = e.getClickedBlock();
 		
@@ -275,16 +273,6 @@ public abstract class Warp implements Listener
 		}
 		
 		e.setCancelled(isSpawnProtection(b.getLocation()));
-		
-		if(!e.isCancelled() && e.getBlock().getType() == Material.SPONGE)
-		{
-			Bukkit.broadcastMessage("sponge...");
-			e.setCancelled(true);
-			Bukkit.getScheduler().runTask(Main.getPlugin(), () ->
-			{
-				b.setType(Material.SPONGE, false);
-			});
-		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -615,9 +603,6 @@ public abstract class Warp implements Listener
 	
 	private void saveChunks()
 	{
-		long time = System.currentTimeMillis();
-		
-		Bukkit.broadcastMessage("SAVING CHUNKS...");
 		Iterator<Entry<ChunkLocation, Map<Short, Short>>> iterator = blockData.entrySet().iterator();
 		
 		while(iterator.hasNext())
@@ -637,7 +622,6 @@ public abstract class Warp implements Listener
 				
 				if(!w.isChunkInUse(cl.getX(), cl.getZ()))
 				{
-					Bukkit.broadcastMessage("" + cl.getX() + " " + cl.getZ() + " isInUse() = false");
 					iterator.remove();
 				}
 			}
@@ -646,8 +630,6 @@ public abstract class Warp implements Listener
 				ex.printStackTrace();
 			}
 		}
-		
-		Bukkit.broadcastMessage("TIME ELAPSED... " + (System.currentTimeMillis() - time) + "MS");
 	}
 	
 	private ChunkLocation loadChunk(int x, int z)

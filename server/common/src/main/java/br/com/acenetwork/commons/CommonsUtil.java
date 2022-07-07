@@ -1850,6 +1850,11 @@ public class CommonsUtil
 		i1.setItemMeta(i2.getItemMeta());
 	}
 	
+	public static boolean compareUUID(ItemStack i, UUID uuid)
+	{
+		return uuid == null ? false : compareUUID(i, hideUUID(uuid));
+	}
+	
 	public static boolean compareUUID(ItemStack i, String hiddenData)
 	{
 		if(i == null || hiddenData == null)

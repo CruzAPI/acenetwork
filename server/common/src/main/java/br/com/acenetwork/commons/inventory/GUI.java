@@ -4,7 +4,9 @@ import java.util.ResourceBundle;
 import java.util.function.Supplier;
 
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -85,5 +87,16 @@ public abstract class GUI implements Listener
 		
 		cp.getPlayer().openInventory(inv);
 		cp.setGUI(this);
+	}
+	
+	@EventHandler
+	public void onInventoryClose(InventoryCloseEvent e)
+	{
+		if(e.getPlayer() != cp.getPlayer())
+		{
+			return;
+		}
+		
+		cp.setGUI(null);
 	}
 }

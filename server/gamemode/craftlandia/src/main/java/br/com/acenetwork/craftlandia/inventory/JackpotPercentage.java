@@ -21,6 +21,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
+import br.com.acenetwork.craftlandia.manager.JackpotItem;
 import net.md_5.bungee.api.ChatColor;
 
 public class JackpotPercentage extends GUI
@@ -29,7 +30,7 @@ public class JackpotPercentage extends GUI
 	{
 		super(cp, () ->
 		{
-			return Bukkit.createInventory(cp.getPlayer(), 9 * 3, "              JACKPOT %");
+			return Bukkit.createInventory(cp.getPlayer(), 9 * 3, "      " + ChatColor.BOLD + "  " + ChatColor.BLACK + ChatColor.BOLD + "   JACKPOT %");
 		});
 		
 		int size = 0;
@@ -43,6 +44,8 @@ public class JackpotPercentage extends GUI
 		double totalAvg = 0;
 		
 		DecimalFormat df = new DecimalFormat("#.###");
+		df.setGroupingSize(3);
+		df.setGroupingUsed(true);
 		
 		Player p = cp.getPlayer();
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
@@ -51,7 +54,7 @@ public class JackpotPercentage extends GUI
 		
 		for(Entry<Byte, Integer> entry : map.entrySet())
 		{
-			ItemStack key = Jackpot.Item.getById(entry.getKey()).getItemSupplier().get(bundle, bet, version).clone();
+			ItemStack key = JackpotItem.getById(entry.getKey()).getItemSupplier().get(bundle, bet, version).clone();
 			int value = entry.getValue();
 			
 			double shards = Jackpot.getValueInShardsTheoretically(bet, key);
@@ -77,13 +80,15 @@ public class JackpotPercentage extends GUI
 		ItemMeta meta = info.getItemMeta();
 		meta.setDisplayName(ChatColor.WHITE + "Total AVG without jackpot = " + df.format(totalAvg));
 		
-		double avgJackpot = (bet - totalAvg) * size;
+		int value = map.get(JackpotItem.JACKPOT.getId());
 		
-		double div = ((double) 1 / size);
-		double avg = div * avgJackpot * 1.0D;
+		double div = ((double) value / size);
+		double avgJackpot = (bet - totalAvg) * div;
+		
+		double avg = avgJackpot * Jackpot.PERCENT;
 		
 		meta.setLore(Arrays.asList(
-				ChatColor.GRAY + "Total AVG w/jackpot 100% = " + df.format(totalAvg + avg),
+				ChatColor.GRAY + "Total AVG w/jackpot " + df.format(Jackpot.PERCENT * 100.0D) + "% = " + df.format(totalAvg + avg),
 				ChatColor.GRAY + "AVG 100% jackpot = " + df.format(avgJackpot)));
 		info.setItemMeta(meta);
 		
