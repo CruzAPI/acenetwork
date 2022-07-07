@@ -1754,6 +1754,31 @@ public class CommonsUtil
 		list.addAll(newList);
 	}
 	
+	public static List<UUID> getHiddenUUIDs(ItemStack item)
+	{
+		List<UUID> list = new ArrayList<>();
+		
+		if(!item.hasItemMeta() || !item.getItemMeta().hasDisplayName())
+		{
+			return list;
+		}
+		String displayName = item.getItemMeta().getDisplayName();
+		
+		for(int i = 0; ; i += 66)
+		{
+			try
+			{
+				list.add(convertHiddenUUID(displayName.substring(i, i + 64)));
+			}
+			catch(Exception e)
+			{
+				break;
+			}
+		}
+		
+		return list;
+	}
+	
 	public static boolean compareUUID(ItemStack i1, ItemStack i2)
 	{
 		if(!i1.hasItemMeta() || !i2.hasItemMeta())
@@ -1788,6 +1813,11 @@ public class CommonsUtil
 	
 	public static boolean compareUUID(ItemStack i, String hiddenData)
 	{
+		if(i == null || hiddenData == null)
+		{
+			return false;
+		}
+		
 		if(!i.hasItemMeta())
 		{
 			return false;
@@ -1798,7 +1828,7 @@ public class CommonsUtil
 			return false;
 		}
 		
-		return i.getItemMeta().getDisplayName().endsWith(hiddenData);
+		return i.getItemMeta().getDisplayName().contains(hiddenData);
 	}
 	
 	public static UUID convertHiddenUUID(String hiddenUUID) throws Exception
@@ -1820,9 +1850,14 @@ public class CommonsUtil
 	
 	public static String getRandomItemUUID()
 	{
+		return hideUUID(UUID.randomUUID());
+	}
+	
+	public static String hideUUID(UUID uuid)
+	{
 		String hiddenData = "";
 		
-		for(char c : UUID.randomUUID().toString().replace("-", "").toCharArray())
+		for(char c : uuid.toString().replace("-", "").toCharArray())
 		{
 			hiddenData += ChatColor.COLOR_CHAR + "" + c;
 		}
@@ -1830,6 +1865,18 @@ public class CommonsUtil
 		return hiddenData;
 	}
 
+	public static String hideNumberData(long number)
+	{
+		String hiddenData = "";
+		
+		for(char c : String.valueOf(number).toCharArray())
+		{
+			hiddenData += ChatColor.COLOR_CHAR + "" + c;
+		}
+		
+		return hiddenData;
+	}
+	
 	public static boolean isDispensable(Material type)
 	{
 		return isDispensable(type, (short) 0);

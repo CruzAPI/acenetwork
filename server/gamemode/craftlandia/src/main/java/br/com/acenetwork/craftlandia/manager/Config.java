@@ -12,6 +12,7 @@ public class Config
 	public enum Type
 	{
 		REGION,
+		WRAPPED_BTA_UUID,
 		JACKPOT,
 		BOT, 
 		COMBATLOG, 
@@ -29,6 +30,9 @@ public class Config
 		{
 		case REGION:
 			file = new File(Main.getInstance().getDataFolder() + "/region/" + args[0], args[1] + ".dat");
+			break;
+		case WRAPPED_BTA_UUID:
+			file = new File(Main.getInstance().getDataFolder() + "/wrapped_bta", "uuid.dat");
 			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");
