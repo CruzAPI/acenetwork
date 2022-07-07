@@ -44,7 +44,7 @@ public class Jackpot implements TabExecutor
 	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String NONE_UUID = CommonsUtil.getRandomItemUUID();
 	
-	public static final double PERCENT = 1.0D; 
+	public static final double PERCENT = 0.25D; 
 	private double jackpot;
 	
 	private static Jackpot instance;

@@ -68,7 +68,7 @@ public class JackpotPercentage extends GUI
 			List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 			
 			lore.add("" + ChatColor.GRAY + value + "/" + size + " (" + df.format(div * 100.0D) + "%)");
-			lore.add("(" + df.format(avg) + " shards)");
+//			lore.add("(" + df.format(avg) + " shards)");
 			
 			meta.setLore(lore);
 			
@@ -82,14 +82,15 @@ public class JackpotPercentage extends GUI
 		
 		int value = map.get(JackpotItem.JACKPOT.getId());
 		
-		double div = ((double) value / size);
-		double avgJackpot = (bet - totalAvg) * div;
+		double avgJackpot = (bet - totalAvg) * ((double) size / value);
 		
-		double avg = avgJackpot * Jackpot.PERCENT;
+		double div = ((double) value / size);
+		double avg = div * avgJackpot * Jackpot.PERCENT;
 		
 		meta.setLore(Arrays.asList(
 				ChatColor.GRAY + "Total AVG w/jackpot " + df.format(Jackpot.PERCENT * 100.0D) + "% = " + df.format(totalAvg + avg),
-				ChatColor.GRAY + "AVG 100% jackpot = " + df.format(avgJackpot)));
+				ChatColor.GRAY + "100% jackpot prize ≃ " + df.format(avgJackpot),
+				ChatColor.GRAY + df.format(Jackpot.PERCENT * 100.0D) + "% jackpot prize ≃ " + df.format(avgJackpot * Jackpot.PERCENT)));
 		info.setItemMeta(meta);
 		
 		inv.setItem(inv.getSize() - 1, info);
