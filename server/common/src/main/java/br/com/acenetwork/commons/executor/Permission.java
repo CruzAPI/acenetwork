@@ -760,7 +760,6 @@ public class Permission implements TabExecutor, Listener
 	@SuppressWarnings("unchecked")
 	public void save()
 	{
-		Bukkit.broadcastMessage("Saving permissions...");
 		long time = System.currentTimeMillis();
 		
 		File file;
@@ -854,8 +853,6 @@ public class Permission implements TabExecutor, Listener
 		{
 			e1.printStackTrace();
 		}
-		
-		Bukkit.broadcastMessage("Saved! Time elapsed: " + (System.currentTimeMillis() - time) + "ms");
 	}
 	
 	public static Permission getInstance()
