@@ -18,7 +18,7 @@ public class Config
 		BOT, 
 		COMBATLOG, 
 		PRICE, 
-		PLAYER_INFO, WRAPPED_BTA_MAP
+		PLAYER_INFO, WRAPPED_BTA_MAP, PORTALS
 		;
 	}
 	
@@ -31,6 +31,9 @@ public class Config
 		{
 		case REGION:
 			file = new File(Main.getInstance().getDataFolder() + "/region/" + args[0], args[1] + ".dat");
+			break;
+		case PORTALS:
+			file = new File(Main.getInstance().getDataFolder(), "portals.dat");
 			break;
 		case RANDOM_ITEM_UUID:
 			file = new File(Main.getInstance().getDataFolder(), "random_item_uuid.dat");

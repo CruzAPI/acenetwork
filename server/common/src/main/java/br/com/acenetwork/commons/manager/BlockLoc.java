@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 
 public class BlockLoc implements Serializable
 {
@@ -44,5 +45,10 @@ public class BlockLoc implements Serializable
 	public World getWorld()
 	{
 		return Bukkit.getWorld(new UUID(mostSigBits, leastSigBits));
+	}
+	
+	public Block getBlock()
+	{
+		return getWorld().getBlockAt(x, y, z);
 	}
 }

@@ -96,6 +96,7 @@ import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.Playtime;
+import br.com.acenetwork.craftlandia.executor.Portal;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
@@ -133,18 +134,6 @@ public class Main extends Common implements Listener
 		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
 		getServer().getPluginManager().registerEvents(new RandomItem(), this);
 		
-		registerCommand(new Temp(), "temp");
-		
-		registerCommand(new ItemInfo(), "iteminfo");
-		registerCommand(new Jackpot(), "jackpot");
-		registerCommand(new Playtime(), "playtime");
-		registerCommand(new Price(), "price");
-		registerCommand(new Spawn(), "spawn");
-		registerCommand(new Sell(), "sell");
-		registerCommand(new Sellall(), "sellall");
-		registerCommand(new Shop(), "shop");
-		registerCommand(new ShopSearch(), "shopsearch");
-		
 		WorldCreator wc;
 		
 		wc = new WorldCreator("factions");
@@ -172,34 +161,22 @@ public class Main extends Common implements Listener
 		wc = new WorldCreator("oldworld");
 		new WarpLand(wc.createWorld());
 		
+		registerCommand(new Temp(), "temp");
+		
+		registerCommand(new ItemInfo(), "iteminfo");
+		registerCommand(new Jackpot(), "jackpot");
+		registerCommand(new Playtime(), "playtime");
+		registerCommand(new Portal(), "portal");
+		registerCommand(new Price(), "price");
+		registerCommand(new Spawn(), "spawn");
+		registerCommand(new Sell(), "sell");
+		registerCommand(new Sellall(), "sellall");
+		registerCommand(new Shop(), "shop");
+		registerCommand(new ShopSearch(), "shopsearch");
+		
 		for(World w : Bukkit.getWorlds())
 		{
-			File file = CommonsConfig.getFile(Type.BLOCK_DATA, false, w.getName());
-			
-			if(!file.exists())
-			{
-				continue;
-			}
-			
-			try(RandomAccessFile access = new RandomAccessFile(file, "r"))
-			{
-				int skipBytes = Util.getArrayLength();
-				
-				while(access.getFilePointer() < access.length())
-				{
-					int x = access.readInt();
-					int y = access.readInt();
-					int z = access.readInt();
-					
-					access.skipBytes(skipBytes);
-					
-					w.getBlockAt(x, y, z).setMetadata("pos", new FixedMetadataValue(this, access.getFilePointer() - 12L - skipBytes));
-				}
-			}
-			catch(IOException ex)
-			{
-				ex.printStackTrace();
-			}
+			File file;
 			
 			file = CommonsConfig.getFile(Type.SIGN_DATA, false, w.getName());
 			
@@ -243,6 +220,7 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		Portal.getInstance().save();
 		Playtime.getInstance().save();
 		Price.getInstance().save();
 		Jackpot.getInstance().save();
