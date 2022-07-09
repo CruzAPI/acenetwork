@@ -11,6 +11,12 @@ public class WarpJackpot extends Warp
 	{
 		super(w);
 		
-		spawnLocation = new Location(w, 0.0D, 69.0D, 0.0D, 0.0F, 0.0F);
+		spawnLocation = new Location(w, 0.5D, 69.0D, 0.5D, 0.0F, 0.0F);
+	}
+	
+	@Override
+	public Location getSpawnLocation()
+	{
+		return spawnLocation;
 	}
 }

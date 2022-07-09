@@ -85,7 +85,8 @@ public class Price implements TabExecutor
 		}
 		catch(IOException e)
 		{
-			throw new RuntimeException(e);
+			e.printStackTrace();
+			return;
 		}
 	}
 	

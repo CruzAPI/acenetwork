@@ -225,9 +225,12 @@ public class Temp implements TabExecutor
 		{
 			Player p = (Player) sender;
 			CommonPlayer cp = CraftCommonPlayer.get(p);
-			p.sendMessage("version = " + ProtocolLibrary.getProtocolManager().getProtocolVersion(p));
-			sender.sendMessage("" + p.getWorld().getName() + " chunks in memory = " + Warp.MAP.get(p.getWorld().getUID()).blockData.size());
-			sender.sendMessage("Unknown command. Type \"/help\" for help.");
+			
+			p.sendMessage(Playtime.getInstance().getItemMap().toString());
+			
+//			p.sendMessage("version = " + ProtocolLibrary.getProtocolManager().getProtocolVersion(p));
+//			sender.sendMessage("" + p.getWorld().getName() + " chunks in memory = " + Warp.MAP.get(p.getWorld().getUID()).blockData.size());
+//			sender.sendMessage("Unknown command. Type \"/help\" for help.");
 			return true;
 		}
 		

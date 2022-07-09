@@ -19,4 +19,10 @@ public class WarpLand extends Warp
 	{
 		return Math.abs(l.getBlockX()) < 190 && Math.abs(l.getBlockZ()) < 190;
 	}
+	
+	@Override
+	public Location getSpawnLocation()
+	{
+		return spawnLocation;
+	}
 }

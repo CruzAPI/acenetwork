@@ -101,6 +101,7 @@ import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
 import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
+import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
@@ -138,6 +139,7 @@ public class Main extends Common implements Listener
 		registerCommand(new Jackpot(), "jackpot");
 		registerCommand(new Playtime(), "playtime");
 		registerCommand(new Price(), "price");
+		registerCommand(new Spawn(), "spawn");
 		registerCommand(new Sell(), "sell");
 		registerCommand(new Sellall(), "sellall");
 		registerCommand(new Shop(), "shop");
@@ -241,6 +243,7 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		Playtime.getInstance().save();
 		Price.getInstance().save();
 		Jackpot.getInstance().save();
 	}

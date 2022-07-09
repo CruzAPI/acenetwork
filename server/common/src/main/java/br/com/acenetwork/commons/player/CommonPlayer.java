@@ -17,6 +17,7 @@ import br.com.acenetwork.commons.inventory.GUI;
 
 public interface CommonPlayer extends Listener
 {
+	void reset(boolean clearInventory);
 	boolean hasInvincibility();
 	void setInvincibility(boolean value);
 	boolean hasPVPInvincibility();
@@ -70,4 +71,5 @@ public interface CommonPlayer extends Listener
 	int requestDatabase(long timeout);
 	int getPing();
 	void setPlayerData(PlayerData cloneMemoryPD);
+	void sendActionBarMessage(String msg);
 }

@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
 
 public class Factions extends Warp
 {
@@ -27,7 +28,7 @@ public class Factions extends Warp
 	{
 		super(w);
 		
-		spawnLocation = new Location(w, 0.0D, 69.0D, 0.0D, 0.0F, 0.0F);
+		spawnLocation = new Location(w, 0.5D, 69.0D, 0.5D, 0.0F, 0.0F);
 		
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
 		{
@@ -121,5 +122,42 @@ public class Factions extends Warp
 	public boolean isSpawnProtection(Location l)
 	{
 		return Math.abs(l.getBlockX()) <= 100 && Math.abs(l.getBlockZ()) <= 100;
+	}
+	
+	@Override
+	public long getChannelingTicks(SurvivalPlayer sp)
+	{
+		Player p = sp.getPlayer();
+		
+		if(p.getWorld() != w)
+		{
+			return MAP.get(p.getWorld().getUID()).getChannelingTicks(sp);
+		}
+		
+		if(sp.hasInvincibility())
+		{
+			return 0L;
+		}
+		
+		for(Player all : w.getPlayers())
+		{
+			if(all == this || !(all instanceof SurvivalPlayer))
+			{
+				continue;
+			}
+			
+			if(p.getWorld() == all.getWorld() && p.getLocation().distance(all.getLocation()) < 100.0D)
+			{
+				return 8L * 5L * 20L;
+			}
+		}
+		
+		return 8L * 20L;
+	}
+	
+	@Override
+	public Location getSpawnLocation()
+	{
+		return spawnLocation;
 	}
 }

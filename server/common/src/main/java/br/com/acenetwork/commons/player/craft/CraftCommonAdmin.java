@@ -41,7 +41,13 @@ public class CraftCommonAdmin extends CraftCommonPlayer implements CommonAdmin
 	@Override
 	public void reset()
 	{
-		super.reset();
+		reset(false);
+	}
+	
+	@Override
+	public void reset(boolean clearInventory)
+	{
+		super.reset(clearInventory);
 		setInvis(true);
 		
 		p.setGameMode(GameMode.CREATIVE);

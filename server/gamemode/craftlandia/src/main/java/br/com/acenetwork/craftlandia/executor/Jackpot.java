@@ -190,7 +190,8 @@ public class Jackpot implements TabExecutor
 		}
 		catch(IOException ex)
 		{
-			throw new RuntimeException(ex);
+			ex.printStackTrace();
+			return;
 		}
 	}
 	

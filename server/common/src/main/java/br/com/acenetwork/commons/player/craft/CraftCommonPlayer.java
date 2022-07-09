@@ -53,6 +53,9 @@ import br.com.acenetwork.commons.manager.PlayerData;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public abstract class CraftCommonPlayer implements CommonPlayer
 {
@@ -560,9 +563,15 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		return playerConfig.getString("clan");
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void reset()
+	{
+		reset(true);
+	}
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	public void reset(boolean clearInventory)
 	{
 		for(PotionEffect effect : p.getActivePotionEffects())
 		{
@@ -573,8 +582,11 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		p.setMaximumNoDamageTicks(20);
 		p.setFireTicks(0);
 		
-		p.getInventory().clear();
-		p.getInventory().setArmorContents(null);
+		if(clearInventory)
+		{
+			p.getInventory().clear();
+			p.getInventory().setArmorContents(null);
+		}
 		
 		Damageable d = (Damageable) p;
 		
@@ -859,5 +871,13 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	public void setPVPInvincibility(boolean value)
 	{
 		pvpInvincibility = value;
+	}
+	
+	@Override
+	public void sendActionBarMessage(String msg)
+	{
+		IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + msg + "\"}");
+		PacketPlayOutChat bar = new PacketPlayOutChat(icbc, (byte) 2);
+		((CraftPlayer) p).getHandle().playerConnection.sendPacket(bar);
 	}
 }

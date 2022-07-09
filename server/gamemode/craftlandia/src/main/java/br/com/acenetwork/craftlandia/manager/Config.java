@@ -18,7 +18,7 @@ public class Config
 		BOT, 
 		COMBATLOG, 
 		PRICE, 
-		PLAYER_INFO,
+		PLAYER_INFO, WRAPPED_BTA_MAP
 		;
 	}
 	
@@ -37,6 +37,9 @@ public class Config
 			break;
 		case WRAPPED_BTA_UUID:
 			file = new File(Main.getInstance().getDataFolder() + "/wrapped_bta", "uuid.dat");
+			break;
+		case WRAPPED_BTA_MAP:
+			file = new File(Main.getInstance().getDataFolder() + "/wrapped_bta", "map.dat");
 			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");

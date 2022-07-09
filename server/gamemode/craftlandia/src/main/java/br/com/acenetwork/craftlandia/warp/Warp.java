@@ -78,6 +78,7 @@ import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
 import br.com.acenetwork.craftlandia.manager.Config;
+import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
 import net.md_5.bungee.api.ChatColor;
 
 public abstract class Warp implements Listener
@@ -672,5 +673,15 @@ public abstract class Warp implements Listener
 	public boolean isSpawnProtection(Location l)
 	{
 		return true;
+	}
+	
+	public long getChannelingTicks(SurvivalPlayer p)
+	{
+		return 0L;
+	}
+
+	public Location getSpawnLocation()
+	{
+		return null;
 	}
 }
