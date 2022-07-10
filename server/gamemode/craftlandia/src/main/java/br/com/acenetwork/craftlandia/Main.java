@@ -89,6 +89,7 @@ import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
+import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.warp.Factions;
@@ -160,6 +161,7 @@ public class Main extends Common implements Listener
 		registerCommand(new Home(), "home");
 		registerCommand(new Sethome(), "sethome");
 		registerCommand(new Delhome(), "delhome");
+		registerCommand(new Visit(), "visit");
 		
 		for(World w : Bukkit.getWorlds())
 		{

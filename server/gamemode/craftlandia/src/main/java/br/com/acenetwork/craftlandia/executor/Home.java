@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -205,14 +206,45 @@ public class Home implements TabExecutor, ChannelCommand
 			return list;
 		}
 		
-		if(args.length != 1)
+		if(args.length > 2)
 		{
 			return list;
 		}
 		
 		Player p = (Player) sender;
 		
-		for(String key : load(p.getUniqueId()).keySet())
+		Map<String, HomeObj> homeMap = load(p.getUniqueId());
+		
+		if(args.length == 2)
+		{
+			CommonPlayer cp = CraftCommonPlayer.get(p);
+			
+			if(!cp.hasPermission("cmd.home.public"))
+			{
+				return list;
+			}
+			
+			HomeObj homeObj = homeMap.get(args[0].toLowerCase());
+			
+			if(homeObj == null)
+			{
+				return list;
+			}
+			
+			String subCommand = homeObj.isPublic() ? "private" : "public";
+			
+			if(subCommand.startsWith(args[1].toLowerCase()))
+			{
+				list.add(subCommand);
+			}
+		}
+		
+		if(args.length != 1)
+		{
+			return list;
+		}
+		
+		for(String key : homeMap.keySet())
 		{
 			if(key.toLowerCase().startsWith(args[0].toLowerCase()))
 			{
@@ -293,6 +325,27 @@ public class Home implements TabExecutor, ChannelCommand
 				
 				extra[0].addExtra(text);
 				
+				text = new TextComponent("■");
+				
+				if(value.isPublic())
+				{
+					text.setColor(ChatColor.DARK_GREEN);
+					text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home " + key + " private /home"));
+					text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+							new ComponentBuilder(StringUtils.capitalize(bundle.getString("cmd.home.adjective.public")))
+							.color(ChatColor.DARK_GREEN).create()));
+				}
+				else
+				{
+					text.setColor(ChatColor.DARK_RED);
+					text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home " + key + " public /home"));
+					text.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
+							new ComponentBuilder(StringUtils.capitalize(bundle.getString("cmd.home.adjective.private")))
+							.color(ChatColor.DARK_RED).create()));
+				}
+				
+				extra[0].addExtra(text);
+				
 				if(iterator.hasNext())
 				{
 					extra[0].addExtra(comma);
@@ -355,11 +408,90 @@ public class Home implements TabExecutor, ChannelCommand
 				run(cp, destiny, key);
 			}
 		}
+		else if((args.length == 2 || args.length == 3 && args[2].equals("/home")) 
+				&& (args[1].equalsIgnoreCase("public") || args[1].equalsIgnoreCase("private")))
+		{
+			if(!cp.hasPermission("cmd.home.public"))
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
+				return true;
+			}
+			
+			String key = args[0].toLowerCase();
+			HomeObj homeObj = load(p.getUniqueId()).get(key);
+			Location destiny = homeObj == null ? null : homeObj.getLocation();
+			
+			if(destiny == null)
+			{
+				TextComponent[] extra = new TextComponent[1];
+				
+				extra[0] = new TextComponent(key);
+				
+				TextComponent text = Message.getTextComponent(bundle.getString("raid.cmds.home-not-found"), extra);
+				text.setColor(ChatColor.RED);
+				p.spigot().sendMessage(text);
+				
+				return true;
+			}
+			
+			boolean setPublic = args[1].equalsIgnoreCase("public");
+			
+			if(homeObj.isPublic() == setPublic)
+			{
+				TextComponent[] extra = new TextComponent[1];
+				
+				if(homeObj.isPublic())
+				{
+					extra[0] = new TextComponent(bundle.getString("cmd.home.adjective.public"));
+				}
+				else
+				{
+					extra[0] = new TextComponent(bundle.getString("cmd.home.adjective.private"));
+				}
+				
+				TextComponent text = Message.getTextComponent(bundle.getString("cmd.home.home-already-public"), extra);
+				text.setColor(ChatColor.RED);
+				p.spigot().sendMessage(text);
+				
+				return true;
+			}
+			
+			homeObj.setPublic(setPublic);
+			
+			TextComponent[] extra = new TextComponent[2];
+			
+			extra[0] = new TextComponent(key);
+			extra[0].setColor(ChatColor.YELLOW);
+			
+			if(homeObj.isPublic())
+			{
+				extra[1] = new TextComponent(bundle.getString("cmd.home.adjective.public"));
+				extra[1].setColor(ChatColor.DARK_GREEN);
+			}
+			else
+			{
+				extra[1] = new TextComponent(bundle.getString("cmd.home.adjective.private"));
+				extra[1].setColor(ChatColor.DARK_RED);
+			}
+			
+			TextComponent text = Message.getTextComponent(bundle.getString("cmd.home.home-is-public-now"), extra);
+			text.setColor(ChatColor.GREEN);
+			p.spigot().sendMessage(text);
+			
+			if(args.length == 3)
+			{
+				Bukkit.dispatchCommand(p, "home");
+			}
+		}
 		else
 		{
 			TextComponent[] extra = new TextComponent[1];
 			
-			extra[0] = new TextComponent("/" + aliases + " [" + bundle.getString("commons.words.home") + "]");
+			String nounHome = bundle.getString("commons.words.home");
+			
+			extra[0] = new TextComponent("\n/" + aliases + " [" + nounHome + "]" 
+					+ "\n/" + aliases + " <" + nounHome + "> public"
+					+ "\n/" + aliases + " <" + nounHome + "> private");
 			
 			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
 			text.setColor(ChatColor.RED);
