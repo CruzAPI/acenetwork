@@ -11,6 +11,8 @@ public class Config
 {
 	public enum Type
 	{
+		HOMES,
+		HOME,
 		RANDOM_ITEM_UUID,
 		REGION,
 		WRAPPED_BTA_UUID,
@@ -29,6 +31,12 @@ public class Config
 
 		switch(type)
 		{
+		case HOMES:
+			file = new File(Main.getInstance().getDataFolder() + "/home", "map.dat");
+			break;
+		case HOME:
+			file = new File(Main.getInstance().getDataFolder() + "/home/map", args[0] + ".dat");
+			break;
 		case REGION:
 			file = new File(Main.getInstance().getDataFolder() + "/region/" + args[0], args[1] + ".dat");
 			break;

@@ -760,8 +760,6 @@ public class Permission implements TabExecutor, Listener
 	@SuppressWarnings("unchecked")
 	public void save()
 	{
-		long time = System.currentTimeMillis();
-		
 		File file;
 		
 		file = CommonsConfig.getFile(Type.USERS_DAT, true);

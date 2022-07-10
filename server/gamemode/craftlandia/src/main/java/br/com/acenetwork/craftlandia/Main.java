@@ -5,26 +5,14 @@ import static org.bukkit.block.BlockFace.NORTH;
 import static org.bukkit.block.BlockFace.SOUTH;
 import static org.bukkit.block.BlockFace.WEST;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,7 +37,6 @@ import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -60,8 +47,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -79,7 +64,6 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.Inventory;
@@ -87,12 +71,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import com.google.common.io.ByteStreams;
-
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
+import br.com.acenetwork.craftlandia.executor.Home;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.Playtime;
@@ -100,21 +84,20 @@ import br.com.acenetwork.craftlandia.executor.Portal;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
+import br.com.acenetwork.craftlandia.executor.Sethome;
 import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
-import br.com.acenetwork.craftlandia.manager.BlockData;
-import br.com.acenetwork.craftlandia.manager.ChunkLocation;
-import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.Farm;
+import br.com.acenetwork.craftlandia.warp.Newbie;
+import br.com.acenetwork.craftlandia.warp.Portals;
 import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.BlockMonsterEggs.EnumMonsterEggVarient;
 
 public class Main extends Common implements Listener
 {
@@ -144,7 +127,7 @@ public class Main extends Common implements Listener
 		wc = new WorldCreator("newbie");
 		wc.environment(Environment.NORMAL);
 		wc.generateStructures(true);
-		wc.createWorld();
+		new Newbie(wc.createWorld());
 		
 		wc = new WorldCreator("farm");
 		wc.environment(Environment.THE_END);
@@ -152,7 +135,7 @@ public class Main extends Common implements Listener
 		
 		wc = new WorldCreator("portals");
 		wc.environment(Environment.THE_END);
-		wc.createWorld();
+		new Portals(wc.createWorld());
 		
 		wc = new WorldCreator("jackpot");
 		wc.environment(Environment.NORMAL);
@@ -173,6 +156,10 @@ public class Main extends Common implements Listener
 		registerCommand(new Sellall(), "sellall");
 		registerCommand(new Shop(), "shop");
 		registerCommand(new ShopSearch(), "shopsearch");
+		
+		registerCommand(new Home(), "home");
+		registerCommand(new Sethome(), "sethome");
+		registerCommand(new Delhome(), "delhome");
 		
 		for(World w : Bukkit.getWorlds())
 		{
@@ -220,6 +207,7 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		Home.getInstance().save();
 		Portal.getInstance().save();
 		Playtime.getInstance().save();
 		Price.getInstance().save();

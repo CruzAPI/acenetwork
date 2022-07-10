@@ -67,7 +67,7 @@ public class Spawn implements TabExecutor, ChannelCommand
 			}
 			else
 			{
-				p.teleport(spawnLocation);
+				run(cp, spawnLocation);
 			}
 		}
 		else

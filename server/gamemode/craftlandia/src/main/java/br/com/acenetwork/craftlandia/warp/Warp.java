@@ -9,16 +9,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.core.net.Priority;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -29,7 +27,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -55,14 +52,12 @@ import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -88,6 +83,11 @@ public abstract class Warp implements Listener
 
 	protected final World w;
 	protected final String worldName;
+	
+	public enum Result
+	{
+		ALLOW, INVINCIBILITY;
+	}
 	
 	public Warp(World w)
 	{
@@ -679,7 +679,22 @@ public abstract class Warp implements Listener
 	{
 		return 0L;
 	}
-
+	
+	public Result canTeleportAwaySpawn(SurvivalPlayer sp)
+	{
+		return Result.ALLOW;
+	}
+	
+	public boolean canSetHome()
+	{
+		return false;
+	}
+	
+	public int blocksAwayFromSpawnToSetHome()
+	{
+		return 0;
+	}
+	
 	public Location getSpawnLocation()
 	{
 		return null;

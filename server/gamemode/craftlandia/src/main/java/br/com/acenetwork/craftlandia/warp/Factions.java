@@ -156,8 +156,38 @@ public class Factions extends Warp
 	}
 	
 	@Override
+	public Result canTeleportAwaySpawn(SurvivalPlayer sp)
+	{
+		Player p = sp.getPlayer();
+		
+		if(p.getWorld() != w)
+		{
+			return MAP.get(p.getWorld().getUID()).canTeleportAwaySpawn(sp);
+		}
+		
+		if(sp.hasInvincibility() || sp.hasPVPInvincibility())
+		{
+			return Result.INVINCIBILITY;
+		}
+		
+		return Result.ALLOW;
+	}
+	
+	@Override
 	public Location getSpawnLocation()
 	{
 		return spawnLocation;
+	}
+	
+	@Override
+	public boolean canSetHome()
+	{
+		return true;
+	}
+	
+	@Override
+	public int blocksAwayFromSpawnToSetHome()
+	{
+		return 512;
 	}
 }
