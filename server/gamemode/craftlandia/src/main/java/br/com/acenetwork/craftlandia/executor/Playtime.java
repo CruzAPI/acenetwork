@@ -28,10 +28,12 @@ import org.bukkit.block.Block;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.inventory.InventoryAction;
@@ -39,6 +41,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -68,12 +71,12 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class Playtime implements TabExecutor, Listener
 {
 	public static final Map<UUID, Time> MAP = new HashMap<>();
-	private static final String WBTA_DISPLAY_NAME = ChatColor.DARK_GREEN + "Wrapped $BTA";
+	private static final String WBTA_DISPLAY_NAME = ChatColor.DARK_PURPLE + "Wrapped $BTA";
 	private final UUID wbtaUUID;
 	
 	private static final long BTA_PER_SECONDS = 2L * 60L * 60L * 20L;
-	private static final long TICKS = 60L * 20L;
-//	private static final long TICKS = 7L * 24L * 60L * 60L * 20L;
+//	private static final long TICKS = 60L * 20L;
+	private static final long TICKS = 7L * 24L * 60L * 60L * 20L;
 	
 	public final Supplier<ItemStack> wbtaSupplier;
 	public final ItemStack burnedWBTA;
@@ -165,9 +168,10 @@ public class Playtime implements TabExecutor, Listener
 		{
 			ItemMeta meta1;
 			
-			ItemStack wbta = new ItemStack(Material.EMERALD);
+			ItemStack wbta = new ItemStack(Material.NETHER_STAR);
 			meta1 = wbta.getItemMeta();
-			meta1.setDisplayName(CommonsUtil.hideUUID(wbtaUUID) + ChatColor.RESET + CommonsUtil.getRandomItemUUID() + WBTA_DISPLAY_NAME + CommonsUtil.hideNumberData(TICKS));
+			meta1.setDisplayName(CommonsUtil.hideUUID(wbtaUUID) + ChatColor.RESET + CommonsUtil.getRandomItemUUID() + 
+					WBTA_DISPLAY_NAME + CommonsUtil.hideNumberData(TICKS));
 			meta1.addEnchant(Enchantment.DURABILITY, 1, true);
 			meta1.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			wbta.setItemMeta(meta1);
@@ -270,16 +274,16 @@ public class Playtime implements TabExecutor, Listener
 	private class Time
 	{
 		private int taskId;
-		private long seconds = 2L;
+		private long ticks = 20L;
 //		private long seconds = BTA_PER_SECONDS;
 		
 		public Time(Player p)
 		{
 			this.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
 			{
-				if(--seconds <= 0L)
+				if(!p.isDead() && (ticks -= 20) <= 0L)
 				{
-					seconds = BTA_PER_SECONDS;
+					ticks = BTA_PER_SECONDS;
 					ItemStack wbta = wbtaSupplier.get();
 					itemMap.put(CommonsUtil.getHiddenUUIDs(wbta).get(1), new WBTA(p, TICKS));
 					p.getInventory().addItem(wbta);
@@ -333,7 +337,7 @@ public class Playtime implements TabExecutor, Listener
 				return true;
 			}
 			
-			if(cp.hasInvincibility())
+			if(cp.hasInvincibility() || cp.hasPVPInvincibility())
 			{
 				p.sendMessage(ChatColor.RED + bundle.getString("cmd.playtime.has-invincibility"));
 				return true;
@@ -344,7 +348,7 @@ public class Playtime implements TabExecutor, Listener
 				put(p);
 			}
 			
-			long time = MAP.get(p.getUniqueId()).seconds;
+			long time = MAP.get(p.getUniqueId()).ticks / 20L;
 			
 			long seconds = time % 60;
 			long minutes = time / (60L) % 60;
@@ -446,7 +450,7 @@ public class Playtime implements TabExecutor, Listener
 			return;
 		}
 		
-		if(cp.hasInvincibility())
+		if(cp.hasInvincibility() || cp.hasPVPInvincibility())
 		{
 			remove(p.getUniqueId());
 		}
@@ -482,7 +486,7 @@ public class Playtime implements TabExecutor, Listener
 		CommonPlayer cp = e.getCommonPlayer();
 		Player p = cp.getPlayer();
 		
-		if(cp instanceof SurvivalPlayer && isValidWorld(p.getWorld()))
+		if(cp instanceof SurvivalPlayer && isValidWorld(p.getWorld()) && !cp.hasInvincibility() && !cp.hasPVPInvincibility())
 		{
 			put(p);
 		}
@@ -614,6 +618,25 @@ public class Playtime implements TabExecutor, Listener
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void b(InventoryClickEvent e)
+	{
+		Player p = (Player) e.getWhoClicked();
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		ItemStack current = e.getCurrentItem();
+		ItemStack cursor = e.getCursor();
+		ItemStack hotbar = e.getHotbarButton() != -1 ? p.getInventory().getItem(e.getHotbarButton()) : null;
+		
+		if((cp.hasInvincibility() || cp.hasPVPInvincibility()) && 
+				(CommonsUtil.compareUUID(current, wbtaUUID)
+				|| CommonsUtil.compareUUID(cursor, wbtaUUID)
+				|| CommonsUtil.compareUUID(hotbar, wbtaUUID)))
+		{
+			e.setCancelled(true);
+		}
+	}
+	
 	@EventHandler
 	public void a(InventoryClickEvent e)
 	{
@@ -696,7 +719,6 @@ public class Playtime implements TabExecutor, Listener
 			}
 			
 			WBTA wbta = itemMap.get(uuid);
-
 			
 			switch(action)
 			{
@@ -730,7 +752,26 @@ public class Playtime implements TabExecutor, Listener
 		wbta.setInvHolder(null);
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void b(PlayerPickupItemEvent e)
+	{
+		ItemStack itemStack = e.getItem().getItemStack();
+		
+		if(!CommonsUtil.compareUUID(itemStack, wbtaUUID))
+		{
+			return;
+		}
+		
+		Player p = e.getPlayer();
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		if(cp.hasInvincibility() || cp.hasPVPInvincibility())
+		{
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(PlayerPickupItemEvent e)
 	{
 		ItemStack itemStack = e.getItem().getItemStack();
@@ -745,6 +786,14 @@ public class Playtime implements TabExecutor, Listener
 		if(!itemMap.containsKey(uuid))
 		{
 			return;
+		}
+		
+		Player p = e.getPlayer();
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		if(cp instanceof SurvivalPlayer)
+		{
+			((SurvivalPlayer) cp).cancelChannel(true);
 		}
 		
 		WBTA wbta = itemMap.get(uuid);		
@@ -793,6 +842,37 @@ public class Playtime implements TabExecutor, Listener
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void a(PlayerCommandPreprocessEvent e)
+	{
+		Player p = e.getPlayer();
+		String[] args = e.getMessage().split(" ");
+		
+		PluginCommand cmd = Main.getInstance().getCommand(args[0].substring(1));
+		
+		if(cmd == null)
+		{
+			return;
+		}
+		
+		if(cmd.getExecutor() instanceof Spawn)
+		{
+			Inventory inv = p.getInventory();
+			
+			for(int i = 0; i < inv.getSize(); i++)
+			{
+				ItemStack item = inv.getItem(0);
+				
+				if(CommonsUtil.compareUUID(item, wbtaUUID))
+				{
+					ResourceBundle bundle = ResourceBundle.getBundle("message", CommonsUtil.getLocaleFromMinecraft(p.spigot().getLocale()));
+					p.sendMessage(ChatColor.RED + bundle.getString("cmd.playtime.can-not-spawn"));
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
+	}
 	
 	@EventHandler
 	public void a(InventoryPickupItemEvent e)

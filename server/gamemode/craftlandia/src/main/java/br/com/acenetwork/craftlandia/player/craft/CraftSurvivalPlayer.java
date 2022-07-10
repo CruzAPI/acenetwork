@@ -11,9 +11,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
 
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
@@ -194,6 +197,24 @@ public class CraftSurvivalPlayer extends CraftCommonPlayer implements SurvivalPl
 	public void a(PlayerDeathEvent e)
 	{
 		if(e.getEntity() != p)
+		{
+			return;
+		}
+		
+		cancelChannel(true);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void a(InventoryOpenEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		Inventory inv = e.getInventory();
+		
+		if(inv.getType() == InventoryType.CRAFTING)
 		{
 			return;
 		}
