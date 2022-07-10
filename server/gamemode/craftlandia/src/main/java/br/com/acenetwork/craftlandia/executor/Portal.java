@@ -143,6 +143,12 @@ public class Portal implements TabExecutor, Listener
 		
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
+		if(!cp.hasPermission("cmd.portal"))
+		{
+			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
+			return true;
+		}
+		
 		if(args.length == 1 && args[0].equalsIgnoreCase("select"))
 		{
 			Set<Material> ignoreSet = new HashSet<>();
