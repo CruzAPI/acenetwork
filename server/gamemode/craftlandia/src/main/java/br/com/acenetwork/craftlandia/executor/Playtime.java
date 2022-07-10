@@ -502,12 +502,6 @@ public class Playtime implements TabExecutor, Listener
 		Player p = e.getPlayer();
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		
-		if(!(cp instanceof SurvivalPlayer))
-		{
-			remove(p.getUniqueId());
-			return;
-		}
-		
 		boolean validFrom = isValidWorld(e.getFrom());
 		boolean validTo = isValidWorld(p.getWorld());
 		
@@ -518,23 +512,30 @@ public class Playtime implements TabExecutor, Listener
 		
 		if(validTo)
 		{
-			put(p);
+			if(cp instanceof SurvivalPlayer)
+			{
+				put(p);
+			}
 		}
 		else
 		{
-			Inventory inv = p.getInventory();
-			
-			for(int i = 0; i < inv.getSize(); i++)
-			{
-				ItemStack item = inv.getItem(i);
-				
-				if(CommonsUtil.compareUUID(item, wbtaUUID))
-				{
-					CommonsUtil.setItemCopyOf(item, burnedWBTA);
-				}
-			}
-			
+			burnWBTA(p);
 			remove(p.getUniqueId());
+		}
+	}
+	
+	private void burnWBTA(Player p)
+	{
+		Inventory inv = p.getInventory();
+		
+		for(int i = 0; i < inv.getSize(); i++)
+		{
+			ItemStack item = inv.getItem(i);
+			
+			if(CommonsUtil.compareUUID(item, wbtaUUID))
+			{
+				CommonsUtil.setItemCopyOf(item, burnedWBTA);
+			}
 		}
 	}
 	
