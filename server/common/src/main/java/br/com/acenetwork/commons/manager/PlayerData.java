@@ -105,7 +105,7 @@ public class PlayerData implements Listener, Serializable, Cloneable
 	{
 		if(bta < 0.0D)
 		{
-			throw new RuntimeException("can't set negative value");
+			throw new InsufficientBalanceException();
 		}
 		
 		this.bta = bta;

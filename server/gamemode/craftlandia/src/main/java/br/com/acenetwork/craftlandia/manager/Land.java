@@ -1,0 +1,582 @@
+package br.com.acenetwork.craftlandia.manager;
+
+import java.text.DecimalFormat;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockMultiPlaceEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.material.Dispenser;
+
+import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
+import br.com.acenetwork.commons.event.SocketEvent;
+import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.warp.Warp;
+import br.com.acenetwork.craftlandia.warp.WarpLand;
+
+public class Land implements Listener
+{
+	public static final Set<Land> SET = new HashSet<>();
+	
+	private final UUID worldUID;
+	private final int x, z;
+	private final int id;
+	private final Type type;
+	
+	private LandData landData;
+	
+	public enum Direction
+	{
+		EAST(1, 0),
+		NORTH(0, -1), 
+		WEST(-1, 0), 
+		SOUTH(0, 1),
+		;
+		
+		private final int x;
+		private final int z;
+		
+		Direction(int x, int z)
+		{
+			this.x = x;
+			this.z = z;
+		}
+	}
+	
+	private static final int PATH_WIDTH = 5;
+	
+	public static void loadLands(UUID worldUID)
+	{
+		int x = -65, z = 65;
+		int k = 0;
+		
+		int id = 0;
+		
+		for(int j = 0; j < Land.Type.values().length; j++)
+		{
+			Land.Type type = Land.Type.values()[j];
+			final int size = type.getSize();
+			
+			z += PATH_WIDTH * Direction.SOUTH.z + size * Direction.SOUTH.z;
+			
+			k = (1 + k) * 2 + 1;
+			
+			for(int i = 0; i < Direction.values().length; i++)
+			{
+				Direction direction = Direction.values()[i];
+				
+				for(int l = 0; l < k; l++)
+				{
+					if(l == 0 && i == 0)
+					{
+						new Land(id++, worldUID, x, z, type);
+						continue;
+					}
+					
+					x += PATH_WIDTH * direction.x + size * direction.x; 
+					z += PATH_WIDTH * direction.z + size * direction.z;
+					
+					new Land(id++, worldUID, x, z, type);
+				}
+			}
+		}
+	}
+	
+	public enum Type
+	{
+		BIG(63),
+		MEDIUM(29), 
+		SMALL(12), 
+		;
+		
+		private final int size;
+		
+		Type(int size)
+		{
+			this.size = size;
+		}
+		
+		public int getSize()
+		{
+			return size;
+		}
+	}
+	
+	private boolean isLand(Block b)
+	{
+		return b != null && isLand(b.getLocation());
+	}
+	
+	private boolean isLand(Location l)
+	{
+		return isLand(l.getWorld(), l.getBlockX(), l.getBlockZ());
+	}
+	
+	private boolean isLand(World w, int x, int z)
+	{
+		return Warp.MAP.get(w.getUID()) instanceof WarpLand 
+				&& x >= this.x && x < this.x + type.size && z <= this.z && z > this.z - type.size;
+	}
+	
+	private Land(int id, UUID worldUID, int x, int z, Type type)
+	{
+		this.id = id;
+		this.worldUID = worldUID;
+		this.x = x;
+		this.z = z;
+		this.type = type;
+		
+		this.landData = LandData.load(id);
+		
+		SET.add(this);
+		
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
+	}
+	
+	public static Land getById(int id)
+	{
+		return SET.stream().filter(x -> x.id == id).findAny().orElse(null);
+	}
+	
+	public LandData getLandData()
+	{
+		return landData;
+	}
+	
+	public void setOwner(UUID uuid)
+	{
+		landData.setOwner(uuid);
+	}
+	
+	public UUID getOwner()
+	{
+		return landData.getOwner();
+	}
+	
+	public boolean isTrusted(UUID uuid)
+	{
+		return landData.isTrusted(uuid);
+	}
+	
+	public boolean isTrusted(Player p)
+	{
+		return isTrusted(p.getUniqueId());
+	}
+	
+	public long getResetCooldown()
+	{
+		return landData.getResetCooldown();
+	}
+	
+	public void setResetCooldown(long cooldown)
+	{
+		landData.setResetCooldown(cooldown);
+	}
+	
+	public boolean isPublic()
+	{
+		return landData.isPublic();
+	}
+	
+	public void setPublic(boolean isPublic)
+	{
+		landData.setPublic(isPublic);
+	}
+	
+	public void setName(String name)
+	{
+		landData.setName(name);
+	}
+	
+	public String getName()
+	{
+		return landData.getName();
+	}
+	
+	public Location getLocation()
+	{
+		return landData.getLocation();
+	}
+	
+	public void setLocation(Location l)
+	{
+		landData.setLocation(l);
+	}
+	
+	@EventHandler
+	public void aa(SocketEvent e)
+	{
+		String[] args = e.getArgs();
+		String cmd = args[0];
+		
+		if(cmd.equals("landuuid"))
+		{
+			int id = Integer.valueOf(args[1]);
+			
+			if(this.id != id)
+			{
+				return;
+			}
+			
+			try
+			{
+				setOwner(UUID.fromString(args[2]));
+			}
+			catch(IllegalArgumentException ex)
+			{
+				setOwner(null);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockGrowEvent e)
+	{
+		Block b = e.getBlock();
+		BlockState block = e.getNewState();
+		
+		if(isLand(b) && isLand(block.getLocation()) && getOwner() != null)
+		{
+			e.setCancelled(false);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockSpreadEvent e)
+	{
+		Block b = e.getSource();
+		BlockState block = e.getNewState();
+		
+		if(isLand(b) && isLand(block.getLocation()) && getOwner() != null)
+		{
+			e.setCancelled(false);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	public void on(PlayerInteractEvent e)
+	{
+		Action a = e.getAction();
+		
+		if(a == Action.RIGHT_CLICK_BLOCK)
+		{
+			Player p = e.getPlayer();
+			
+			Block b = e.getClickedBlock();
+			BlockFace bf = e.getBlockFace();
+			
+			Block iteract = CommonsUtil.isInteractable(b.getType(), b.getData()) && !p.isSneaking() ? b : b.getRelative(bf);
+			
+			if(isLand(iteract))
+			{
+				if(isTrusted(p))
+				{
+					e.setCancelled(false);
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(HangingBreakByEntityEvent e)
+	{
+		Entity entity = e.getEntity();
+		
+		if(isLand(entity.getLocation()))
+		{
+			Entity remover = e.getRemover();
+			Projectile projectile = null;
+			Player p = null;
+			
+			if(remover instanceof Projectile)
+			{
+				projectile = (Projectile) remover;
+				
+				if(projectile.getShooter() instanceof Player)
+				{
+					p = (Player) projectile.getShooter();
+				}
+			}
+			else if(remover instanceof Player)
+			{
+				p = (Player) remover;
+			}
+			
+			if(p != null)
+			{
+				if(isTrusted(p))
+				{
+					e.setCancelled(false);
+				}
+			}
+			else if(projectile != null)
+			{
+				if(projectile.getShooter() instanceof Block)
+				{
+					if(isLand(((Block) projectile.getShooter())))
+					{
+						e.setCancelled(false);
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(PlayerBucketFillEvent e)
+	{
+		Block b = e.getBlockClicked();
+		
+		if(isLand(b))
+		{
+			Player p = e.getPlayer();
+			e.setCancelled(!isTrusted(p));
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(PlayerBucketEmptyEvent e)
+	{
+		Block b = e.getBlockClicked();
+		
+		if(isLand(b))
+		{
+			Player p = e.getPlayer();
+			e.setCancelled(!isTrusted(p));
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	public void on(BlockBreakEvent e)
+	{
+		Block b = e.getBlock();
+		Player p = e.getPlayer();
+		
+		if(isLand(b))
+		{
+			e.setCancelled(!isTrusted(p));
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	public void on(BlockPlaceEvent e)
+	{
+		Block b = e.getBlock();
+		Player p = e.getPlayer();
+		
+		if(isLand(b))
+		{
+			e.setCancelled(!isTrusted(p));
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockFromToEvent e)
+	{
+		Block b = e.getToBlock();
+		
+		if(isLand(b) && getOwner() != null)
+		{
+			e.setCancelled(false);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockPhysicsEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(isLand(b) && getOwner() != null)
+		{
+			e.setCancelled(false);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockPistonExtendEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(isLand(b) && getOwner() != null)
+		{
+			e.setCancelled(false);
+			
+			for(Block blocks : e.getBlocks())
+			{
+				blocks = blocks.getRelative(e.getDirection());
+				
+				if(!isLand(blocks))
+				{
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockPistonRetractEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(isLand(b))
+		{
+			e.setCancelled(false);
+			
+			for(Block blocks : e.getBlocks())
+			{
+				if(!isLand(blocks))
+				{
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockMultiPlaceEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(isLand(b))
+		{
+			Player p = e.getPlayer();
+			
+			if(isTrusted(p))
+			{
+				e.setCancelled(false);
+				
+				for(BlockState bs : e.getReplacedBlockStates())
+				{
+					if(!isLand(bs.getLocation()))
+					{
+						e.setCancelled(true);
+						return;
+					}
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(CustomStructureGrowEvent ce)
+	{
+		StructureGrowEvent e = ce.getStructureGrowEvent();
+		
+		Location l = e.getLocation();
+		
+		if(isLand(l))
+		{
+			e.getBlocks().clear();
+			
+			for(BlockState blocks : ce.getOriginalBlocks())
+			{
+				if(isLand(blocks.getLocation()))
+				{
+					e.getBlocks().add(blocks);
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void asd(BlockDispenseEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(isLand(b))
+		{
+			Dispenser dispenser = (Dispenser) b.getState().getData();
+			
+			if(!CommonsUtil.isDispensable(e.getItem().getType()) || isLand(b.getRelative(dispenser.getFacing())))
+			{
+				e.setCancelled(false);
+			}
+		}
+	}
+	
+	public World getWorld()
+	{
+		return Bukkit.getWorld(worldUID);
+	}
+	
+	public UUID getWorldUID()
+	{
+		return worldUID;
+	}
+	
+	public int getX()
+	{
+		return x;
+	}
+	
+	public int getZ()
+	{
+		return z;
+	}
+	
+	public int getSize()
+	{
+		return type.size;
+	}
+	
+	public boolean isOwner(UUID uuid)
+	{
+		return uuid.equals(getOwner());
+	}
+	
+	public String getBeautyId()
+	{
+		return new DecimalFormat("000").format(id + 1);
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "Land [id=" + id + "]";
+	}
+	
+	public int getId()
+	{
+		return id;
+	}
+	
+	public int getMinX()
+	{
+		return x;
+	}
+	
+	public int getMinZ()
+	{
+		return z - getSize() + 1;
+	}
+}

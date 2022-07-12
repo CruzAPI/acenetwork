@@ -79,6 +79,7 @@ import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.Home;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
+import br.com.acenetwork.craftlandia.executor.LandCMD;
 import br.com.acenetwork.craftlandia.executor.Playtime;
 import br.com.acenetwork.craftlandia.executor.Portal;
 import br.com.acenetwork.craftlandia.executor.Price;
@@ -91,6 +92,7 @@ import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.manager.LandData;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.Farm;
 import br.com.acenetwork.craftlandia.warp.Newbie;
@@ -157,6 +159,8 @@ public class Main extends Common implements Listener
 		registerCommand(new Shop(), "shop");
 		registerCommand(new ShopSearch(), "shopsearch");
 		
+		registerCommand(new LandCMD(), "land");
+		
 		registerCommand(new Home(), "home");
 		registerCommand(new Sethome(), "sethome");
 		registerCommand(new Delhome(), "delhome");
@@ -207,6 +211,7 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		LandData.save();
 		Home.getInstance().save();
 		Portal.getInstance().save();
 		Playtime.getInstance().save();

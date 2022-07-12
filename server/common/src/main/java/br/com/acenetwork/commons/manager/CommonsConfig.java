@@ -13,6 +13,7 @@ public class CommonsConfig
 {
 	public enum Type
 	{
+		LINKS,
 		PLAYER_DATA,
 		PLAYERS_DATA,
 		PLAYER_PERMISSION,
@@ -38,6 +39,9 @@ public class CommonsConfig
 
 		switch(type)
 		{
+		case LINKS:
+			file = new File(Common.getPlugin().getDataFolder(), "links.yml");
+			break;
 		case PLAYER_DATA:
 			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/users/" + args[0], "user.dat");
 			break;
@@ -126,6 +130,19 @@ public class CommonsConfig
 				if(config == null)
 				{
 					config = YamlConfiguration.loadConfiguration(file);
+				}
+				
+				switch(type)
+				{
+				case LINKS:
+					config.set("website", "https://www.acetokennetwork.com.br/");
+					config.set("lands", "https://www.lands.com.br/");
+					config.set("whitepaper", "https://ace-network.gitbook.io/ace-network-whitepaper-versao-em-portugues/introducao/visao-geral");
+					config.set("tracker", "https://www.brawl.com/wiki/tracking-raid/");
+					config.set("discord", "https://discord.gg/EYV538gQt7");
+					break;
+				default:
+					break;
 				}
 				
 				config.save(file);

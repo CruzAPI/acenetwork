@@ -1,8 +1,5 @@
 package br.com.acenetwork.commons;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-
-import java.io.File;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -16,10 +13,9 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -30,17 +26,27 @@ import com.google.common.io.ByteStreams;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
-import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.IdData;
-import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.TranslatableComponent;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public class CommonsUtil
 {
+	public static int getHighestBlockYAt(World w, int x, int z)
+	{
+		for(int y = w.getMaxHeight(); y >= 0; y--)
+		{
+			Block b =  w.getBlockAt(x, y, z);
+			
+			if(b.getType() != Material.AIR)
+			{
+				return y;
+			}
+		}
+		
+		return w.getMaxHeight();
+	}
+	
 	public static void setCustomSkull(SkullMeta skull, String url)
 	{
 		if(url.isEmpty())
