@@ -423,7 +423,7 @@ public class Util
 		return o;
 	}
 	
-	public static boolean isShoppable(ItemStack shop, ItemStack toCompare)
+	public static boolean isShoppable(ItemStack shop, ItemStack toCompare, boolean isSold)
 	{
 		if(shop.getType() != toCompare.getType())
 		{
@@ -446,6 +446,10 @@ public class Util
 			return false;
 		}
 		
+		Bukkit.broadcastMessage(shopMeta.getLore().toString());
+		Bukkit.broadcastMessage("-----");
+		Bukkit.broadcastMessage(toCompareMeta.getLore().toString());
+		
 		if(!shopMeta.getLore().equals(toCompareMeta.getLore()))
 		{
 			Bukkit.broadcastMessage("C2");
@@ -462,7 +466,7 @@ public class Util
 		{
 			Repairable repairable = (Repairable) shopMeta;
 			
-			if(Util.containsItemTag(shop, Property.SOLD) && repairable.getRepairCost() != 0)
+			if(isSold && repairable.getRepairCost() != 0)
 			{
 				Bukkit.broadcastMessage("E");
 				return false;

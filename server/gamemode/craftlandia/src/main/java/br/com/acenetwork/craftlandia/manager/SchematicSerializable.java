@@ -2,8 +2,6 @@ package br.com.acenetwork.craftlandia.manager;
 
 import java.io.Serializable;
 
-import br.com.acenetwork.craftlandia.executor.BlockSerializable;
-
 public class SchematicSerializable implements Serializable
 {
 	private static final long serialVersionUID = -7150624386439621255L;

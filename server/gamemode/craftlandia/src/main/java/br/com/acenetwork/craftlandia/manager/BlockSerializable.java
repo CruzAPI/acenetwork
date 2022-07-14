@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.craftlandia.manager;
 
 import java.io.Serializable;
 

@@ -614,10 +614,10 @@ public class Shop implements TabExecutor, Listener
 				}
 				
 				ItemStack cloneItemStack = itemStack.clone();
-				
+				boolean isSold = Util.getProperties(cloneItemStack).contains(Property.SOLD);
 				Util.setItemTag(cloneItemStack, Property.SOLD);
 				
-				if(Util.isShoppable(cloneItemStack, item))
+				if(Util.isShoppable(cloneItemStack, item, isSold))
 				{
 					int oldAmount = itemStack.getAmount();
 					itemStack.setAmount(Math.max(0, oldAmount - amountSold));
@@ -670,7 +670,9 @@ public class Shop implements TabExecutor, Listener
 					itemStack.setAmount(0);
 				}
 				
-				if(Util.isShoppable(itemStack, item))
+				boolean isSold = Util.getProperties(itemStack).contains(Property.SOLD);
+				
+				if(Util.isShoppable(itemStack, item, isSold))
 				{
 					int oldAmount = itemStack.getAmount();
 					itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), oldAmount + amountSold));
