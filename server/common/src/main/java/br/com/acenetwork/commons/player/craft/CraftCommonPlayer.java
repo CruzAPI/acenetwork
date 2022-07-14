@@ -659,7 +659,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		Runtime.getRuntime().exec(String.format("node %s/reset/vip %s %s %s", System.getProperty("user.home"),
 				Common.getSocketPort(), 
 				requestDatabase(), 
-				p.getUniqueId()));
+				p.getUniqueId().version() == 4 ? p.getUniqueId() : p.getName()));
 	}
 	
 	@Override

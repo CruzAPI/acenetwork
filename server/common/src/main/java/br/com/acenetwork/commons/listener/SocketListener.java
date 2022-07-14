@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.executor.Stop;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
@@ -52,7 +53,17 @@ public class SocketListener implements Listener
 		
 		if(cmd.equalsIgnoreCase("vip"))
 		{
-			Player p = Bukkit.getPlayer(UUID.fromString(args[2]));
+			Player p;
+			
+			try
+			{
+				p = Bukkit.getPlayer(UUID.fromString(args[2]));
+			}
+			catch(IllegalArgumentException ex)
+			{
+				p = CommonsUtil.getOfflinePlayerIfCached(args[2]).getPlayer();
+			}
+			
 			CommonPlayer cp = CraftCommonPlayer.get(p);
 			
 			if(cp == null)
