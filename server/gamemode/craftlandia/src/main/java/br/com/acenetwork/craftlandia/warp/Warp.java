@@ -32,12 +32,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
@@ -56,8 +58,11 @@ import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -543,8 +548,43 @@ public abstract class Warp implements Listener
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void sda(PlayerChangedWorldEvent e)
+	{
+		if(e.getPlayer().getWorld() != w)
+		{
+			return;
+		}
+		
+		e.getPlayer().spigot().setCollidesWithEntities(true);
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(PlayerDropItemEvent e)
+	{
+		if(e.getPlayer().getWorld() != w)
+		{
+			return;
+		}
+		
+		e.setCancelled(!e.getPlayer().spigot().getCollidesWithEntities());
+	}
+	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void a(BlockPhysicsEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(b.getWorld() != w)
+		{
+			return;
+		}
+		
+		e.setCancelled(isSpawnProtection(b.getLocation()));
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(BlockIgniteEvent e)
 	{
 		Block b = e.getBlock();
 		

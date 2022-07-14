@@ -569,7 +569,6 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		reset(true);
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void reset(boolean clearInventory)
 	{
@@ -577,6 +576,8 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		{
 			p.removePotionEffect(effect.getType());
 		}
+		
+		p.spigot().setCollidesWithEntities(true);
 		
 		p.setVelocity(new Vector());
 		p.setMaximumNoDamageTicks(20);

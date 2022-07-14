@@ -114,11 +114,6 @@ public class Main extends Common implements Listener
 		
 		super.onEnable();
 		
-		
-		getServer().getPluginManager().registerEvents(this, this);
-		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
-		getServer().getPluginManager().registerEvents(new RandomItem(), this);
-		
 		WorldCreator wc;
 		
 		wc = new WorldCreator("factions");
@@ -145,6 +140,12 @@ public class Main extends Common implements Listener
 		
 		wc = new WorldCreator("oldworld");
 		new WarpLand(wc.createWorld());
+		
+		Bukkit.getWorlds().stream().forEach(x -> x.setWeatherDuration(0));
+		
+		getServer().getPluginManager().registerEvents(this, this);
+		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
+		getServer().getPluginManager().registerEvents(new RandomItem(), this);
 		
 		registerCommand(new Temp(), "temp");
 		
@@ -612,10 +613,11 @@ public class Main extends Common implements Listener
 		inv.setResult(result);
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void a(WeatherChangeEvent e)
 	{
-		e.setCancelled(true);
+		e.setCancelled(false);
+//		e.setCancelled(e.getWorld().getWeatherDuration() <= 0);
 	}
 	
 	@EventHandler

@@ -20,7 +20,7 @@ public class Config
 		BOT, 
 		COMBATLOG, 
 		PRICE, 
-		PLAYER_INFO, WRAPPED_BTA_MAP, PORTALS, LANDS, LINKS, LAND_SCHEM
+		PLAYER_INFO, WRAPPED_BTA_MAP, PORTALS, LANDS, LINKS, LAND_SCHEM, LAND_ENTITY_DATA
 		;
 	}
 	
@@ -31,6 +31,9 @@ public class Config
 
 		switch(type)
 		{
+		case LAND_ENTITY_DATA:
+			file = new File(Main.getInstance().getDataFolder() + "/lands", "entities.dat");
+			break;
 		case LANDS:
 			file = new File(Main.getInstance().getDataFolder() + "/lands", "map.dat");
 			break;

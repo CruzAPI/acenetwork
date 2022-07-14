@@ -1,12 +1,15 @@
 package br.com.acenetwork.craftlandia.manager;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -28,23 +31,34 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.material.Dispenser;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.event.SocketEvent;
+import br.com.acenetwork.commons.listener.EntitySpawn;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 
 public class Land implements Listener
 {
-	public static final Set<Land> SET = new HashSet<>();
+	public static final Set<Land> SET = new TreeSet<Land>(new Comparator<Land>()
+	{
+		@Override
+		public int compare(Land arg0, Land arg1)
+		{
+			return arg0.getBeautyName().compareTo(arg1.getBeautyName());
+		}
+	});
 	
 	private final UUID worldUID;
 	private final int x, z;
@@ -52,6 +66,8 @@ public class Land implements Listener
 	private final Type type;
 	
 	private LandData landData;
+	
+	private int task;
 	
 	public enum Direction
 	{
@@ -130,17 +146,17 @@ public class Land implements Listener
 		}
 	}
 	
-	private boolean isLand(Block b)
+	public boolean isLand(Block b)
 	{
 		return b != null && isLand(b.getLocation());
 	}
 	
-	private boolean isLand(Location l)
+	public boolean isLand(Location l)
 	{
 		return isLand(l.getWorld(), l.getBlockX(), l.getBlockZ());
 	}
 	
-	private boolean isLand(World w, int x, int z)
+	public boolean isLand(World w, int x, int z)
 	{
 		return Warp.MAP.get(w.getUID()) instanceof WarpLand 
 				&& x >= this.x && x < this.x + type.size && z <= this.z && z > this.z - type.size;
@@ -164,6 +180,11 @@ public class Land implements Listener
 	public static Land getById(int id)
 	{
 		return SET.stream().filter(x -> x.id == id).findAny().orElse(null);
+	}
+	
+	public Set<UUID> getTrustedPlayers()
+	{
+		return landData.getTrustedPlayers();
 	}
 	
 	public LandData getLandData()
@@ -206,12 +227,120 @@ public class Land implements Listener
 		return landData.isPublic();
 	}
 	
-	public void setPublic(boolean isPublic)
+	public boolean setPublic(boolean isPublic)
 	{
+		if(task != 0 || isPublic() == isPublic)
+		{
+			return false;
+		}
+		
+		final int minX = getMinX() - 1;
+		final int maxX = minX + getSize() + 1;
+		final int minZ = getMinZ() - 1;
+		final int maxZ = minZ + getSize() + 1;
+		final int size = getSize() + 1;
+		
+		World w = getWorld();
+		
+		Material type = isPublic ? Material.AIR : Material.STAINED_GLASS_PANE;
+		byte data;
+		Block b = w.getBlockAt(getX(), 63, getZ());
+		Bukkit.broadcastMessage(b.getBiome() + "");
+		
+		switch(b.getBiome())
+		{
+		case ICE_PLAINS_SPIKES:
+			data = 0;
+			break;
+		case DESERT:
+			data = 4;
+			break;
+		case HELL:
+			data = 14;
+			break;
+		case SKY:
+			data = 10;
+			break;
+		case JUNGLE:
+			data = 5;
+			break;
+		case SWAMPLAND:
+			data = 13;
+			break;
+		case MESA:
+			data = 1;
+			break;
+		case MUSHROOM_ISLAND:
+			data = 2;
+			break;
+		default:
+			type = Material.GLASS;
+			data = 0;
+			break;
+		}
+		
+		int id = type.getId();
+		
+		int maxHeight = w.getMaxHeight();
+		
+		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), new Runnable()
+		{
+			int y = 63;
+			
+			@Override
+			public void run()
+			{
+				if(y >= maxHeight)
+				{
+					Bukkit.getScheduler().cancelTask(task);
+					task = 0;
+					
+					Warp warp = Warp.MAP.get(w.getUID());
+					
+					for(Player all : w.getPlayers())
+					{
+//						if(isTrusted(all))
+//						{
+//							continue;
+//						}
+						
+						if(isLand(all.getLocation()))
+						{
+							all.teleport(warp.getSpawnLocation());
+						}
+					}
+					
+					return;
+				}
+				
+				for(int x = minX; x <= maxX; x++)
+				{
+					for(int z = minZ; z <= maxZ;)
+					{
+						Block b = w.getBlockAt(x, y, z);
+						b.setTypeIdAndData(id, data, false);
+						w.playSound(b.getLocation(), Sound.DIG_STONE, 1.0F, 1.0F);
+						
+						if(x == minX || x == maxX)
+						{
+							z++;
+						}
+						else
+						{
+							z += size;
+						}
+					}
+				}
+				
+				y++;
+			}
+		}, 2L, 2L);
+		
 		landData.setPublic(isPublic);
+		return true;
 	}
 	
-	public void setName(String name)
+	public void setName(String name) throws NameAlreadyInUseException
 	{
 		landData.setName(name);
 	}
@@ -524,6 +653,29 @@ public class Land implements Listener
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(CreatureSpawnEvent e)
+	{
+		if(isLand(e.getLocation()))
+		{
+			if(hasOwner())
+			{
+				e.setCancelled(false);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void a(EntitySpawnEvent e)
+	{
+		if(!isLand(e.getLocation()))
+		{
+			return;
+		}
+		
+		e.getEntity().setMetadata("land", new FixedMetadataValue(Main.getInstance(), id));
+	}
+	
 	public World getWorld()
 	{
 		return Bukkit.getWorld(worldUID);
@@ -578,5 +730,32 @@ public class Land implements Listener
 	public int getMinZ()
 	{
 		return z - getSize() + 1;
+	}
+	
+	public String getBeautyName()
+	{
+		return getName() == null ? getBeautyId() : getName();
+	}
+	
+	public static Land getLandByUserInput(String input)
+	{
+		try
+		{
+			return getById(Integer.valueOf(input) - 1);
+		}
+		catch(NumberFormatException e)
+		{
+			return SET.stream().filter(x -> input.equals(x.getName())).findAny().orElse(null);
+		}
+	}
+
+	public int getTrustedPlayerLimit()
+	{
+		return getSize() / 4;
+	}
+	
+	public boolean hasOwner()
+	{
+		return getOwner() != null;
 	}
 }

@@ -12,13 +12,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 import com.google.common.io.ByteStreams;
 
@@ -27,6 +25,8 @@ import br.com.acenetwork.craftlandia.manager.Config.Type;
 
 public class LandData implements Serializable
 {
+	private static final long serialVersionUID = -1004416978143252480L;
+
 	public static Map<Integer, LandData> map = new HashMap<>();
 	
 	private UUID ownerUUID;
@@ -66,8 +66,16 @@ public class LandData implements Serializable
 		return name;
 	}
 	
-	public void setName(String name)
+	public void setName(String name) throws NameAlreadyInUseException
 	{
+		if(name != null)
+		{
+			if(map.values().stream().filter(x -> name.equals(x.name)).findAny().isPresent())
+			{
+				throw new NameAlreadyInUseException();
+			}
+		}
+		
 		this.name = name;
 	}
 	
@@ -123,6 +131,7 @@ public class LandData implements Serializable
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static void loadAll()
 	{
 		File file = Config.getFile(Type.LANDS, false);

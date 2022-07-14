@@ -15,6 +15,7 @@ import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import br.com.acenetwork.craftlandia.warp.Warp;
+import br.com.acenetwork.craftlandia.warp.WarpLand;
 
 public class Temp implements TabExecutor
 {
@@ -226,7 +227,8 @@ public class Temp implements TabExecutor
 			Player p = (Player) sender;
 			CommonPlayer cp = CraftCommonPlayer.get(p);
 			
-			p.sendMessage(Playtime.getInstance().getItemMap().toString());
+			p.sendMessage(((WarpLand) Warp.MAP.get(p.getWorld().getUID())).map.keySet().toString());
+//			p.sendMessage(Playtime.getInstance().getItemMap().toString());
 			
 //			p.sendMessage("version = " + ProtocolLibrary.getProtocolManager().getProtocolVersion(p));
 //			sender.sendMessage("" + p.getWorld().getName() + " chunks in memory = " + Warp.MAP.get(p.getWorld().getUID()).blockData.size());
