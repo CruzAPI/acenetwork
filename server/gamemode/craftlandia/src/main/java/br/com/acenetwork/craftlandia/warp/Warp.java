@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
@@ -73,6 +74,7 @@ import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
@@ -287,7 +289,7 @@ public abstract class Warp implements Listener
 		
 		BlockData bd = new BlockData();
 		
-		bd.setRarity(Util.getRarity(e.getItemInHand()));
+		bd.setRarity(Optional.ofNullable(Util.getRarity(e.getItemInHand())).orElse(Rarity.COMMON));
 		bd.setProperties(Util.getProperties(e.getItemInHand()));
 		
 		writeBlock(b, bd);
@@ -304,20 +306,6 @@ public abstract class Warp implements Listener
 		}
 		
 		e.setCancelled(isSpawnProtection(l));
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void b(EntityChangeBlockEvent e)
-	{
-		if(e.getBlock().getWorld() != w)
-		{
-			return;
-		}
-		
-		if(e.getEntity().getType() == EntityType.ENDERMAN)
-		{
-			e.setCancelled(isSpawnProtection(e.getBlock().getLocation()));
-		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

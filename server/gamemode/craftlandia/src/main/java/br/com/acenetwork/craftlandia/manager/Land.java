@@ -32,6 +32,7 @@ import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -650,6 +651,17 @@ public class Land implements Listener
 			{
 				e.setCancelled(false);
 			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void ab(EntityChangeBlockEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(isLand(b) && hasOwner())
+		{
+			e.setCancelled(false);
 		}
 	}
 	

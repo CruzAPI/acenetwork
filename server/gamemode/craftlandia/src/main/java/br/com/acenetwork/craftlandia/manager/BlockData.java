@@ -47,7 +47,8 @@ public class BlockData implements Serializable
 			
 			if((main & 0x40) == 0x40)
 			{
-				properties = Property.getPropertySet(in.readNBytes(Property.getByteArrayLength()));
+//				properties = Property.getPropertySet(in.readNBytes(Property.getByteArrayLength())); NoSuchMethodError
+				properties = Property.getPropertySet(new byte[] { in.readByte() });
 			}
 			
 			if((main & 0x20) == 0x20)

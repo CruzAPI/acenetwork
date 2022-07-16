@@ -96,16 +96,22 @@ public class Util
 	
 	public static List<String> getLore(Block b)
 	{
-		BlockData data = Util.readBlock(b);
-		Rarity rarity = data.getRarity() == null ? getRarity(b.getWorld()) : data.getRarity();
+		return getLore(Util.readBlock(b), b.getWorld());
+	}
+	public static List<String> getLore(BlockData data, World world)
+	{
+		Rarity rarity = data == null || data.getRarity() == null ? getRarity(world) : data.getRarity();
 		
 		List<String> lore = new ArrayList<>();
 		
 		lore.add(rarity.toString());
 		
-		for(Property property : data.getProperties())
+		if(data != null)
 		{
-			lore.add(property.toString());
+			for(Property property : data.getProperties())
+			{
+				lore.add(property.toString());
+			}
 		}
 		
 		return lore;

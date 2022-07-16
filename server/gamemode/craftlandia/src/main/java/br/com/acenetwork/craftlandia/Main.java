@@ -29,6 +29,7 @@ import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
@@ -75,6 +76,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
 import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.Home;
@@ -92,6 +94,7 @@ import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
+import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.manager.BlockData;
@@ -154,6 +157,7 @@ public class Main extends Common implements Listener
 		getServer().getPluginManager().registerEvents(this, this);
 		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
 		getServer().getPluginManager().registerEvents(new RandomItem(), this);
+		getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
 		
 		registerCommand(new Temp(), "temp");
 		
@@ -646,7 +650,7 @@ public class Main extends Common implements Listener
 		}
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(EntityChangeBlockEvent e)
 	{
 		Block b = e.getBlock();
@@ -656,6 +660,10 @@ public class Main extends Common implements Listener
 		{
 			return;
 		}
+		
+		FallingBlock fb = (FallingBlock) entity;
+		fb.setDropItem(false);
+		Bukkit.broadcastMessage("e.getTo() " + e.getTo().toString());
 		
 		if(e.getTo() == Material.AIR)
 		{
@@ -671,6 +679,29 @@ public class Main extends Common implements Listener
 				BlockData data = (BlockData) entity.getMetadata("data").get(0).value();
 				Util.writeBlock(b, data);
 			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void a(FallingBlockObstructEvent e)
+	{
+		FallingBlock fb = e.getFallingBlock();
+		
+		if(fb.getDropItem())
+		{
+			return;
+		}
+		
+		if(fb.hasMetadata("data"))
+		{
+			BlockData data = (BlockData) fb.getMetadata("data").get(0).value();
+			
+			ItemStack item = new ItemStack(fb.getBlockId(), 1, fb.getBlockData());
+			ItemMeta meta = item.getItemMeta();
+			meta.setLore(Util.getLore(data, fb.getWorld()));
+			item.setItemMeta(meta);
+			
+			fb.getWorld().dropItem(fb.getLocation(), item);
 		}
 	}
 	
