@@ -50,7 +50,7 @@ public class Test implements TabExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command arg1, String arg2, String[] args)
 	{
-		sender.sendMessage("test!");
+		sender.sendMessage(ChatColor.RED + "test!");
 //		ItemStack item = p.getItemInHand();
 //		
 //		

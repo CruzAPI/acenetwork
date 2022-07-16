@@ -57,11 +57,11 @@ public enum Property implements ItemTag
 		
 		for(int i = 0; i < values.length;)
 		{
-			byte b = Byte.MIN_VALUE;
+			byte b = 0b00000000;
 			
 			for(int j = 7; j >= 0; j--, i++)
 			{
-				b += i < values.length ? set.contains(values[i]) ? 1 << j : 0 : 0;
+				b |= i < values.length ? set.contains(values[i]) ? 1 << j : 0 : 0;
 			}
 			
 			bytes[(i / 8) - 1] = b;
@@ -80,16 +80,14 @@ public enum Property implements ItemTag
 		
 		for(int i = 0; i < bytes.length; i++)
 		{
-			int b = bytes[i] + 128;
+			byte b = bytes[i];
 			
 			for(int j = 7; j >= 0; j--)
 			{
-				if(b % 2 == 1 && n + j < values.length)
+				if((b >> j) % 2 == 1 && n + j < values.length)
 				{
 					set.add(values[n + j]);
 				}
-				
-				b /= 2;
 			}
 			
 			n += 8;

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -49,7 +50,10 @@ import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.Property;
+import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BlockSerializable;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
@@ -788,7 +792,14 @@ public class LandCMD implements TabExecutor, Listener
 				y = 63;
 				Block b = w.getBlockAt(x, y - 1, z);
 				b.setType(Material.GLASS);
-				Util.writeBlock(b, new byte[] {1, -128});
+				
+				BlockData data = new BlockData();
+				
+				data.setRarity(Rarity.COMMON);
+				data.setProperties(new HashSet<>());
+				data.getProperties().add(Property.SOLD);
+				
+				Util.writeBlock(b, data);
 			}
 			
 			p.teleport(new Location(w, x + 0.5D, y, z + 0.5D, -135.0F, 0.0F));

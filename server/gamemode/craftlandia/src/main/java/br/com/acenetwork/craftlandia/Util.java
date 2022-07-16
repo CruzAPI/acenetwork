@@ -35,6 +35,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
 import br.com.acenetwork.craftlandia.warp.Warp;
@@ -95,18 +96,14 @@ public class Util
 	
 	public static List<String> getLore(Block b)
 	{
-		byte[] bytes = Util.readBlock(b);
-		byte[] propertyByteArray = new byte[bytes.length - 1];
-		
-		System.arraycopy(bytes, 1, propertyByteArray, 0, propertyByteArray.length);
-		
-		Rarity rarity = Rarity.getByDataOrWorld(bytes[0], b.getWorld());
+		BlockData data = Util.readBlock(b);
+		Rarity rarity = data.getRarity() == null ? getRarity(b.getWorld()) : data.getRarity();
 		
 		List<String> lore = new ArrayList<>();
 		
 		lore.add(rarity.toString());
 		
-		for(Property property : Property.getPropertySet(propertyByteArray))
+		for(Property property : data.getProperties())
 		{
 			lore.add(property.toString());
 		}
@@ -114,14 +111,33 @@ public class Util
 		return lore;
 	}
 	
-	public static byte[] readBlock(Block b)
+	public static BlockData readBlock(Block b)
 	{
 		return Warp.MAP.get(b.getWorld().getUID()).readBlock(b);
 	}
 	
-	public static void writeBlock(Block b, byte[] data)
+	public static void writeBlock(Block b, BlockData data)
 	{
 		Warp.MAP.get(b.getWorld().getUID()).writeBlock(b, data);
+	}
+	
+	public static byte[] copyArrays(byte[]... arrays)
+	{
+		int length = 0;
+		
+		for(byte[] array : arrays)
+		{
+			length += array.length;
+		}
+		
+		byte[] copy = new byte[length];
+		
+		for(int i = 0, destPos = 0; i < arrays.length && destPos < copy.length; destPos += arrays[i++].length)
+		{
+			System.arraycopy(arrays[i], 0, copy, destPos, arrays[i].length);
+		}
+		
+		return copy;
 	}
 	
 	public static int getArrayLength()

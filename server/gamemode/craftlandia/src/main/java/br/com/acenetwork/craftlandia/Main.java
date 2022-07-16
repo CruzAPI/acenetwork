@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -93,6 +94,7 @@ import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.LandData;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.Farm;
@@ -126,6 +128,11 @@ public class Main extends Common implements Listener
 		wc.environment(Environment.NORMAL);
 		wc.generateStructures(true);
 		new Newbie(wc.createWorld());
+		
+		wc = new WorldCreator("testtt");
+		wc.environment(Environment.NORMAL);
+		wc.generateStructures(true);
+		wc.createWorld();
 		
 		wc = new WorldCreator("farm");
 		wc.environment(Environment.THE_END);
@@ -266,23 +273,15 @@ public class Main extends Common implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void b(BlockPlaceEvent e)
-	{
-		Block b = e.getBlock();
-		
-		Util.writeBlock(b, Util.getByteArray(e.getItemInHand()));
-	}
-	
-	@EventHandler
 	public void a(BlockPistonExtendEvent e)
 	{
-		List<byte[]> list = new ArrayList<>();
+		List<BlockData> list = new ArrayList<>();
 		
 		for(int i = 0; i < e.getBlocks().size(); i++)
 		{
 			Block b = e.getBlocks().get(i);
 			
-			byte[] data = Util.readBlock(b);
+			BlockData data = Util.readBlock(b);
 			
 			list.add(data);
 			
@@ -402,12 +401,12 @@ public class Main extends Common implements Listener
 			break;
 		}
 		
-		byte[] data = Util.readBlock(source);
+		BlockData data = Util.readBlock(source);
 		
 		Util.writeBlock(newState.getBlock(), data);
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(PlayerBucketFillEvent e)
 	{
 		Player p = e.getPlayer();
@@ -416,18 +415,19 @@ public class Main extends Common implements Listener
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
 		
-		byte data = Util.readBlock(b)[0];
+		BlockData data = Util.readBlock(b);
 		Util.writeBlock(b, null);
 		
-		Rarity rarity = Rarity.getByDataOrWorld(data, b.getWorld());
+		Rarity bucketRarity = data.getRarity() == null ? Util.getRarity(b.getWorld()) : data.getRarity();
+		Rarity itemRarity = Optional.ofNullable(Util.getRarity(itemInHand)).orElse(Rarity.COMMON);
+		Rarity finalRarity = Rarity.getByData((byte) Math.min(bucketRarity.getData(), itemRarity.getData()));
 		
-		Util.addRarity(item, Util.getRarity(itemInHand));
-		Util.addRarity(item, rarity);
+		Util.setCommodity(item, finalRarity);
 		
 		e.setItemStack(item);
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(PlayerBucketEmptyEvent e)
 	{
 		Player p = e.getPlayer();
@@ -436,21 +436,18 @@ public class Main extends Common implements Listener
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
 		
-		Util.writeBlock(b, Util.getByteArray(itemInHand));
+		BlockData data = new BlockData();
 		
-		Util.addRarity(item, Util.getRarity(itemInHand));
+		Rarity itemRarity = Util.getRarity(itemInHand);
+		
+		data.setRarity(itemRarity);
+		data.setProperties(Util.getProperties(itemInHand));
+		
+		Util.writeBlock(b, data);
+		
+		Util.setCommodity(item, itemRarity);
 		
 		e.setItemStack(item);
-	}
-	
-	@EventHandler
-	public void a(PlayerInteractEntityEvent e)
-	{
-		Entity entity = e.getRightClicked();
-		
-		Player p = e.getPlayer();
-		
-		p.sendMessage(entity.hasMetadata("task") + "");
 	}
 	
 	@EventHandler
@@ -578,7 +575,9 @@ public class Main extends Common implements Listener
 	public void a(SpawnerSpawnEvent e)
 	{
 		Entity entity = e.getEntity();
-		entity.setCustomName(Rarity.getByDataOrWorld(Util.readBlock(e.getSpawner().getBlock())[0], entity.getWorld()).toString());
+		BlockData data = Util.readBlock(e.getSpawner().getBlock());
+		entity.setCustomName(((data == null ? null : data.getRarity()) == null
+				? Util.getRarity(entity.getWorld()) : data.getRarity()).toString());
 	}
 	
 	@EventHandler
@@ -625,13 +624,13 @@ public class Main extends Common implements Listener
 	@EventHandler
 	public void a(BlockPistonRetractEvent e)
 	{
-		List<byte[]> list = new ArrayList<>();
+		List<BlockData> list = new ArrayList<>();
 		
 		for(int i = 0; i < e.getBlocks().size(); i++)
 		{
 			Block b = e.getBlocks().get(i);
 			
-			byte[] data = Util.readBlock(b);
+			BlockData data = Util.readBlock(b);
 			
 			list.add(data);
 			
@@ -660,7 +659,7 @@ public class Main extends Common implements Listener
 		
 		if(e.getTo() == Material.AIR)
 		{
-			byte[] data = Util.readBlock(b);
+			BlockData data = Util.readBlock(b);
 			entity.setMetadata("data", new FixedMetadataValue(this, data));
 			
 			Util.writeBlock(b, null);
@@ -669,7 +668,7 @@ public class Main extends Common implements Listener
 		{
 			if(entity.hasMetadata("data"))
 			{
-				byte[] data = (byte[]) entity.getMetadata("data").get(0).value();
+				BlockData data = (BlockData) entity.getMetadata("data").get(0).value();
 				Util.writeBlock(b, data);
 			}
 		}
@@ -789,9 +788,9 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
-		byte[] bytes = Util.readBlock(b);
+		BlockData data = Util.readBlock(b);
 		
-		Bukkit.broadcastMessage("" + bytes[0] + " " + bytes[1]);
+		Bukkit.broadcastMessage(data + "");
 	}
 	
 //	@EventHandler

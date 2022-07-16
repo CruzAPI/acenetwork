@@ -32,7 +32,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
@@ -62,7 +61,6 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -76,6 +74,7 @@ import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
@@ -84,8 +83,8 @@ import net.md_5.bungee.api.ChatColor;
 public abstract class Warp implements Listener
 {
 	public static final Map<UUID, Warp> MAP = new HashMap<>();
-	public final Map<ChunkLocation, Map<Short, Short>> blockData = new HashMap<>();
-
+	public final Map<ChunkLocation, Map<Short, BlockData>> blockData = new HashMap<>();
+	
 	protected final World w;
 	protected final String worldName;
 	
@@ -279,6 +278,19 @@ public abstract class Warp implements Listener
 		}
 		
 		e.setCancelled(isSpawnProtection(b.getLocation()));
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void c(BlockPlaceEvent e)
+	{
+		Block b = e.getBlock();
+		
+		BlockData bd = new BlockData();
+		
+		bd.setRarity(Util.getRarity(e.getItemInHand()));
+		bd.setProperties(Util.getProperties(e.getItemInHand()));
+		
+		writeBlock(b, bd);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -607,21 +619,21 @@ public abstract class Warp implements Listener
 		saveChunks();
 	}
 	
-	public byte[] readBlock(Block b)
+	public BlockData readBlock(Block b)
 	{
 		Chunk c = b.getChunk();
-		Map<Short, Short> map = blockData.get(loadChunk(c.getX(), c.getZ()));
+		Map<Short, BlockData> map = blockData.get(loadChunk(c.getX(), c.getZ()));
 		short coords = Util.chunkCoordsToShort(b);
 		
 		if(!map.containsKey(coords))
 		{
-			return Util.emptyArray();
+			return null;
 		}
 		
-		return Util.toByteArray(map.get(coords));
+		return map.get(coords);
 	}
 	
-	public void writeBlock(Block b, byte[] bytes)
+	public void writeBlock(Block b, BlockData bd)
 	{
 		if(b.getWorld() != w)
 		{
@@ -629,28 +641,28 @@ public abstract class Warp implements Listener
 		}
 		
 		Chunk c = b.getChunk();
-		Map<Short, Short> map = blockData.get(loadChunk(c.getX(), c.getZ()));
+		Map<Short, BlockData> map = blockData.get(loadChunk(c.getX(), c.getZ()));
 		short coords = Util.chunkCoordsToShort(b);
 		
-		if(bytes == null)
+		if(bd == null)
 		{
 			map.remove(coords);
 		}
 		else
 		{
-			map.put(coords, Util.toShort(bytes));
+			map.put(coords, bd);
 		}
 	}
 	
 	private void saveChunks()
 	{
-		Iterator<Entry<ChunkLocation, Map<Short, Short>>> iterator = blockData.entrySet().iterator();
+		Iterator<Entry<ChunkLocation, Map<Short, BlockData>>> iterator = blockData.entrySet().iterator();
 		
 		while(iterator.hasNext())
 		{
-			Entry<ChunkLocation, Map<Short, Short>> entry = iterator.next();
+			Entry<ChunkLocation, Map<Short, BlockData>> entry = iterator.next();
 			ChunkLocation cl = entry.getKey();
-			Map<Short, Short> value = entry.getValue();
+			Map<Short, BlockData> value = entry.getValue();
 			
 			File file = Config.getFile(Config.Type.REGION, true, w.getName(), cl.getX() + "." + cl.getZ());
 			
@@ -658,7 +670,14 @@ public abstract class Warp implements Listener
 					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 					ObjectOutputStream out = new ObjectOutputStream(streamOut))
 			{
-				out.writeObject(value);
+				Map<Short, byte[]> temp = new HashMap<>();
+				
+				for(Entry<Short, BlockData> entry1 : value.entrySet())
+				{
+					temp.put(entry1.getKey(), entry1.getValue().toByteArray());
+				}
+				
+				out.writeObject(temp);
 				fileOut.write(streamOut.toByteArray());
 				
 				if(!w.isChunkInUse(cl.getX(), cl.getZ()))
@@ -666,7 +685,7 @@ public abstract class Warp implements Listener
 					iterator.remove();
 				}
 			}
-			catch(IOException ex)
+			catch(Exception ex)
 			{
 				ex.printStackTrace();
 			}
@@ -694,7 +713,14 @@ public abstract class Warp implements Listener
 				ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 				ObjectInputStream in = new ObjectInputStream(streamIn))
 		{
-			blockData.put(cl, (Map<Short, Short>) in.readObject());
+			Map<Short, BlockData> temp = new HashMap<>();
+			
+			for(Entry<Short, byte[]> entry : ((Map<Short, byte[]>) in.readObject()).entrySet())
+			{
+				temp.put(entry.getKey(), new BlockData(entry.getValue()));
+			}
+			
+			blockData.put(cl, temp);
 		}
 		catch(ClassNotFoundException | IOException ex)
 		{

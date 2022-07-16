@@ -47,7 +47,7 @@ public enum Rarity implements ItemTag
 		return null;
 	}
 	
-	public static Rarity getByData(short data)
+	public static Rarity getByData(byte data)
 	{
 		for(Rarity itemTag : values())
 		{
