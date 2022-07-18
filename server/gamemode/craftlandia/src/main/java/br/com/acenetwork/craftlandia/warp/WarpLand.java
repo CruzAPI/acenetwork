@@ -105,7 +105,6 @@ public class WarpLand extends Warp
 			{
 				tempMap.put(entity.getUniqueId(), entity);
 			}
-//			w.getEntities().stream().collect(Collectors.toMap(x -> x.getUniqueId(), x -> x));
 			
 			Iterator<Entry<UUID, LandEntityData>> iterator = map.entrySet().iterator();
 			
@@ -123,14 +122,15 @@ public class WarpLand extends Warp
 				}
 				
 				Location l = entity.getLocation();
+				Location lastLocation = value.getLastLocation();
 				
 				if(value.getLand().isLand(l))
 				{
 					value.setLastLocation(l);
 				}
-				else
+				else if(lastLocation != null)
 				{
-					entity.teleport(value.getLastLocation());
+					entity.teleport(lastLocation);
 				}
 			}
 		}, 10L, 10L);

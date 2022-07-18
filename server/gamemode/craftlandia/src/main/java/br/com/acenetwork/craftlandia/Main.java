@@ -178,37 +178,6 @@ public class Main extends Common implements Listener
 		registerCommand(new Sethome(), "sethome");
 		registerCommand(new Delhome(), "delhome");
 		registerCommand(new Visit(), "visit");
-		
-		for(World w : Bukkit.getWorlds())
-		{
-			File file;
-			
-			file = CommonsConfig.getFile(Type.SIGN_DATA, false, w.getName());
-			
-			if(!file.exists())
-			{
-				continue;
-			}
-			
-			try(RandomAccessFile access = new RandomAccessFile(file, "r"))
-			{
-				while(access.getFilePointer() < access.length())
-				{
-					int x = access.readInt();
-					int y = access.readInt();
-					int z = access.readInt();
-					
-					w.getBlockAt(x, y, z).setMetadata("signPos", new FixedMetadataValue(this, access.getFilePointer() - 12L));
-					
-					access.skipBytes(72);
-//					access.seek(access.getFilePointer() + 72L);
-				}
-			}
-			catch(IOException ex)
-			{
-				ex.printStackTrace();
-			}
-		}
 	}
 	
 	@Override
@@ -720,28 +689,10 @@ public class Main extends Common implements Listener
 		e.setCancelled(true);
 		
 		ItemStack tool = p.getItemInHand();
-		List<ItemStack> drops = new ArrayList<>(b.getDrops(tool));
 		
 		Bukkit.broadcastMessage(b.getType() + "");
 		
-		if(b.getType() == Material.MOB_SPAWNER && tool.getType() == Material.GOLD_PICKAXE)
-		{
-			Bukkit.broadcastMessage("aaadd");
-			drops.add(new ItemStack(Material.MOB_SPAWNER, 1, (short) b.getData()));
-		}
-		
-		for(ItemStack item : drops)
-		{
-			ItemMeta meta;
-			meta = item.getItemMeta();
-			meta.setLore(Util.getLore(b));
-			item.setItemMeta(meta);
-			
-			Bukkit.getScheduler().runTask(this, () ->
-			{
-				b.getWorld().dropItemNaturally(b.getLocation(), item);
-			});
-		}
+		BlockUtil.breakNaturally(b, tool);
 		
 		short damage;
 		
@@ -805,8 +756,6 @@ public class Main extends Common implements Listener
 				p.setItemInHand(null);
 			}
 		}
-		
-		b.setType(Material.AIR);
 	}
 	
 	@EventHandler

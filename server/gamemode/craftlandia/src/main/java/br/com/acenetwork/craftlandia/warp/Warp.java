@@ -287,12 +287,18 @@ public abstract class Warp implements Listener
 	{
 		Block b = e.getBlock();
 		
-		BlockData bd = new BlockData();
+		BlockData data = new BlockData();
 		
-		bd.setRarity(Optional.ofNullable(Util.getRarity(e.getItemInHand())).orElse(Rarity.COMMON));
-		bd.setProperties(Util.getProperties(e.getItemInHand()));
+		data.setRarity(Optional.ofNullable(Util.getRarity(e.getItemInHand())).orElse(Rarity.COMMON));
+		data.setProperties(Util.getProperties(e.getItemInHand()));
 		
-		writeBlock(b, bd);
+		if(b.getType() == Material.WALL_SIGN)
+		{
+			Bukkit.broadcastMessage("WALL_SIGN");
+			data.setPlayer(e.getPlayer().getUniqueId());
+		}
+		
+		writeBlock(b, data);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -26,8 +26,12 @@ import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EntityType;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
@@ -190,35 +194,6 @@ public class Util
 		return (short) (coords[1] << 8 | coords[0] << 4 & 0xF0 | coords[2] & 0x0F);
 	}
 	
-	public static UUID readSign(Block b)
-	{
-		if(!b.hasMetadata("signPos"))
-		{
-			return null;
-		}
-		
-		File file = CommonsConfig.getFile(Type.SIGN_DATA, true, b.getWorld().getName());
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "r"))
-		{
-			access.seek(b.getMetadata("signPos").get(0).asLong() + 12L);
-			
-			String string = "";
-			
-			for(int i = 0; i < 36; i++)
-			{
-				string += access.readChar();
-			}
-			
-			return UUID.fromString(string);
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-			return null;
-		}
-	}
-	
 	public static byte[] getByteArray(ItemStack item)
 	{
 		ItemMeta meta = item.getItemMeta();
@@ -253,36 +228,6 @@ public class Util
 		}
 		
 		return bytes;
-	}
-	
-	public static void writeSign(Block b, UUID uuid)
-	{
-		File file = CommonsConfig.getFile(Type.SIGN_DATA, true, b.getWorld().getName());
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-		{
-			long pos;
-			
-			if(b.hasMetadata("signPos"))
-			{
-				pos = b.getMetadata("signPos").get(0).asLong();
-			}
-			else
-			{
-				pos = access.length();
-				b.setMetadata("signPos", new FixedMetadataValue(Main.getInstance(), pos));
-			}
-			
-			access.seek(pos);
-			access.writeInt(b.getX());
-			access.writeInt(b.getY());
-			access.writeInt(b.getZ());
-			access.writeChars(uuid.toString());
-		}
-		catch(IOException ex)
-		{
-			ex.printStackTrace();
-		}
 	}
 	
 	public static void setCommodity(ItemStack item, Rarity rarity)
@@ -534,18 +479,14 @@ public class Util
 		return Arrays.stream(Property.values()).filter(x -> lore.contains(x.toString())).collect(Collectors.toSet());
 	}
 	
-	public static Collection<ItemStack> getDrops(Block b, BreakReason reason)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void a(EntityExplodeEvent e)
 	{
-		return getDrops(b, reason, null);
-	}
-	
-	public static Collection<ItemStack> getDrops(Block b, ItemStack tool)
-	{
-		return getDrops(b, BreakReason.PLAYER, tool);
-	}
-	
-	private static Collection<ItemStack> getDrops(Block b, BreakReason reason, ItemStack tool)
-	{
-		return null;
+		for(Block b : e.blockList())
+		{
+			BlockUtil.breakNaturally(b, BreakReason.EXPLOSION);
+		}
+		
+		e.blockList().clear();
 	}
 }

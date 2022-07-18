@@ -835,7 +835,7 @@ public class Playtime implements TabExecutor, Listener
 			{
 				WBTA wbta = entry.getValue();
 				
-				if(wbta.getInvHolder().equals(cb.getInventory().getHolder()))
+				if(cb.getInventory().getHolder().equals(wbta.getInvHolder()))
 				{
 					wbta.setInvHolder(null);
 				}

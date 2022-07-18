@@ -11,7 +11,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
@@ -29,10 +28,9 @@ public class FallingBlockChecker implements Listener
 			while(iterator.hasNext())
 			{
 				FallingBlock fb = iterator.next();
-				Bukkit.broadcastMessage("!!!");
+				
 				if(fb.isDead())
 				{
-					Bukkit.broadcastMessage("???");
 					iterator.remove();
 					Bukkit.getPluginManager().callEvent(new FallingBlockObstructEvent(fb));
 				}

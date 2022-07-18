@@ -22,7 +22,6 @@ public class CommonsConfig
 		USER_DAT,
 		USERS_FOLDER,
 		BLOCK_DATA,
-		SIGN_DATA,
 		ITEM_INFO_FOLDER,
 		ITEM_INFO,
 		WHITELISTED_IP,
@@ -58,12 +57,6 @@ public class CommonsConfig
 			break;
 		case ACTIVATED_VIPS:
 			file = new File(Common.getPlugin().getConfigFolder(), "activated_vips.txt");
-			break;
-		case SIGN_DATA:
-			file = new File(Common.getPlugin().getConfigFolder() + "/sign_data", args[0] + ".txt");
-			break;
-		case BLOCK_DATA:
-			file = new File(Common.getPlugin().getConfigFolder() + "/block_data", args[0] + ".txt");
 			break;
 		case ITEM_INFO:
 			file = new File(Common.getPlugin().getConfigFolder() + "/item_info", args[0] + ".yml");

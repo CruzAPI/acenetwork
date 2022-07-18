@@ -1,56 +1,52 @@
 package br.com.acenetwork.craftlandia.executor;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
-import org.bukkit.material.Directional;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Currency;
-import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.manager.PlayerData;
-import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.ItemTag;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Property;
+import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.inventory.AmountSelector;
 import br.com.acenetwork.craftlandia.inventory.CurrencySelector;
 import br.com.acenetwork.craftlandia.inventory.EnchantSelector;
 import br.com.acenetwork.craftlandia.inventory.ItemSelector;
 import br.com.acenetwork.craftlandia.inventory.PriceSelector;
 import br.com.acenetwork.craftlandia.inventory.RaritySelector;
+import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.InvalidCommandArgumentException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -63,8 +59,8 @@ public class Shop implements TabExecutor, Listener
 	}
 	
 	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		// TODO Auto-generated method stub
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
+	{
 		return null;
 	}
 
@@ -328,7 +324,6 @@ public class Shop implements TabExecutor, Listener
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void asad(PlayerInteractEvent e)
 	{
-		Player p = e.getPlayer();
 		Block clickedBlock = e.getClickedBlock();
 		ItemStack itemInHand = e.getItem();
 		
@@ -339,7 +334,7 @@ public class Shop implements TabExecutor, Listener
 		
 		Block relative = clickedBlock.getRelative(e.getBlockFace());
 		
-		if(clickedBlock.getType() != Material.CHEST || relative.getType() != Material.AIR)
+		if(clickedBlock.getType() != Material.CHEST || relative.getType() != Material.AIR || !e.getPlayer().isSneaking())
 		{
 			return;
 		}
@@ -353,6 +348,7 @@ public class Shop implements TabExecutor, Listener
 		}
 		
 		String[] line = new String[] {"", "", "", ""};
+		
 		if(itemInHand.getType() == Material.SIGN)
 		{
 			if(itemInHand.hasItemMeta())
@@ -379,7 +375,26 @@ public class Shop implements TabExecutor, Listener
 		
 		if(e.isCancelled())
 		{
+			BlockState state = relative.getState();
+			BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(relative, state, clickedBlock, itemInHand, e.getPlayer(), true);
 			relative.setType(Material.WALL_SIGN);
+			Bukkit.getPluginManager().callEvent(blockPlaceEvent);
+			
+			if(blockPlaceEvent.isCancelled())
+			{
+				relative.setTypeIdAndData(state.getTypeId(), state.getRawData(), false);
+				return;
+			}
+			
+			if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
+			{
+				itemInHand.setAmount(itemInHand.getAmount() - 1);
+				
+				if(itemInHand.getAmount() <= 0)
+				{
+					e.getPlayer().setItemInHand(null);
+				}
+			}
 			
 			if(relative.getState() instanceof Sign)
 			{
@@ -394,8 +409,6 @@ public class Shop implements TabExecutor, Listener
 				signData.setFacingDirection(face);
 				sign.setRawData(signData.getData());
 				sign.update();
-				
-				Util.writeSign(relative, p.getUniqueId());
 			}
 		}
 	}
@@ -475,9 +488,10 @@ public class Shop implements TabExecutor, Listener
 				return;
 			}
 			
-			UUID owner = Util.readSign(b);
+			BlockData data = Util.readBlock(b);
+			UUID owner;
 			
-			if(owner == null)
+			if(data == null || (owner = data.getPlayer()) == null)
 			{
 				return;
 			}
