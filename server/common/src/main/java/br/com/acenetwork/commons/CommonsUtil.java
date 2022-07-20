@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.UUID;
@@ -19,6 +21,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import com.google.common.io.ByteArrayDataOutput;
@@ -32,6 +36,240 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommonsUtil
 {
+	public static boolean addEnchant(ItemStack item, Enchantment ench, int level, boolean ignoreLevelRestriction)
+	{
+		ItemMeta meta = item.getItemMeta();
+		boolean changed;
+		
+		if(item.getItemMeta() instanceof EnchantmentStorageMeta)
+		{
+			EnchantmentStorageMeta storage = ((EnchantmentStorageMeta) meta);
+			changed = storage.addStoredEnchant(ench, level, ignoreLevelRestriction);
+		}
+		else
+		{
+			changed = meta.addEnchant(ench, level, ignoreLevelRestriction);
+		}
+		
+		item.setItemMeta(meta);
+		return changed;
+	}
+	
+	public static boolean removeEnchant(ItemStack item, Enchantment ench)
+	{
+		ItemMeta meta = item.getItemMeta();
+		
+		boolean changed;
+		
+		if(meta instanceof EnchantmentStorageMeta)
+		{
+			EnchantmentStorageMeta storage = ((EnchantmentStorageMeta) meta);
+			changed = storage.removeStoredEnchant(ench);
+		}
+		else
+		{
+			changed = meta.removeEnchant(ench);
+		}
+		
+		item.setItemMeta(meta);
+		return changed;
+	}
+	
+	public static Map<Enchantment, Integer> getEnchants(ItemStack item)
+	{
+		if(!item.hasItemMeta())
+		{
+			return new HashMap<>();
+		}
+		
+		if(item.getItemMeta() instanceof EnchantmentStorageMeta)
+		{
+			return ((EnchantmentStorageMeta) item.getItemMeta()).getStoredEnchants();
+		}
+		
+		return item.getEnchantments();
+	}
+	
+	public static int getEnchantmentMultiplierFromItem(Enchantment enchantment)
+	{
+		if(enchantment.equals(Enchantment.PROTECTION_FIRE))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.PROTECTION_FALL))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.PROTECTION_EXPLOSIONS))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.THORNS))
+		{
+			return 8;
+		}
+		
+		if(enchantment.equals(Enchantment.OXYGEN))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.DEPTH_STRIDER))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.WATER_WORKER))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.DAMAGE_UNDEAD))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.DAMAGE_ARTHROPODS))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.KNOCKBACK))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.FIRE_ASPECT))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.LOOT_BONUS_MOBS))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.SILK_TOUCH))
+		{
+			return 8;
+		}
+		
+		if(enchantment.equals(Enchantment.DURABILITY))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.LOOT_BONUS_BLOCKS))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.ARROW_KNOCKBACK))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.ARROW_FIRE))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.ARROW_INFINITE))
+		{
+			return 8;
+		}
+		
+		if(enchantment.equals(Enchantment.LUCK))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.LURE))
+		{
+			return 4;
+		}
+		
+		return 1;
+	}
+	
+	public static int getEnchantmentMultiplierFromBook(Enchantment enchantment)
+	{
+		if(enchantment.equals(Enchantment.PROTECTION_EXPLOSIONS))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.THORNS))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.OXYGEN))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.DEPTH_STRIDER))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.WATER_WORKER))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.FIRE_ASPECT))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.LOOT_BONUS_MOBS))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.SILK_TOUCH))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.LOOT_BONUS_BLOCKS))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.ARROW_KNOCKBACK))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.ARROW_FIRE))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.ARROW_INFINITE))
+		{
+			return 4;
+		}
+		
+		if(enchantment.equals(Enchantment.LUCK))
+		{
+			return 2;
+		}
+		
+		if(enchantment.equals(Enchantment.LURE))
+		{
+			return 2;
+		}
+		
+		return 1;
+	}
+	
 	public static int getHighestBlockYAt(World w, int x, int z)
 	{
 		for(int y = w.getMaxHeight(); y >= 0; y--)

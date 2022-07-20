@@ -11,6 +11,8 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Leaves;
+import org.bukkit.material.Tree;
 
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 
@@ -34,6 +36,7 @@ public class BlockUtil
 		int amount;
 		double major;
 		double minor;
+		Material drop;
 		
 		List<ItemStack> items = new ArrayList<>();
 		
@@ -174,7 +177,7 @@ public class BlockUtil
 				}
 				else
 				{
-					items.add(new ItemStack(Material.COAL));
+					items.add(new ItemStack(Material.COAL, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
 			break;
@@ -222,7 +225,7 @@ public class BlockUtil
 				}
 				else
 				{
-					items.add(new ItemStack(Material.INK_SACK, 4 + r.nextInt(4 + 1), (short) 4));
+					items.add(new ItemStack(Material.INK_SACK, getOreMultiplier(fortune, r) * (4 + r.nextInt(4 + 1)), (short) 4));
 				}
 			}
 			break;
@@ -235,7 +238,7 @@ public class BlockUtil
 				}
 				else
 				{
-					items.add(new ItemStack(Material.EMERALD));
+					items.add(new ItemStack(Material.EMERALD, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
 			break;
@@ -248,7 +251,7 @@ public class BlockUtil
 				}
 				else
 				{
-					items.add(new ItemStack(Material.DIAMOND));
+					items.add(new ItemStack(Material.DIAMOND, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
 			break;
@@ -261,17 +264,24 @@ public class BlockUtil
 				}
 				else
 				{
-					items.add(new ItemStack(Material.QUARTZ));
+					items.add(new ItemStack(Material.QUARTZ, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
 			break;
 		case POTATO:
+			drop = Material.POTATO_ITEM;
 			if(r.nextInt(50) == 0)
 			{
 				items.add(new ItemStack(Material.POISONOUS_POTATO, 1));
 			}
+		case CROPS:
+			drop = Material.SEEDS;
+			if(b.getData() == 7)
+			{
+				items.add(new ItemStack(Material.WHEAT));
+			}
 		case CARROT:
-			Material drop = b.getType() == Material.POTATO ? Material.POTATO_ITEM : Material.CARROT_ITEM;
+			drop = Material.CARROT_ITEM;
 			
 			if(b.getData() < 7)
 			{
@@ -309,39 +319,56 @@ public class BlockUtil
 			{
 				items.add(new ItemStack(b.getType(), 1, b.getData()));
 			}
-			else if(r.nextInt(8) == 0)
+			else
 			{
-				items.add(new ItemStack(Material.SEEDS, 1));
+				next = r.nextDouble();
+				n = 2 + 2 * fortune;
+				
+				minor = 0.875D - (b.getType() == Material.LONG_GRASS ? 0.0D : 0.125D);
+				major = 1.0D - minor;
+				total = 0.0D;
+				
+				for(int i = 0; i < n; i++)
+				{
+					if(next <= (total += Math.pow(minor, n - 1 - i) * Math.pow(major, i) * choose(n - 1, (Math.max(n - 1L - i, i))))
+							|| i + 1 == n)
+					{
+						if(n != 0)
+						{
+							items.add(new ItemStack(Material.SEEDS, n));
+						}
+						
+						break s0;
+					}
+				}
 			}
 			break;
 		case LEAVES_2:
 		case LEAVES:
-			byte fakeData = (byte) ((byte) (b.getType() == Material.LEAVES ? 0 : 4) + b.getData());
-			Bukkit.broadcastMessage("fakedata = " + fakeData);
+			byte data = (byte) (b.getType() == Material.LEAVES ? ((Tree) b.getState().getData()).getSpecies().getData() : 4 + b.getData() % 2);
 			
 			if(tool != null && tool.getType() == Material.SHEARS || silkTouch > 0)
 			{
-				items.add(new ItemStack(b.getType(), 1, b.getData()));
+				items.add(new ItemStack(b.getType(), 1, (short) (data < 4 ? data : data - 4)));
 				break;
 			}
 			
 			n = r.nextInt(Math.max(20, 200 - fortune * 20 - (fortune >= 5 ? 20 : 0)));
-			Bukkit.broadcastMessage("nextInt = " + n);
+			
 			int a = 0;
 			
-			if(n < (a += (fakeData == 3 ? 5 : 10)))
+			if(n < (a += (data == 3 ? 5 : 10)))
 			{
-				items.add(new ItemStack(Material.SAPLING, 1, fakeData));
+				items.add(new ItemStack(Material.SAPLING, 1, data));
 			}
-			else if((fakeData == 0 || fakeData == 5) && n < (a += 1))
+			else if((data == 0 || data == 5) && n < (a += 1))
 			{
 				items.add(new ItemStack(Material.APPLE));
 			}
-			else if(fakeData == 3 && n < (a += 1))
+			else if(data == 3 && n < (a += 1))
 			{
 				items.add(new ItemStack(Material.INK_SACK, 1, (short) 3));
 			}
-			Bukkit.broadcastMessage("FAKEDATA = " + fakeData);
 			break;
 		case MELON_BLOCK:
 			if(silkTouch > 0)
@@ -398,6 +425,23 @@ public class BlockUtil
 					break s0;
 				}
 			}
+		case ENDER_CHEST:
+			if(tool == null || getPickaxeLevel(tool.getType()) >= getPickaxeLevel(Material.WOOD_PICKAXE))
+			{
+				if(silkTouch > 0)
+				{
+					items.add(new ItemStack(Material.ENDER_CHEST));
+					break;
+				}
+				
+				items.addAll(b.getDrops());
+			}
+			break;
+		case VINE:
+			if(tool != null && tool.getType() == Material.SHEARS)
+			{
+				items.add(new ItemStack(Material.VINE));
+			}
 		default:
 			Bukkit.broadcastMessage("default!!!!!");
 			items.addAll(b.getDrops());
@@ -405,7 +449,12 @@ public class BlockUtil
 		}
 		
 		List<String> lore = Util.getLore(b);
-		b.setType(Material.AIR);
+		
+		if(reason != BreakReason.LIQUID)
+		{
+			b.setType(Material.AIR);
+		}
+		
 		Util.writeBlock(b, null);
 		
 		ItemMeta meta;
@@ -439,6 +488,20 @@ public class BlockUtil
 		default:
 			return 0;
 		}
+	}
+	
+	private static int getOreMultiplier(int fortune, Random r)
+	{
+		double nextDouble = r.nextDouble();
+		int multiplier = 1;
+		double noBonus = 2.0D / (2.0D + fortune);
+		
+		if(nextDouble > noBonus)
+		{
+			multiplier += 1 + r.nextInt(Math.max(1, fortune));
+		}
+		
+		return multiplier;
 	}
 	
 	public static long choose(long total, long choose)

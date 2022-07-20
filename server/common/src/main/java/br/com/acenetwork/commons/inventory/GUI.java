@@ -4,6 +4,7 @@ import java.util.ResourceBundle;
 import java.util.function.Supplier;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -16,6 +17,7 @@ import br.com.acenetwork.commons.player.CommonPlayer;
 public abstract class GUI implements Listener
 {
 	protected final CommonPlayer cp;
+	protected final Player p;
 	protected final Inventory inv;
 		
 	public GUI(CommonPlayer cp, Inventory inv)
@@ -26,6 +28,7 @@ public abstract class GUI implements Listener
 	public GUI(CommonPlayer cp, Inventory inv, boolean openInventory)
 	{
 		this.cp = cp;
+		this.p = cp.getPlayer();
 		this.inv = inv;
 		
 		if(openInventory)
@@ -54,6 +57,7 @@ public abstract class GUI implements Listener
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
 		this.cp = cp;
+		this.p = cp.getPlayer();
 		this.inv = Bukkit.createInventory(cp.getPlayer(), type, bundle.getString(key));
 		
 		cp.getPlayer().openInventory(inv);
@@ -68,6 +72,7 @@ public abstract class GUI implements Listener
 	public GUI(CommonPlayer cp, Supplier<Inventory> supplier, boolean openInventory)
 	{
 		this.cp = cp;
+		this.p = cp.getPlayer();
 		this.inv = supplier.get();
 		
 		if(openInventory)
@@ -83,9 +88,10 @@ public abstract class GUI implements Listener
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
 		this.cp = cp;
+		this.p = cp.getPlayer();
 		this.inv = Bukkit.createInventory(cp.getPlayer(), size, bundle.getString(key));
 		
-		cp.getPlayer().openInventory(inv);
+		p.openInventory(inv);
 		cp.setGUI(this);
 	}
 	

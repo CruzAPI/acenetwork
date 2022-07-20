@@ -110,7 +110,7 @@ public class Util
 		
 		lore.add(rarity.toString());
 		
-		if(data != null)
+		if(data != null && data.getProperties() != null)
 		{
 			for(Property property : data.getProperties())
 			{
@@ -479,14 +479,65 @@ public class Util
 		return Arrays.stream(Property.values()).filter(x -> lore.contains(x.toString())).collect(Collectors.toSet());
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void a(EntityExplodeEvent e)
+	public static Rarity getWorstRarity(Rarity... rarities)
 	{
-		for(Block b : e.blockList())
+		if(rarities.length == 0)
 		{
-			BlockUtil.breakNaturally(b, BreakReason.EXPLOSION);
+			return COMMON;
 		}
 		
-		e.blockList().clear();
+		Rarity worst = LEGENDARY;
+		
+		for(Rarity rarity : rarities)
+		{
+			if(rarity == null || rarity == COMMON)
+			{
+				return COMMON;
+			}
+			
+			if(rarity.getData() < worst.getData())
+			{
+				worst = rarity;
+			}
+		}
+		
+		return worst;
+	}
+	
+	public static int getMaxLevel(Enchantment enchantment, Rarity rarity)
+	{
+		switch(rarity)
+		{
+		case RARE:
+		case LEGENDARY:
+			if(enchantment.equals(Enchantment.DAMAGE_ALL) 
+					|| enchantment.equals(Enchantment.DAMAGE_ARTHROPODS) 
+					|| enchantment.equals(Enchantment.DAMAGE_UNDEAD)
+					|| enchantment.equals(Enchantment.ARROW_DAMAGE)
+					|| enchantment.equals(Enchantment.PROTECTION_ENVIRONMENTAL)
+					|| enchantment.equals(Enchantment.PROTECTION_EXPLOSIONS)
+					|| enchantment.equals(Enchantment.PROTECTION_PROJECTILE)
+					|| enchantment.equals(Enchantment.PROTECTION_FIRE)
+					|| enchantment.equals(Enchantment.PROTECTION_FALL)
+					|| enchantment.equals(Enchantment.DIG_SPEED))
+			{
+				return rarity == LEGENDARY ? 10 : 7;
+			}
+			
+			if(enchantment.equals(Enchantment.LOOT_BONUS_MOBS)
+					|| enchantment.equals(Enchantment.OXYGEN)
+					|| enchantment.equals(Enchantment.ARROW_DAMAGE)
+					|| enchantment.equals(Enchantment.THORNS)
+					|| enchantment.equals(Enchantment.DURABILITY)
+					|| enchantment.equals(Enchantment.LOOT_BONUS_BLOCKS)
+					|| enchantment.equals(Enchantment.LURE)
+					|| enchantment.equals(Enchantment.LUCK))
+			{
+				return rarity == LEGENDARY ? 5 : 4;
+			}
+			
+			default:
+				return enchantment.getMaxLevel();
+		}
 	}
 }

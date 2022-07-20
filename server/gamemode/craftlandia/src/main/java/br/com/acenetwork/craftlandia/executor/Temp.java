@@ -6,10 +6,15 @@ import java.util.List;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.Repairable;
 
 import com.comphenix.protocol.ProtocolLibrary;
 
+import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
@@ -227,7 +232,23 @@ public class Temp implements TabExecutor
 			Player p = (Player) sender;
 			CommonPlayer cp = CraftCommonPlayer.get(p);
 			
-			p.sendMessage(((WarpLand) Warp.MAP.get(p.getWorld().getUID())).map.keySet().toString());
+			ItemStack item = p.getItemInHand();
+			
+			p.sendMessage(CommonsUtil.getEnchants(item).toString());
+			
+//			p.sendMessage(item.getEnchantmentLevel(Enchantment.getById(Integer.valueOf(args[0])))	 + "");
+			
+			
+//			if(args.length == 2)
+//			{
+//				ItemStack item = p.getItemInHand();
+//				
+//				item.addUnsafeEnchantment(Enchantment.getById(Integer.valueOf(args[0])), Integer.valueOf(args[1]));
+//				
+//				p.setItemInHand(item);
+//			}
+//			p.sendMessage(((Repairable) p.getItemInHand().getItemMeta()).getRepairCost() + " repairCost");
+//			p.sendMessage(((WarpLand) Warp.MAP.get(p.getWorld().getUID())).map.keySet().size() + "");
 //			p.sendMessage(Playtime.getInstance().getItemMap().toString());
 			
 //			p.sendMessage("version = " + ProtocolLibrary.getProtocolManager().getProtocolVersion(p));

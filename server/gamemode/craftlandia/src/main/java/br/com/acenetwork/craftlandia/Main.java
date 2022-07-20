@@ -24,6 +24,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
@@ -41,12 +42,14 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -76,6 +79,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.commons.player.CommonPlayer;
+import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
 import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
@@ -94,10 +99,12 @@ import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
+import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.manager.BlockData;
+import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.LandData;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.Farm;
@@ -105,6 +112,7 @@ import br.com.acenetwork.craftlandia.warp.Newbie;
 import br.com.acenetwork.craftlandia.warp.Portals;
 import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
+import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.md_5.bungee.api.ChatColor;
 
 public class Main extends Common implements Listener
@@ -144,6 +152,10 @@ public class Main extends Common implements Listener
 		wc = new WorldCreator("portals");
 		wc.environment(Environment.THE_END);
 		new Portals(wc.createWorld());
+		
+		wc = new WorldCreator("tutorial");
+		wc.environment(Environment.THE_END);
+		new WarpTutorial(wc.createWorld());
 		
 		wc = new WorldCreator("jackpot");
 		wc.environment(Environment.NORMAL);
@@ -675,6 +687,46 @@ public class Main extends Common implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(EntityExplodeEvent e)
+	{
+		for(Block b : e.blockList())
+		{
+			BlockUtil.breakNaturally(b, BreakReason.EXPLOSION);
+		}
+		
+		e.blockList().clear();
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(BlockFromToEvent e)
+	{
+		if(e.getBlock().getType().name().contains("LAVA"))
+		{
+			return;
+		}
+		
+		BlockUtil.breakNaturally(e.getToBlock(), BreakReason.LIQUID);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(BlockPistonExtendEvent e)
+	{
+		for(Block b : e.getBlocks())
+		{
+			if(b.getPistonMoveReaction() == PistonMoveReaction.BREAK)
+			{
+				BlockUtil.breakNaturally(b, BreakReason.LEAVES_DECAY);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void a(LeavesDecayEvent e)
+	{
+		BlockUtil.breakNaturally(e.getBlock(), BreakReason.LEAVES_DECAY);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(BlockBreakEvent e)
 	{
 		Player p = e.getPlayer();
@@ -758,6 +810,24 @@ public class Main extends Common implements Listener
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void abc(PlayerInteractEvent e)
+	{
+		Block clickedBlock = e.getClickedBlock();
+		
+		if(clickedBlock != null && clickedBlock.getType() == Material.ANVIL && e.getAction().name().contains("RIGHT") && !e.getPlayer().isSneaking())
+		{
+			BlockData data = Util.readBlock(clickedBlock);
+			Rarity rarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Rarity.COMMON);
+			Player p = e.getPlayer();
+			CommonPlayer cp = CraftCommonPlayer.get(p);
+			
+			e.setCancelled(true);
+			
+			new CustomAnvil(cp, rarity);
+		}
+	}
+	
 	@EventHandler
 	public void a(PlayerInteractEvent e)
 	{
@@ -833,18 +903,14 @@ public class Main extends Common implements Listener
 		e.setCancelled(true);
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void a(BlockPlaceEvent e)
 	{
 		Block b = e.getBlock();
 		
-//		if(b.getType() == Material.BEDROCK)
+//		if(b.getType() == Material.LEAVES_2)
 //		{
-//			e.setCancelled(true);
-//			
-//			World w = b.getWorld();
-//			
-//			w.spawnEntity(b.getLocation().add(0.5D, 1.0D, 0.5D), EntityType.ENDER_CRYSTAL);
+//			b.setData((byte) (e.getItemInHand().getData().getData() + 4));
 //		}
 	}
 	
