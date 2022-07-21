@@ -24,6 +24,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.enchantments.Enchantment;
@@ -39,6 +40,7 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Wither;
 import org.bukkit.entity.WitherSkull;
+import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -57,6 +59,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
@@ -65,6 +68,7 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
@@ -74,10 +78,12 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -496,6 +502,63 @@ public class Main extends Common implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void setRarityChestLoot(InventoryMoveItemEvent e)
+	{
+		Inventory destination = e.getDestination();
+		
+		if(destination.getHolder() instanceof ContainerBlock)
+		{
+			ContainerBlock container = (ContainerBlock) destination.getHolder();
+			
+			BlockData data = Util.readBlock(((BlockState) container).getBlock());
+			
+			if(data != null)
+			{
+				return;
+			}
+			
+			setChestLootCommodity(container);
+		}
+	}
+	
+	private void setChestLootCommodity(ContainerBlock container)
+	{
+		Block b = ((BlockState) container).getBlock();
+		Rarity rarity = Util.getRarity(b.getWorld());
+		BlockData data = new BlockData();
+		data.setRarity(rarity);
+		Util.writeBlock(b, data);
+		
+		for(ItemStack item : container.getInventory())
+		{
+			if(item != null && Util.getRarity(item) == null)
+			{
+				Util.setCommodity(item, rarity);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void setRarityChestLoot(PlayerInteractEvent e)
+	{
+		Block b = e.getClickedBlock();
+		
+		if(b == null || !(b.getState() instanceof ContainerBlock))
+		{
+			return;
+		}
+		
+		BlockData data = Util.readBlock(b);
+		
+		if(data != null)
+		{
+			return;
+		}
+		
+		setChestLootCommodity((ContainerBlock) b.getState());
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void ab(PlayerInteractEvent e)
 	{
 		Player p = e.getPlayer();
@@ -651,7 +714,6 @@ public class Main extends Common implements Listener
 		
 		FallingBlock fb = (FallingBlock) entity;
 		fb.setDropItem(false);
-		Bukkit.broadcastMessage("e.getTo() " + e.getTo().toString());
 		
 		if(e.getTo() == Material.AIR)
 		{
@@ -696,9 +758,43 @@ public class Main extends Common implements Listener
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void ab(EntityExplodeEvent e)
 	{
+		int power;
+		
+		Entity entity = e.getEntity();
+		
+		if(entity instanceof Creeper)
+		{
+			power = ((Creeper) entity).isPowered() ? 6 : 3;
+		}
+		else if(entity instanceof TNTPrimed)
+		{
+			power = 4;
+		}
+		else if(entity instanceof EnderCrystal)
+		{
+			power = 6;
+		}
+		else if(entity instanceof Wither)
+		{
+			power = 8;
+		}
+		else
+		{
+			power = 1;
+		}
+		
+		Random r = new Random();
+		
 		for(Block b : e.blockList())
 		{
-			BlockUtil.breakNaturally(b, BreakReason.EXPLOSION);
+			if(r.nextInt(power) == 0)
+			{
+				BlockUtil.breakNaturally(b, BreakReason.EXPLOSION);
+			}
+			else
+			{
+				b.setType(Material.AIR);
+			}
 		}
 		
 		e.blockList().clear();
@@ -708,7 +804,7 @@ public class Main extends Common implements Listener
 	{
 		FurnaceInventory inv = furnace.getInventory();
 		
-		if(furnace.hasMetadata("task"))
+		if(furnace.hasMetadata("task") || furnace.getBurnTime() <= 0)
 		{
 			return;
 		}
@@ -736,7 +832,6 @@ public class Main extends Common implements Listener
 				}
 				else
 				{
-					Bukkit.broadcastMessage("cancel");
 					cancel();
 					furnace.removeMetadata("task", Main.this);
 					furnace.update();
@@ -782,7 +877,7 @@ public class Main extends Common implements Listener
 	{
 		Rarity rarity = Optional.ofNullable(Util.getRarity(e.getSource())).orElse(Rarity.COMMON);
 		ItemStack result = e.getResult();
-		Bukkit.broadcastMessage("result = " + result);
+		
 		Util.setCommodity(result, rarity);
 		e.setResult(result);
 	}
@@ -801,6 +896,62 @@ public class Main extends Common implements Listener
 		item.setItemStack(itemStack);
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void asdad(ChunkLoadEvent e)
+	{
+		if(!e.isNewChunk())
+		{
+			return;
+		}
+		
+		Bukkit.getScheduler().runTask(this, () ->
+		{
+			Rarity rarity = Util.getRarity(e.getWorld());
+			
+			for(Entity entity : e.getChunk().getEntities())
+			{
+				if(entity.getType() == EntityType.MINECART_CHEST)
+				{
+					for(ItemStack item : ((StorageMinecart) entity).getInventory())
+					{
+						if(item != null && Util.getRarity(item) == null)
+						{
+							Util.setCommodity(item, rarity);
+						}
+					}
+				}
+			}
+		});
+	}
+	
+//	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+//	public void setRarityStorageMinecart(PlayerInteractEntityEvent e)
+//	{
+//		Entity rightClicked = e.getRightClicked();
+//		
+//		if(rightClicked instanceof Player || !(rightClicked instanceof StorageMinecart))
+//		{
+//			return;
+//		}
+//		
+//		Rarity rarity = Util.getRarity(rightClicked);
+//		
+//		if(rarity != null)
+//		{
+//			return;
+//		}
+//		
+//		rarity = Util.getRarity(rightClicked.getWorld());
+//		rightClicked.setCustomName(getName());
+//		
+//	for(ItemStack item : ((StorageMinecart) rightClicked).getInventory())
+//	{
+//		if(item != null && Util.getRarity(item) == null)
+//		{
+//			Util.setCommodity(item, rarity);
+//		}
+//	}
+//	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void ab(BlockFromToEvent e)
@@ -851,8 +1002,6 @@ public class Main extends Common implements Listener
 		e.setCancelled(true);
 		
 		ItemStack tool = p.getItemInHand();
-		
-		Bukkit.broadcastMessage(b.getType() + "");
 		
 		BlockUtil.breakNaturally(b, tool);
 		
@@ -955,57 +1104,12 @@ public class Main extends Common implements Listener
 		
 		BlockData data = Util.readBlock(b);
 		
-		Bukkit.broadcastMessage(data + "");
+		if(e.getPlayer().isSneaking())
+		{
+			Bukkit.broadcastMessage(data + "");
+		}
 	}
 	
-//	@EventHandler
-//	public void a(PlayerPickupItemEvent e)
-//	{
-//		Item item = e.getItem();
-//		ItemStack itemStack = item.getItemStack();
-//		
-//		ItemTag itemTag;
-//		
-//		
-//		
-//		ItemMeta meta;
-//		
-//		meta = itemStack.getItemMeta();
-//		
-//		meta.setLore(Arrays.asList(
-//		(
-//				itemTag.toString()
-//		)));
-//		
-//		itemStack.setItemMeta(meta);
-//	}
-	
-//	@EventHandler
-//	public void a(ChunkPopulateEvent e)
-//	{
-//		if(e.getChunk().getX() == 0 && e.getChunk().getZ() == 0)
-//		{
-//			Bukkit.broadcastMessage("0 0");
-//		}
-//		
-//		if(e.getWorld().getName().equals("farm"))
-//		{
-////			new Thread(() ->
-////			{
-//				for(int x = 0; x < 16; x++)
-//				{
-//					for(int z = 0; z < 16; z++)
-//					{
-//						for(int y = 0; y < 4; y++)
-//						{
-//							e.getChunk().getBlock(x, y, z).setType(Material.AIR);
-//						}
-//					}
-//				}
-////			}).start();
-//		}
-//	}
-//	
 	@EventHandler
 	public void a(BlockSpreadEvent e)
 	{

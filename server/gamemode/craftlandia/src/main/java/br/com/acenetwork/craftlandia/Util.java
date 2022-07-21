@@ -28,6 +28,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Damageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -70,6 +71,16 @@ public class Util
 	public static short toShort(byte[] a)
 	{
 		return (short) (a[0] << 8 | a[1] & 0xFF);
+	}
+	
+	public static Rarity getRarity(Entity entity)
+	{
+		if(entity.getCustomName() == null)
+		{
+			return null;
+		}
+		
+		return Rarity.valueOfToString(entity.getCustomName());	
 	}
 	
 	public static Rarity getRarity(ItemStack item)

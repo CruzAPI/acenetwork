@@ -42,8 +42,6 @@ public class BlockUtil
 		
 		Random r = new Random();
 		
-		Bukkit.broadcastMessage("data = " + b.getData());
-		
 		s0:switch(b.getType())
 		{
 		case BOOKSHELF:
@@ -443,12 +441,9 @@ public class BlockUtil
 				items.add(new ItemStack(Material.VINE));
 			}
 		default:
-			Bukkit.broadcastMessage("default!!!!!");
 			items.addAll(b.getDrops());
 			break;
 		}
-		
-		Bukkit.broadcastMessage("BreakReason." + reason.name());
 		
 		List<String> lore = Util.getLore(b);
 		
