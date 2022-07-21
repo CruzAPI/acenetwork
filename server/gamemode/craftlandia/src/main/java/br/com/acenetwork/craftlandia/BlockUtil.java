@@ -448,12 +448,11 @@ public class BlockUtil
 			break;
 		}
 		
+		Bukkit.broadcastMessage("BreakReason." + reason.name());
+		
 		List<String> lore = Util.getLore(b);
 		
-		if(reason != BreakReason.LIQUID)
-		{
-			b.setType(Material.AIR);
-		}
+		b.setType(Material.AIR);
 		
 		Util.writeBlock(b, null);
 		

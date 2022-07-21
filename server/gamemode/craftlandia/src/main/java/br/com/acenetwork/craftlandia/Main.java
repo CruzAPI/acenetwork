@@ -24,6 +24,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
@@ -31,6 +32,7 @@ import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
@@ -57,6 +59,8 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
+import org.bukkit.event.inventory.FurnaceBurnEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -66,15 +70,18 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.CommonsConfig;
@@ -697,15 +704,118 @@ public class Main extends Common implements Listener
 		e.blockList().clear();
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void ab(BlockFromToEvent e)
+	private void updateFurnace(Furnace furnace)
 	{
-		if(e.getBlock().getType().name().contains("LAVA"))
+		FurnaceInventory inv = furnace.getInventory();
+		
+		if(furnace.hasMetadata("task"))
 		{
 			return;
 		}
 		
-		BlockUtil.breakNaturally(e.getToBlock(), BreakReason.LIQUID);
+		furnace.setMetadata("task", new FixedMetadataValue(this, new BukkitRunnable()
+		{
+			@Override
+			public void run()
+			{
+				if(furnace.getBurnTime() > 0)
+				{
+					ItemStack smelting = inv.getSmelting();
+					ItemStack result = inv.getResult();
+					
+					if(smelting == null || result == null)
+					{
+						return;
+					}
+					
+					if(Optional.ofNullable(Util.getRarity(smelting)).orElse(Rarity.COMMON) != Util.getRarity(result))
+					{
+						furnace.setCookTime((short) 0);
+						furnace.update();
+					}
+				}
+				else
+				{
+					Bukkit.broadcastMessage("cancel");
+					cancel();
+					furnace.removeMetadata("task", Main.this);
+					furnace.update();
+				}
+			}
+		}.runTaskTimer(this, 0L, 1L).getTaskId()));
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void monitor(FurnaceBurnEvent e)
+	{
+		updateFurnace((Furnace) e.getBlock().getState());
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void highest(FurnaceBurnEvent e)
+	{
+		Furnace f = (Furnace) e.getBlock().getState();
+		FurnaceInventory inv = f.getInventory();
+		
+		ItemStack smelting = inv.getSmelting();
+		ItemStack result = inv.getResult();
+		
+		if(Optional.ofNullable(Util.getRarity(smelting)).orElse(Rarity.COMMON) != Util.getRarity(result))
+		{
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(InventoryOpenEvent e)
+	{
+		if(e.getInventory().getType() != InventoryType.FURNACE)
+		{
+			return;
+		}
+		
+		updateFurnace((Furnace) e.getInventory().getHolder());
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(FurnaceSmeltEvent e)
+	{
+		Rarity rarity = Optional.ofNullable(Util.getRarity(e.getSource())).orElse(Rarity.COMMON);
+		ItemStack result = e.getResult();
+		Bukkit.broadcastMessage("result = " + result);
+		Util.setCommodity(result, rarity);
+		e.setResult(result);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(PlayerFishEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		Rarity rarity = Util.getWorstRarity(Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON), 
+				Util.getRarity(p.getWorld()));
+		
+		Item item = (Item) e.getCaught();
+		ItemStack itemStack = item.getItemStack();
+		Util.setCommodity(itemStack, rarity);
+		item.setItemStack(itemStack);
+	}
+	
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void ab(BlockFromToEvent e)
+	{
+		if(e.getBlock().getType().name().contains("LAVA") || e.getBlock().getType() == Material.DRAGON_EGG)
+		{
+			return;
+		}
+		
+		Material type = e.getToBlock().getType();
+		
+		if(type != Material.AIR && type != Material.WATER && type != Material.STATIONARY_WATER)
+		{
+			BlockUtil.breakNaturally(e.getToBlock(), BreakReason.LIQUID);
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -797,6 +907,11 @@ public class Main extends Common implements Listener
 		}
 		
 		Random r = new Random();
+		
+		if(tool.getType().getMaxDurability() == 0)
+		{
+			return;
+		}
 		
 		if(r.nextDouble() <= (1.0D / (tool.getEnchantmentLevel(Enchantment.DURABILITY) + 1.0D)))
 		{

@@ -74,7 +74,9 @@ public class Util
 	
 	public static Rarity getRarity(ItemStack item)
 	{
-		if(!item.hasItemMeta())
+		ItemMeta meta = item.getItemMeta();
+		
+		if(meta == null)
 		{
 			return null;
 		}
@@ -233,6 +235,11 @@ public class Util
 	public static void setCommodity(ItemStack item, Rarity rarity)
 	{
 		ItemMeta meta = item.getItemMeta();
+		
+		if(meta == null)
+		{
+			return;
+		}
 		
 		List<String> lore = new ArrayList<>();
 		

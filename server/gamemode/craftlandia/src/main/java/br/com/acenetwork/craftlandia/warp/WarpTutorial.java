@@ -42,6 +42,6 @@ public class WarpTutorial extends Warp
 	@Override
 	public boolean isSpawnProtection(Location l)
 	{
-		return false;
+		return true;
 	}
 }

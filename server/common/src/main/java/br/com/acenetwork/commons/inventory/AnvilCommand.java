@@ -1,6 +1,7 @@
 package br.com.acenetwork.commons.inventory;
 import java.text.MessageFormat;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -8,12 +9,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.manager.FakeAnvil;
 import br.com.acenetwork.commons.player.CommonPlayer;
+import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.ChatComponentText;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutOpenWindow;
@@ -22,6 +26,7 @@ public class AnvilCommand extends GUI
 {
 	private final String command;
 	private final boolean clickablePlaceHolder;
+	private int task;
 	
 	public AnvilCommand(CommonPlayer cp, String placeholder, String command)
 	{	
@@ -35,24 +40,59 @@ public class AnvilCommand extends GUI
 		this.command = command;
 		this.clickablePlaceHolder = clickablePlaceHolder;
 		
-		ItemStack item = new ItemStack(Material.PAPER);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(placeholder);
-		item.setItemMeta(meta);
-
-		inv.setItem(0, item);
+		if(placeholder != null)
+		{
+			ItemStack item = new ItemStack(Material.PAPER);
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName(placeholder);
+			item.setItemMeta(meta);
+			
+			inv.setItem(0, item);
+		}
+		
+		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Common.getPlugin(), () ->
+		{
+			ItemStack item = inv.getItem(2);
+			
+			if(item == null)
+			{
+				return;
+			}
+			
+			ItemMeta meta = item.getItemMeta();
+			
+			if(meta != null && meta.hasDisplayName())
+			{
+				meta.setDisplayName(meta.getDisplayName().replace('&', ChatColor.COLOR_CHAR));
+				item.setItemMeta(meta);
+			}
+		}, 0L, 1L);
 	}
-
-	@EventHandler
-	public void onInventoryClose(InventoryCloseEvent e)
-	{
-		Player p = cp.getPlayer();
 	
+	public void run(String displayName)
+	{
+		p.closeInventory();
+		p.chat(MessageFormat.format(command, displayName));
+	}
+	
+	@EventHandler
+	public void ab(InventoryCloseEvent e)
+	{
 		if(e.getPlayer() != p)
 		{
 			return;
 		}
-
+		Bukkit.getScheduler().cancelTask(task);
+		task = 0;
+	}
+	@EventHandler
+	public void clearInventoryOnClose(InventoryCloseEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
 		inv.clear();
 	}
 
@@ -75,15 +115,25 @@ public class AnvilCommand extends GUI
 			return;
 		}
 		
+		
 		String displayName = current.hasItemMeta() ? current.getItemMeta().getDisplayName() : null;
 		
 		ClickType click = e.getClick();
 		int rawSlot = e.getRawSlot();
-		 
+		
+		if(rawSlot == 2)
+		{
+			final int level = p.getLevel();
+			Bukkit.broadcastMessage("p.getLevel() = " + level);
+			
+			Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
+			{
+				p.setLevel(p.getLevel());
+			});
+		}
 		if(displayName != null && (rawSlot == 0 && clickablePlaceHolder || rawSlot == 2) && click == ClickType.LEFT)
 		{
-			p.closeInventory();
-			p.chat(MessageFormat.format(command, displayName));
+			run(displayName);
 		}
 	}
 	

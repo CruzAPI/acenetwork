@@ -13,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -36,13 +37,20 @@ public class CustomAnvil extends GUI
 	private ItemStack levelCost;
 	private ItemStack tooExpensive;
 	private ItemStack renameItem;
+	private ItemStack clearRename;
 	private final Rarity rarity;
 	private int cost;
 	private int materials;
 	private String levelCostUUID = CommonsUtil.getRandomItemUUID();
 	private Rarity worstRarity = Rarity.COMMON;
+	private String rename;
 	
 	public CustomAnvil(CommonPlayer cp, Rarity rarity)
+	{
+		this(cp, rarity, null, new ItemStack[2]);
+	}
+	
+	public CustomAnvil(CommonPlayer cp, Rarity rarity, String rename, ItemStack[] content)
 	{
 		super(cp, () ->
 		{
@@ -50,6 +58,7 @@ public class CustomAnvil extends GUI
 		});
 		
 		this.rarity = rarity;
+		this.rename = rename;
 		
 		ItemMeta meta;
 		
@@ -62,7 +71,6 @@ public class CustomAnvil extends GUI
 		meta = grayGlass.getItemMeta();
 		meta.setDisplayName(CommonsUtil.getRandomItemUUID() + "");
 		grayGlass.setItemMeta(meta);
-
 		
 		levelCost = new ItemStack(Material.GLASS_BOTTLE, 1);
 		meta = levelCost.getItemMeta();
@@ -71,8 +79,13 @@ public class CustomAnvil extends GUI
 		
 		renameItem = new ItemStack(Material.NAME_TAG, 1);
 		meta = renameItem.getItemMeta();
-		meta.setDisplayName(CommonsUtil.getRandomItemUUID() + "");
+		meta.setDisplayName(CommonsUtil.getRandomItemUUID() + ChatColor.WHITE + "Rename");
 		renameItem.setItemMeta(meta);
+		
+		clearRename = new ItemStack(Material.INK_SACK, 1, (short) 1);
+		meta = clearRename.getItemMeta();
+		meta.setDisplayName(CommonsUtil.getRandomItemUUID() + ChatColor.RED + "Clear Name");
+		clearRename.setItemMeta(meta);
 		
 		tooExpensive = new ItemStack(Material.INK_SACK, 1, (short) 1);
 		meta = tooExpensive.getItemMeta();
@@ -89,11 +102,10 @@ public class CustomAnvil extends GUI
 			inv.setItem(i, blackGlass);
 		}
 		
-		inv.setItem(16, grayGlass);
-		inv.setItem(32, renameItem);
-		inv.setItem(33, levelCost);
+		inv.setItem(10, content[0]);
+		inv.setItem(12, content[1]);
 		
-		cp.getPlayer().updateInventory();
+		refresh();
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -134,6 +146,11 @@ public class CustomAnvil extends GUI
 	public void asda(InventoryClickEvent e)
 	{
 		if(e.getWhoClicked() != p)
+		{
+			return;
+		}
+		
+		if(e.getAction() == InventoryAction.NOTHING)
 		{
 			return;
 		}
@@ -217,6 +234,8 @@ public class CustomAnvil extends GUI
 		int leftCost = leftMeta == null ? 0 : leftMeta.getRepairCost();
 		int rightCost = rightMeta == null ? 0 : rightMeta.getRepairCost();
 		
+		inv.setItem(32, left.getType() == Material.AIR ? blackGlass : rename == null ? renameItem : clearRename);
+		
 		if(leftCost > 256 || rightCost > 256)
 		{
 			inv.setItem(33, tooExpensive);
@@ -226,23 +245,32 @@ public class CustomAnvil extends GUI
 		
 		ItemStack result = left.clone();
 		
+		materials = 0;
 		int repairCost = getRepairCost(left, right, result);
 		int enchantmentCost = getEnchantmentCost(left, right, result);
+		int renameCost = rename == null ? 0 : 1;
 		
-		if(repairCost > 0 || enchantmentCost > 0)
+		if(result.getType() != Material.AIR && (repairCost > 0 || enchantmentCost > 0 || renameCost > 0))
 		{
-			cost = leftCost + rightCost + repairCost + enchantmentCost;
+			cost = leftCost + rightCost + repairCost + enchantmentCost + renameCost;
 			Util.setCommodity(result, worstRarity);
 			
 			levelCost.setAmount(cost);
 			levelCost.setType(Material.EXP_BOTTLE);
 			meta = levelCost.getItemMeta();
-			meta.setDisplayName(levelCostUUID + "Cost: " + cost);
+			ChatColor color = p.getLevel() < cost ? ChatColor.RED : ChatColor.GREEN;
+			meta.setDisplayName(levelCostUUID + color + "Enchantment Cost: " + cost);
 			levelCost.setItemMeta(meta);
 			
 			inv.setItem(33, levelCost);
 			
 			Repairable resultMeta = (Repairable) result.getItemMeta();
+			
+			if(rename != null)
+			{
+				((ItemMeta) resultMeta).setDisplayName(rename);
+			}
+			
 			resultMeta.setRepairCost(Math.max(leftCost, rightCost) * 2 + 1);
 			result.setItemMeta((ItemMeta) resultMeta);
 			
@@ -293,6 +321,8 @@ public class CustomAnvil extends GUI
 			double points = Math.ceil(((double) limit) / 4.0D);
 			int maxMaterials = (int) Math.ceil(target.getDurability() / points);
 			materials = Math.min(sacrifice.getAmount(), maxMaterials);
+			
+			result.setDurability((short) Math.max(0, result.getDurability() - points * materials));
 			
 			return materials;
 		}
@@ -371,18 +401,25 @@ public class CustomAnvil extends GUI
 		ItemStack result = Optional.ofNullable(inv.getItem(16)).orElse(grayGlass);
 		
 		ItemStack cursor = e.getCursor();
+		ItemStack current = e.getCurrentItem();
 		
 		if(inv.equals(e.getClickedInventory()))
 		{
+			e.setCancelled(true);
+			
 			if(rawSlot == 16)
 			{
-				if(grayGlass.isSimilar(result) || (p.getLevel() < cost && p.getGameMode() != GameMode.CREATIVE)
-						|| left.getType() == Material.AIR || right.getType() == Material.AIR || right.getAmount() < materials 
+				if(grayGlass.isSimilar(result) 
+						|| (p.getLevel() < cost && p.getGameMode() != GameMode.CREATIVE)
+						|| left.getType() == Material.AIR 
+						|| (right.getType() == Material.AIR && rename == null)
+						|| right.getAmount() < materials 
 						|| cursor.getType() != Material.AIR)
 				{
-					e.setCancelled(true);
 					return;
 				}
+				
+				rename = null;
 				
 				right.setAmount(right.getAmount() - materials);
 				
@@ -397,10 +434,28 @@ public class CustomAnvil extends GUI
 				e.setCancelled(false);
 				return;
 			}
-			
-			if(!(rawSlot == 10 || rawSlot == 12))
+			else if(rawSlot == 10 || rawSlot == 12)
 			{
-				e.setCancelled(true);
+				e.setCancelled(false);
+			}
+			else if(CommonsUtil.compareDisplayName(current, clearRename))
+			{
+				rename = null;
+				refresh();
+			}
+			else if(CommonsUtil.compareDisplayName(current, renameItem))
+			{
+				ItemStack[] contents = getContents();
+				ItemStack[] clonedContents = new ItemStack[contents.length];
+				
+				for(int i = 0; i < contents.length; i++)
+				{
+					clonedContents[i] = contents[i] == null ? null : contents[i].clone();
+				}
+				
+				clearContents();
+				
+				new RenameItem(cp, rarity, clonedContents);
 			}
 			
 			return;
@@ -418,6 +473,22 @@ public class CustomAnvil extends GUI
 		refresh();
 	}
 	
+	public ItemStack[] getContents()
+	{
+		ItemStack[] contents = new ItemStack[2];
+		
+		contents[0] = inv.getItem(10);
+		contents[1] = inv.getItem(12);
+		
+		return contents;
+	}
+	
+	public void clearContents()
+	{
+		inv.setItem(10, null);
+		inv.setItem(12, null);
+	}
+	
 	@EventHandler
 	public void a(InventoryCloseEvent e)
 	{
@@ -425,8 +496,6 @@ public class CustomAnvil extends GUI
 		{
 			return;
 		}
-		
-		
 		
 		List<ItemStack> items = new ArrayList<>();
 		
