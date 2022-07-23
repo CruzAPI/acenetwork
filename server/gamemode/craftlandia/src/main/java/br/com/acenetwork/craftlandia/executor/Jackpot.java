@@ -80,7 +80,7 @@ public class Jackpot implements TabExecutor
 		int size = 0;
 		final int maxSize = 30000;
 		
-		COAL_MAP.put(JACKPOT.getId(), -size + (size += 1));
+		COAL_MAP.put(JACKPOT.getId(), -size + (size += 100000));
 		COAL_MAP.put(VIP.getId(), -size + (size += 30));
 		COAL_MAP.put(RANDOM_ITEM.getId(), -size + (size += 3000));
 		COAL_MAP.put(NUGGET_1.getId(), -size + (size += 1800));
@@ -144,7 +144,7 @@ public class Jackpot implements TabExecutor
 			}
 			
 			cp.setBalance(newBalance);
-			setJackpot(getJackpot() + bet * PERCENT);
+			setJackpot(getJackpot() + bet);
 			
 			cp.setJackpoting(true);
 			new JackpotGUI(cp, COAL_MAP);

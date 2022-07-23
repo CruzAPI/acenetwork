@@ -8,6 +8,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -37,6 +38,7 @@ public class BlockUtil
 		double major;
 		double minor;
 		Material drop;
+		List<String> lore = Util.getLore(b);
 		
 		List<ItemStack> items = new ArrayList<>();
 		
@@ -311,8 +313,49 @@ public class BlockUtil
 				items.add(new ItemStack(b.getType(), 1, b.getData()));
 			}
 			break;
-		case LONG_GRASS:
 		case DOUBLE_PLANT:
+			Block base = b.getData() == 10 ? b.getRelative(BlockFace.DOWN) : b;
+			lore = Util.getLore(base);
+			
+			if(base.getType() != b.getType() || base.getData() == 10)
+			{
+				break;
+			}
+			
+			if(base.getData() != 2 && base.getData() != 3)
+			{
+				if(base.equals(b))
+				{
+					items.add(new ItemStack(Material.DOUBLE_PLANT, 1, base.getData()));
+				}
+				
+				break;
+			}
+			
+			Block up = base.getRelative(BlockFace.UP);
+			
+			Bukkit.broadcastMessage(base.getData() + " baseData");
+			Bukkit.broadcastMessage(b.getData() + " bData");
+			
+			short durability = (short) (base.getData() - 1);
+			
+			Bukkit.broadcastMessage("durability = " + durability);
+			
+			if(tool != null && tool.getType() == Material.SHEARS)
+			{
+				if(up.getType() == Material.DOUBLE_PLANT && up.getData() == 10)
+				{
+					base.setType(Material.AIR, base.equals(b));
+					Util.writeBlock(up, null);
+					items.add(new ItemStack(Material.LONG_GRASS, 2, durability));
+				}
+				else
+				{
+					items.add(new ItemStack(Material.LONG_GRASS, 1, durability));
+				}
+				break;
+			}
+		case LONG_GRASS:
 			if(tool != null && tool.getType() == Material.SHEARS)
 			{
 				items.add(new ItemStack(b.getType(), 1, b.getData()));
@@ -331,9 +374,9 @@ public class BlockUtil
 					if(next <= (total += Math.pow(minor, n - 1 - i) * Math.pow(major, i) * choose(n - 1, (Math.max(n - 1L - i, i))))
 							|| i + 1 == n)
 					{
-						if(n != 0)
+						if(i != 0)
 						{
-							items.add(new ItemStack(Material.SEEDS, n));
+							items.add(new ItemStack(Material.SEEDS, i));
 						}
 						
 						break s0;
@@ -444,8 +487,6 @@ public class BlockUtil
 			items.addAll(b.getDrops());
 			break;
 		}
-		
-		List<String> lore = Util.getLore(b);
 		
 		b.setType(Material.AIR);
 		

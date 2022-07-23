@@ -27,7 +27,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.ContainerBlock;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
@@ -35,9 +37,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wither;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.entity.minecart.StorageMinecart;
@@ -77,15 +82,27 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Attachable;
+import org.bukkit.material.Bed;
+import org.bukkit.material.Directional;
+import org.bukkit.material.Door;
+import org.bukkit.material.Rails;
+import org.bukkit.material.Stairs;
+import org.bukkit.material.Step;
+import org.bukkit.material.TrapDoor;
+import org.bukkit.material.WoodenStep;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -127,6 +144,8 @@ import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 
 public class Main extends Common implements Listener
 {
@@ -227,35 +246,405 @@ public class Main extends Common implements Listener
 		Jackpot.getInstance().save();
 	}
 	
-	@EventHandler
-	public void a(EntityExplodeEvent e)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void a(PlayerShearEntityEvent e)
 	{
 		Entity entity = e.getEntity();
+		Rarity entityRarity = Util.getRarity(entity);
+		Rarity rarity = Optional.ofNullable(entityRarity).orElse(Util.getRarity(entity.getWorld()));
 		
-		if(entity instanceof Creeper)
+		ItemStack item;
+		
+		entity.getWorld().playSound(entity.getLocation(), Sound.SHEEP_SHEAR, 1.0F, 1.0F);
+		
+		if(entity instanceof MushroomCow)
 		{
-			Creeper creeper = (Creeper) entity;
-			Bukkit.broadcastMessage("POWER: " + (creeper.isPowered() ? 6 : 3));
-		}
-		else if(entity instanceof TNTPrimed)
-		{
-			TNTPrimed tntPrimed = (TNTPrimed) entity;
-			Bukkit.broadcastMessage("POWER: 4 (yield = " + tntPrimed.getYield() + ")");
-		}
-		else if(entity instanceof EnderCrystal)
-		{
-			Bukkit.broadcastMessage("POWER: 6");
-		}
-		else if(entity instanceof Wither)
-		{
+			entity.remove();
 			
-		}
-		else if(entity instanceof WitherSkull)
-		{
+			entity.getWorld().spawnEntity(entity.getLocation(), EntityType.COW);
 			
+			item = new ItemStack(Material.RED_MUSHROOM, 5);
+			Util.setCommodity(item, rarity);
+			entity.getWorld().dropItemNaturally(entity.getLocation(), item);
+			
+			e.setCancelled(true);
+		}
+		else if(entity instanceof Sheep)
+		{
+			((Sheep) entity).setSheared(true);
+			
+			Random r = new Random();
+			
+			item = new ItemStack(Material.WOOL, 1 + r.nextInt(3), ((Sheep) entity).getColor().getData());
+			Util.setCommodity(item, rarity);
+			entity.getWorld().dropItemNaturally(entity.getLocation(), item);
+			
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void sapling(StructureGrowEvent e)
+	{
+		Block b = e.getLocation().getBlock();
+		BlockData data = Util.readBlock(b);
+		
+		if(data == null)
+		{
+			return;
 		}
 		
-		Bukkit.broadcastMessage(e.getEntityType() + " type");
+		e.getBlocks().forEach(x -> Util.writeBlock(x.getBlock(), data));
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void doublePlantBoneMeal(PlayerInteractEvent e)
+	{
+		Block clicked = e.getClickedBlock();
+		
+		if(clicked == null || clicked.getType() != Material.DOUBLE_PLANT)
+		{
+			return;
+		}
+		
+		ItemStack item = e.getItem();
+		
+		if(item.getType() != Material.INK_SACK || item.getDurability() != 15 || item.getAmount() <= 0)
+		{
+			return;
+		}
+		
+		Block base = clicked.getData() == 10 ? clicked.getRelative(BlockFace.DOWN) : clicked;
+		
+		if(base.getData() == 10 || base.getData() == 2 || base.getData() == 3)
+		{
+			return;
+		}
+		
+		if(e.getPlayer().getGameMode() != GameMode.CREATIVE)
+		{
+			item.setAmount(item.getAmount() - 1);
+			
+			if(item.getAmount() <= 0)
+			{
+				e.getPlayer().setItemInHand(null);
+			}
+		}
+		
+		BlockData data = Util.readBlock(base);
+		Rarity blockRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(base.getWorld()));
+		Rarity itemRarity = Util.getRarity(item);
+		Rarity worstRarity = Util.getWorstRarity(blockRarity, itemRarity);
+		
+		ItemStack drop = new ItemStack(Material.DOUBLE_PLANT, 1, base.getData());
+		Util.setCommodity(drop, worstRarity);
+		base.getWorld().dropItemNaturally(base.getLocation().add(0.5D, 0.5D, 0.5D), drop);
+		
+		((CraftPlayer) e.getPlayer()).getHandle().playerConnection.sendPacket(new PacketPlayOutWorldParticles(
+				EnumParticle.VILLAGER_HAPPY, true, clicked.getX() + 0.5F, clicked.getY() + 0.5F, clicked.getZ() + 0.5F, 0.25F, 0.25F, 0.25F, 0.0F, 20, 174));
+		
+		e.setCancelled(true);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void breakNaturallyOnBlockPhysics(BlockPhysicsEvent e)
+	{
+		Block b = e.getBlock();
+		Block down = b.getRelative(BlockFace.DOWN);
+		Block up = b.getRelative(BlockFace.UP);
+		Block attached;
+		
+		switch0:switch(b.getType())
+		{
+		case SUGAR_CANE_BLOCK:
+			if(down.getType() == Material.SUGAR_CANE_BLOCK)
+			{
+				break;
+			}
+			
+			if(down.getType() == Material.SAND || down.getType() == Material.DIRT || down.getType() == Material.GRASS)
+			{
+				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
+				
+				for(BlockFace face : directions)
+				{
+					if(down.getRelative(face).getType() == Material.WATER || down.getRelative(face).getType() == Material.STATIONARY_WATER)
+					{
+						break switch0;
+					}
+				}
+			}
+			
+			e.setCancelled(true);
+			BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			break;
+		case CACTUS:
+			boolean toBreak = true;
+			
+			if(down.getType() == Material.CACTUS || down.getType() == Material.SAND)
+			{
+				toBreak = false;
+				
+				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
+				
+				for(BlockFace face : directions)
+				{
+					Material type = b.getRelative(face).getType();
+					
+					if(type.isSolid() || type == Material.WEB)
+					{
+						toBreak = true;
+						break;
+					}
+				}
+			}
+			
+			if(!toBreak)
+			{
+				break;
+			}
+			
+			e.setCancelled(true);
+			BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			break;
+		case RED_MUSHROOM:
+		case BROWN_MUSHROOM:
+			if(!down.getType().isOccluding() && !down.getType().name().contains("LEAVES")
+					|| (!(down.getType() == Material.MYCEL || down.getType() == Material.DIRT && b.getData() == 2) && b.getLightLevel() > 12))
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case SAPLING:
+		case YELLOW_FLOWER:
+		case RED_ROSE:
+		case LONG_GRASS:
+			if(down.getType() != Material.GRASS && down.getType() != Material.DIRT)
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case DOUBLE_PLANT:
+			boolean isBase = b.getData() != 10;
+			
+			if(isBase)
+			{
+				if(down.getType() != Material.GRASS && down.getType() != Material.DIRT
+						|| up.getType() != b.getType() || up.getData() != 10)
+				{
+					e.setCancelled(true);
+					BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+				}
+			}
+			else
+			{
+				if(down.getType() != b.getType() || down.getData() == 10)
+				{
+					e.setCancelled(true);
+					BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+				}
+			}
+			
+			break;
+		case CARPET:
+			if(down.getType() == Material.AIR)
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case WATER_LILY:
+			if(down.getType() != Material.STATIONARY_WATER || down.getData() != 0)
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case WALL_BANNER:
+		case WALL_SIGN:
+			Attachable attachable = (Attachable) b.getState().getData();
+			attached = b.getRelative(attachable.getAttachedFace());
+			
+			if(!attached.getType().isSolid())
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case TRAP_DOOR:
+		case IRON_TRAPDOOR:
+			TrapDoor trapDoor = (TrapDoor) b.getState().getData();
+			attached = b.getRelative(trapDoor.getAttachedFace());
+			
+			boolean isInverted;
+			
+			if(attached.getState().getData() instanceof Step)
+			{
+				isInverted = ((Step) attached.getState().getData()).isInverted();
+			}
+			else if(attached.getState().getData() instanceof WoodenStep)
+			{
+				isInverted = ((WoodenStep) attached.getState().getData()).isInverted();
+			}
+			else if(attached.getType() == Material.STONE_SLAB2)
+			{
+				isInverted = attached.getData() == 0 ? false : true;
+			}
+			else if(!attached.getType().isOccluding() && !(attached.getState().getData() instanceof Stairs))
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+				break;
+			}
+			else
+			{
+				break;
+			}
+			
+			if(isInverted != trapDoor.isInverted())
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case TORCH:
+		case REDSTONE_TORCH_OFF:
+		case REDSTONE_TORCH_ON:
+		case LADDER:
+		case TRIPWIRE:
+		case STONE_BUTTON:
+		case WOOD_BUTTON:
+		case LEVER:
+			Directional directional = (Directional) b.getState().getData();
+			Block relative = b.getRelative(directional.getFacing().getOppositeFace());
+			
+			if(!relative.getType().isSolid() || !relative.getType().isOccluding())
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case SIGN_POST:
+		case STANDING_BANNER:
+			if(!down.getType().isSolid())
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case FLOWER_POT:
+		case WOOD_PLATE:
+		case STONE_PLATE:
+		case IRON_PLATE:
+		case GOLD_PLATE:
+		case REDSTONE_WIRE:
+		case DIODE_BLOCK_ON:
+		case DIODE_BLOCK_OFF:
+		case REDSTONE_COMPARATOR_OFF:
+		case REDSTONE_COMPARATOR_ON:
+			if(!down.getType().isOccluding() || !down.getType().isSolid())
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case RAILS:
+		case ACTIVATOR_RAIL:
+		case DETECTOR_RAIL:
+		case POWERED_RAIL:
+			Rails rails = (Rails) b.getState().getData();
+			
+			if(!down.getType().isOccluding()
+					|| (rails.isOnSlope() && !b.getRelative(rails.getDirection()).getType().isOccluding()))
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		case ACACIA_DOOR:
+		case BIRCH_DOOR:
+		case DARK_OAK_DOOR:
+		case IRON_DOOR_BLOCK:
+		case JUNGLE_DOOR:
+		case SPRUCE_DOOR:
+		case WOODEN_DOOR:
+			Door door = (Door) b.getState().getData();
+			
+			if(door.isTopHalf())
+			{
+				if((down.getType() != b.getType() || ((Door) down.getState().getData()).isTopHalf()))
+				{
+					e.setCancelled(true);
+					BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+				}
+			}
+			else
+			{
+				if(!down.getType().isOccluding() || up.getType() != b.getType() || !((Door) up.getState().getData()).isTopHalf())
+				{
+					e.setCancelled(true);
+					BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+				}
+			}
+			break;
+		case BED_BLOCK:
+			Bed bed = (Bed) b.getState().getData();
+			relative = b.getRelative(bed.isHeadOfBed() ? bed.getFacing().getOppositeFace() : bed.getFacing());
+			
+			if(relative.getType() != Material.BED_BLOCK)
+			{
+				e.setCancelled(true);
+				BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void setRarityOnVillagerTrade(InventoryClickEvent e)
+	{
+		if(e.getInventory().getType() != InventoryType.MERCHANT)
+		{
+			return;
+		}
+		
+		if(e.getAction() == InventoryAction.NOTHING)
+		{
+			return;
+		}
+		
+		MerchantInventory inv = (MerchantInventory) e.getInventory();
+		
+		ItemStack result = inv.getItem(2);
+		
+		if(result == null)
+		{
+			return;
+		}
+		
+		Entity entity = (Entity) inv.getHolder();
+		ItemStack left = inv.getItem(0);
+		ItemStack right = inv.getItem(1);
+		
+		
+		List<Rarity> list = new ArrayList<>();
+		
+		Rarity entityRarity = Optional.ofNullable(Rarity.valueOfToString(entity.getCustomName())).orElse(Util.getRarity(entity.getWorld()));
+		Rarity leftRarity = left == null ? null : Optional.ofNullable(Util.getRarity(left)).orElse(Rarity.COMMON);
+		Rarity rightRarity = right == null ? null : Optional.ofNullable(Util.getRarity(right)).orElse(Rarity.COMMON);
+		
+		list.add(entityRarity);
+		list.add(leftRarity);
+		list.add(rightRarity);
+		list.removeIf(x -> x == null);
+		Rarity worstRarity = Util.getWorstRarity(list.stream().toArray(x -> new Rarity[x]));
+		
+		Util.setCommodity(result, worstRarity);
+		inv.setItem(2, result);
 	}
 	
 	@EventHandler
@@ -296,90 +685,90 @@ public class Main extends Common implements Listener
 	}
 	
 
-	@EventHandler
-	public void a(BlockPhysicsEvent e)
-	{
-		Block b = e.getBlock();
-		World w = b.getWorld();
-		
-		if(b.getType() == Material.SUGAR_CANE_BLOCK)
-		{
-			e.setCancelled(true);
-			
-			Block down = b.getRelative(BlockFace.DOWN);
-			
-			if(down.getType() == Material.SUGAR_CANE_BLOCK)
-			{
-				return;
-			}
-			
-			if(down.getType() == Material.SAND || down.getType() == Material.DIRT || down.getType() == Material.GRASS)
-			{
-				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
-				
-				for(BlockFace face : directions)
-				{
-					if(down.getRelative(face).getType() == Material.WATER || down.getRelative(face).getType() == Material.STATIONARY_WATER)
-					{
-						return;
-					}
-				}
-			}
-			
-			b.setType(Material.AIR, true);
-			
-			ItemStack item = new ItemStack(Material.SUGAR_CANE, 1);
-			ItemMeta meta = item.getItemMeta();
-			meta.setLore(Util.getLore(b));
-			item.setItemMeta(meta);
-			
-			Util.writeBlock(b, null);
-			
-			w.dropItemNaturally(b.getLocation(), item);
-		}
-		else if(b.getType() == Material.CACTUS)
-		{
-			e.setCancelled(true);
-		
-			Block down = b.getRelative(BlockFace.DOWN);
-			
-			boolean toBreak = true;
-			
-			if(down.getType() == Material.CACTUS || down.getType() == Material.SAND)
-			{
-				toBreak = false;
-				
-				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
-				
-				for(BlockFace face : directions)
-				{
-					if(b.getRelative(face).getType().isSolid())
-					{
-						toBreak = true;
-						break;
-					}
-				}
-			}
-			
-			if(!toBreak)
-			{
-				return;
-			}
-			
-			b.setType(Material.AIR, true);
-			
-			ItemStack item = new ItemStack(Material.CACTUS, 1);
-			ItemMeta meta = item.getItemMeta();
-			meta.setLore(Util.getLore(b));
-			item.setItemMeta(meta);
-			
-			Util.writeBlock(b, null);
-			
-			w.dropItemNaturally(b.getLocation(), item);
-		}
-	}
+//	@EventHandler
+//	public void a(BlockPhysicsEvent e)
+//	{
+//		Block b = e.getBlock();
+//		World w = b.getWorld();
+//		
+//		if(b.getType() == Material.SUGAR_CANE_BLOCK)
+//		{
+//			e.setCancelled(true);
+//			
+//			Block down = b.getRelative(BlockFace.DOWN);
+//			
+//			if(down.getType() == Material.SUGAR_CANE_BLOCK)
+//			{
+//				return;
+//			}
+//			
+//			if(down.getType() == Material.SAND || down.getType() == Material.DIRT || down.getType() == Material.GRASS)
+//			{
+//				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
+//				
+//				for(BlockFace face : directions)
+//				{
+//					if(down.getRelative(face).getType() == Material.WATER || down.getRelative(face).getType() == Material.STATIONARY_WATER)
+//					{
+//						return;
+//					}
+//				}
+//			}
+//			
+//			b.setType(Material.AIR, true);
+//			
+//			ItemStack item = new ItemStack(Material.SUGAR_CANE, 1);
+//			ItemMeta meta = item.getItemMeta();
+//			meta.setLore(Util.getLore(b));
+//			item.setItemMeta(meta);
+//			
+//			Util.writeBlock(b, null);
+//			
+//			w.dropItemNaturally(b.getLocation(), item);
+//		}
+//		else if(b.getType() == Material.CACTUS)
+//		{
+//			e.setCancelled(true);
+//		
+//			Block down = b.getRelative(BlockFace.DOWN);
+//			
+//			boolean toBreak = true;
+//			
+//			if(down.getType() == Material.CACTUS || down.getType() == Material.SAND)
+//			{
+//				toBreak = false;
+//				
+//				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
+//				
+//				for(BlockFace face : directions)
+//				{
+//					if(b.getRelative(face).getType().isSolid())
+//					{
+//						toBreak = true;
+//						break;
+//					}
+//				}
+//			}
+//			
+//			if(!toBreak)
+//			{
+//				return;
+//			}
+//			
+//			b.setType(Material.AIR, true);
+//			
+//			ItemStack item = new ItemStack(Material.CACTUS, 1);
+//			ItemMeta meta = item.getItemMeta();
+//			meta.setLore(Util.getLore(b));
+//			item.setItemMeta(meta);
+//			
+//			Util.writeBlock(b, null);
+//			
+//			w.dropItemNaturally(b.getLocation(), item);
+//		}
+//	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(BlockGrowEvent e)
 	{
 		Block b = e.getBlock();
@@ -410,17 +799,22 @@ public class Main extends Common implements Listener
 		Player p = e.getPlayer();
 		Block b = e.getBlockClicked();
 		
+		if(b == null)
+		{
+			return;
+		}
+		
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
 		
 		BlockData data = Util.readBlock(b);
-		Util.writeBlock(b, null);
 		
-		Rarity bucketRarity = data.getRarity() == null ? Util.getRarity(b.getWorld()) : data.getRarity();
+		Rarity blockRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
 		Rarity itemRarity = Optional.ofNullable(Util.getRarity(itemInHand)).orElse(Rarity.COMMON);
-		Rarity finalRarity = Rarity.getByData((byte) Math.min(bucketRarity.getData(), itemRarity.getData()));
+		Rarity worstRarity = Util.getWorstRarity(blockRarity, itemRarity);
 		
-		Util.setCommodity(item, finalRarity);
+		Util.writeBlock(b, null);
+		Util.setCommodity(item, worstRarity);
 		
 		e.setItemStack(item);
 	}
@@ -430,6 +824,7 @@ public class Main extends Common implements Listener
 	{
 		Player p = e.getPlayer();
 		Block b = e.getBlockClicked();
+		Block relative = b.getRelative(e.getBlockFace());
 		
 		ItemStack itemInHand = p.getItemInHand();
 		ItemStack item = e.getItemStack();
@@ -441,7 +836,7 @@ public class Main extends Common implements Listener
 		data.setRarity(itemRarity);
 		data.setProperties(Util.getProperties(itemInHand));
 		
-		Util.writeBlock(b, data);
+		Util.writeBlock(relative, data);
 		
 		Util.setCommodity(item, itemRarity);
 		
@@ -1079,7 +1474,7 @@ public class Main extends Common implements Listener
 	{
 		Block clickedBlock = e.getClickedBlock();
 		
-		if(clickedBlock != null && clickedBlock.getType() == Material.ANVIL && e.getAction().name().contains("RIGHT") && !e.getPlayer().isSneaking())
+		if(clickedBlock != null && clickedBlock.getType() == Material.ANVIL && e.getAction().name().contains("RIGHT"))
 		{
 			BlockData data = Util.readBlock(clickedBlock);
 			Rarity rarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Rarity.COMMON);
@@ -1088,7 +1483,7 @@ public class Main extends Common implements Listener
 			
 			e.setCancelled(true);
 			
-			new CustomAnvil(cp, rarity);
+			new CustomAnvil(cp, rarity, clickedBlock);
 		}
 	}
 	
@@ -1110,10 +1505,57 @@ public class Main extends Common implements Listener
 		}
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void mushroom(PlayerInteractEntityEvent e)
+	{
+		Entity clicked = e.getRightClicked();
+		
+		Player p = e.getPlayer();
+		ItemStack inHand = p.getItemInHand();
+		
+		if(inHand.getType() != Material.BOWL && inHand.getType() != Material.BUCKET)
+		{
+			return;
+		}
+		
+		ItemStack result = new ItemStack(inHand.getType() == Material.BOWL ? Material.MUSHROOM_SOUP : Material.MILK_BUCKET);
+		
+		if(!(clicked instanceof MushroomCow) && (!(clicked instanceof Cow) || inHand.getType() != Material.BUCKET))
+		{
+			return;
+		}
+		
+		if(inHand.getType() != Material.BOWL || inHand.getAmount() <= 0 || inHand.getAmount() != 1 && p.getInventory().firstEmpty() == -1)
+		{
+			return;
+		}
+		
+		Rarity entityRarity = Optional.ofNullable(Util.getRarity(clicked)).orElse(Util.getRarity(clicked.getWorld()));
+		Rarity itemRarity = Optional.ofNullable(Util.getRarity(inHand)).orElse(Rarity.COMMON);
+		Rarity worst = Util.getWorstRarity(entityRarity, itemRarity);
+		
+		Util.setCommodity(result, worst);
+		
+		if(inHand.getAmount() == 1)
+		{
+			p.setItemInHand(result);
+		}
+		else if(p.getInventory().addItem(result).isEmpty())
+		{
+			inHand.setAmount(inHand.getAmount() - 1);
+			p.setItemInHand(inHand);
+		}
+		
+		e.setCancelled(true);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(BlockSpreadEvent e)
 	{
-		e.setCancelled(true);
+		Block source = e.getSource();
+		Block b = e.getBlock();
+		
+		Util.writeBlock(b, Util.readBlock(source));
 	}
 	
 	@EventHandler

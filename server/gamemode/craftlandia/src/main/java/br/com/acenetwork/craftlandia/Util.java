@@ -85,6 +85,11 @@ public class Util
 	
 	public static Rarity getRarity(ItemStack item)
 	{
+		if(item == null)
+		{
+			return null;
+		}
+		
 		ItemMeta meta = item.getItemMeta();
 		
 		if(meta == null)

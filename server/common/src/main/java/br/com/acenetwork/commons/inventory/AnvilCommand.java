@@ -9,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -123,9 +122,6 @@ public class AnvilCommand extends GUI
 		
 		if(rawSlot == 2)
 		{
-			final int level = p.getLevel();
-			Bukkit.broadcastMessage("p.getLevel() = " + level);
-			
 			Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
 			{
 				p.setLevel(p.getLevel());

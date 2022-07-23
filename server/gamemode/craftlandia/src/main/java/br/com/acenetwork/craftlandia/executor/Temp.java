@@ -2,6 +2,7 @@ package br.com.acenetwork.craftlandia.executor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,6 +19,7 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
@@ -234,7 +236,13 @@ public class Temp implements TabExecutor
 			
 			ItemStack item = p.getItemInHand();
 			
-			p.sendMessage(CommonsUtil.getEnchants(item).toString());
+			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+			
+			Jackpot.getInstance().setJackpot(1000000.0D);
+			p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null, args));
+//			p.sendMessage(aliases);
+			
+//			p.sendMessage(CommonsUtil.getEnchants(item).toString());
 			
 //			p.sendMessage(item.getEnchantmentLevel(Enchantment.getById(Integer.valueOf(args[0])))	 + "");
 			

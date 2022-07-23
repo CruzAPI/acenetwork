@@ -1,27 +1,53 @@
 package br.com.acenetwork.craftlandia.inventory;
 
+import java.util.Arrays;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.inventory.AnvilCommand;
 import br.com.acenetwork.commons.player.CommonPlayer;
+import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Rarity;
 
 public class RenameItem extends AnvilCommand
 {
 	private final Rarity rarity;
+	private final Block b;
+	private ItemStack[] contents;
+	private int task;
 	
-	public RenameItem(CommonPlayer cp, Rarity rarity, ItemStack[] contents)
+	public RenameItem(CommonPlayer cp, Rarity rarity, Block b, ItemStack[] contents)
 	{
 		super(cp, null, null);
 		this.rarity = rarity;
+		this.contents = contents;
+		this.b = b;
 		
-		for(int i = 0; i < contents.length && i < inv.getSize(); i++)
+		task = new BukkitRunnable()
 		{
-			inv.setItem(i, contents[i]);
-		}
+			@Override
+			public void run()
+			{
+				if(b.getType() != Material.ANVIL 
+						|| p.getWorld() != b.getWorld()
+						|| p.getLocation().distance(b.getLocation()) > 5.0D)
+				{
+					this.cancel();
+					p.closeInventory();
+					return;
+				}
+			}
+		}.runTaskTimer(Main.getPlugin(), 0L, 1L).getTaskId();
+		
+		inv.setItem(0, contents[0]);
 		
 		p.updateInventory();
 	}
@@ -34,49 +60,49 @@ public class RenameItem extends AnvilCommand
 	}
 	
 	@EventHandler
-	public void asdasd(InventoryClickEvent e)
+	public void cancelTask(InventoryCloseEvent e)
 	{
-		if(e.getWhoClicked() != p)
+		if(e.getPlayer() != p)
 		{
 			return;
 		}
 		
-		if(e.getRawSlot() == 0)
+		if(contents != null)
 		{
-			ItemStack[] clonedContents = getClonedContents();
-			inv.clear();
-			new CustomAnvil(cp, rarity, null, clonedContents);
+			for(ItemStack item : contents)
+			{
+				if(item != null)
+				{
+					p.getWorld().dropItem(p.getLocation().add(0.0D, 1.25D, 0.0D), item).setVelocity(p.getLocation().getDirection().multiply(0.35D));
+				}
+			}
+			
+			contents = null;
 		}
+		
+		inv.clear();
+		Bukkit.getScheduler().cancelTask(task);
+		task = 0;
 	}
 	
-	private ItemStack[] getClonedContents()
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void cancelTask(PlayerTeleportEvent e)
 	{
-		ItemStack[] contents = getContents();
-		ItemStack[] clonedContents = new ItemStack[contents.length];
-		
-		for(int i = 0; i < contents.length; i++)
+		if(e.getPlayer() != p)
 		{
-			clonedContents[i] = contents[i] == null ? null : contents[i].clone();
+			return;
 		}
 		
-		return clonedContents;
+		Bukkit.getScheduler().cancelTask(task);
+		task = 0;
 	}
 	
 	@Override
 	public void run(String displayName)
 	{
-		ItemStack[] clonedContents = getClonedContents();
 		inv.clear();
-		new CustomAnvil(cp, rarity, displayName, clonedContents);
-	}
-	
-	public ItemStack[] getContents()
-	{
-		ItemStack[] contents = new ItemStack[2];
-		
-		contents[0] = inv.getItem(0);
-		contents[1] = inv.getItem(1);
-		
-		return contents;
+		ItemStack[] clone = Arrays.stream(contents).map(x -> x == null ? null : x.clone()).toArray(x -> new ItemStack[x]);
+		contents = null;
+		new CustomAnvil(cp, rarity, b, displayName, clone);
 	}
 }
