@@ -10,32 +10,40 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.commons.manager.Message;
+import br.com.acenetwork.commons.manager.InsufficientBalanceException;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
+import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.inventory.JackpotGUI;
 import br.com.acenetwork.craftlandia.inventory.JackpotPercentage;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
+import net.citizensnpcs.api.CitizensAPI;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 
-public class Jackpot implements TabExecutor
+public class Jackpot implements TabExecutor, Listener
 {
 	public static final String JACKPOT_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String RANDOM_ITEM_UUID = CommonsUtil.getRandomItemUUID();
@@ -48,6 +56,8 @@ public class Jackpot implements TabExecutor
 	private double jackpot;
 	
 	private static Jackpot instance;
+	
+	private boolean inUse;
 	
 	public static final int $BTA_TO_SHARDS = 200;
 	
@@ -65,7 +75,7 @@ public class Jackpot implements TabExecutor
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					DataInputStream in = new DataInputStream(streamIn))
 			{
-				setJackpot(in.readDouble());
+				setJackpotTotal(in.readDouble());
 			}
 			catch(IOException e)
 			{
@@ -74,13 +84,13 @@ public class Jackpot implements TabExecutor
 		}
 		else
 		{
-			setJackpot(0.0D);
+			setJackpotTotal(0.0D);
 		}
 		
 		int size = 0;
 		final int maxSize = 30000;
 		
-		COAL_MAP.put(JACKPOT.getId(), -size + (size += 100000));
+		COAL_MAP.put(JACKPOT.getId(), -size + (size += 1));
 		COAL_MAP.put(VIP.getId(), -size + (size += 30));
 		COAL_MAP.put(RANDOM_ITEM.getId(), -size + (size += 3000));
 		COAL_MAP.put(NUGGET_1.getId(), -size + (size += 1800));
@@ -102,6 +112,8 @@ public class Jackpot implements TabExecutor
 		COAL_MAP.put($BTA_3.getId(), -size + (size += 400));
 		COAL_MAP.put($BTA_5.getId(), -size + (size += 200));
 		COAL_MAP.put(NONE.getId(), -size + (size += Math.max(0, maxSize - size)));
+		
+		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
 	}
 	
 	@Override
@@ -123,56 +135,83 @@ public class Jackpot implements TabExecutor
 		
 		Player p = (Player) sender;
 		CommonPlayer cp = CraftCommonPlayer.get(p);
+		new JackpotPercentage(cp, COAL_MAP);
 		
-		bundle = ResourceBundle.getBundle("message", cp.getLocale());
+//		TextComponent[] extra = new TextComponent[1];
+//		
+//		extra[0] = new TextComponent("\n/" + aliases + "\n" + "/" + aliases + " %");
+//		
+//		TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
+//		text.setColor(ChatColor.RED);
+//		p.spigot().sendMessage(text);
 		
-		if(args.length == 0)
-		{
-			if(cp.isJackpoting())
-			{
-				return true;
-			}
-			
-			final double bet = 1000.0D;
-			
-			double newBalance = cp.getBalance() - bet;
-			
-			if(newBalance < 0.0D)
-			{
-				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.insufficient-balance"));
-				return true;
-			}
-			
-			cp.setBalance(newBalance);
-			setJackpot(getJackpot() + bet);
-			
-			cp.setJackpoting(true);
-			new JackpotGUI(cp, COAL_MAP);
-		}
-		else if(args.length == 1 && args[0].equalsIgnoreCase("%"))
-		{
-			new JackpotPercentage(cp, COAL_MAP);
-		}
-		else
-		{
-			TextComponent[] extra = new TextComponent[1];
-			
-			extra[0] = new TextComponent("\n/" + aliases + "\n" + "/" + aliases + " %");
-			
-			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
-			text.setColor(ChatColor.RED);
-			p.spigot().sendMessage(text);
-		}
-
 		return false;
 	}
 	
-	public double getJackpot()	
+	@EventHandler
+	public void a(PlayerInteractEntityEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		Entity clicked = e.getRightClicked();
+		
+		if(CitizensAPI.getNPCRegistry().isNPC(clicked) && clicked.getName().equals("test"))
+		{
+			run(CraftCommonPlayer.get(p));
+		}
+	}
+	
+	private boolean run(CommonPlayer cp)
+	{
+		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		Player p = cp.getPlayer();
+		
+		if(inUse)
+		{
+			p.sendMessage(ChatColor.AQUA + "[" + bundle.getString("noun.jackpot").toUpperCase() + "] " 
+					+ ChatColor.RED + bundle.getString("cmd.jackpot.occupied-machine"));
+			return false;
+		}
+		
+		if(cp.isJackpoting())
+		{
+			return false;
+		}
+		
+		final double bet = 1000.0D;
+		
+		try
+		{
+			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(cp.getLocale()));
+			
+			cp.setBalance(cp.getBalance() - bet);
+			p.sendMessage(ChatColor.DARK_RED + "(-" + df.format(bet) + " SHARDS)");
+		}
+		catch(InsufficientBalanceException e)
+		{
+			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.insufficient-balance"));
+			return false;
+		}
+		
+		setJackpotTotal(getJackpotTotal() + bet);
+		
+		cp.setJackpoting(true);
+		inUse = true;
+		new JackpotGUI(cp, COAL_MAP);
+		return true;
+	}
+	
+	public double getJackpotTotal()	
 	{
 		return jackpot;
 	}
 	
-	public void setJackpot(double jackpot)
+	public double getJackpotPrize()	
+	{
+		return jackpot * PERCENT;
+	}
+	
+	public void setJackpotTotal(double jackpot)
 	{
 		this.jackpot = jackpot;
 	}
@@ -204,7 +243,7 @@ public class Jackpot implements TabExecutor
 	{
 		if(CommonsUtil.compareUUID(item, Jackpot.JACKPOT_UUID))
 		{
-			return Math.max(0.0D, instance.getJackpot());
+			return Math.max(0.0D, instance.getJackpotPrize());
 		}
 		
 		if(CommonsUtil.compareUUID(item, Jackpot.SHARDS_UUID))
@@ -258,6 +297,16 @@ public class Jackpot implements TabExecutor
 		}
 		
 		return multiplier * item.getAmount();
+	}
+	
+	public void setInUse(boolean inUse)
+	{
+		this.inUse = inUse;
+	}
+	
+	public boolean isInUse()
+	{
+		return inUse;
 	}
 }
 

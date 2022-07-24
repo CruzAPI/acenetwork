@@ -1,30 +1,19 @@
 package br.com.acenetwork.commons.inventory;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.executor.VipChest;
-import br.com.acenetwork.commons.manager.CommonsConfig;
-import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
 
 public class VipChestGUI extends GUI

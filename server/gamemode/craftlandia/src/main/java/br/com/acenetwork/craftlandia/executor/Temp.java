@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -23,6 +25,8 @@ import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 
 public class Temp implements TabExecutor
 {
@@ -234,11 +238,19 @@ public class Temp implements TabExecutor
 			Player p = (Player) sender;
 			CommonPlayer cp = CraftCommonPlayer.get(p);
 			
+			if(args.length == 1)
+			{
+				NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "test");
+				npc.spawn(new Location(p.getWorld(), 0.5D, 83.0D, 37.5D, -180.0F, 0.0F));
+				npc.data().setPersistent("jackpot", true);
+				return true;
+			}
+			
 			ItemStack item = p.getItemInHand();
 			
 			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 			
-			Jackpot.getInstance().setJackpot(1000000.0D);
+			Jackpot.getInstance().setJackpotTotal(1000000.0d);
 			p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null, args));
 //			p.sendMessage(aliases);
 			

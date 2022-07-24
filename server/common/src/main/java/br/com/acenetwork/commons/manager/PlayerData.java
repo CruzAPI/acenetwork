@@ -88,6 +88,11 @@ public class PlayerData implements Listener, Serializable, Cloneable
 	
 	public void setBalance(double balance)
 	{
+		if(balance < 0.0D)
+		{
+			throw new InsufficientBalanceException();
+		}
+		
 		this.balance = balance;
 	}
 	

@@ -83,6 +83,7 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -133,6 +134,7 @@ import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.listener.TestListener;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.LandData;
@@ -143,6 +145,10 @@ import br.com.acenetwork.craftlandia.warp.Portals;
 import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.CitizensPreReloadEvent;
+import net.citizensnpcs.api.event.CitizensReloadEvent;
+import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
@@ -155,6 +161,8 @@ public class Main extends Common implements Listener
 	public void onEnable()
 	{
 		instance = this;
+		
+//		CitizensAPI.getNPCRegistry().deregisterAll();
 		
 		registerCommand(new Give(), "give");
 		
@@ -202,6 +210,7 @@ public class Main extends Common implements Listener
 		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
 		getServer().getPluginManager().registerEvents(new RandomItem(), this);
 		getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
+		getServer().getPluginManager().registerEvents(new TestListener(), this);
 		
 		registerCommand(new Temp(), "temp");
 		
@@ -230,6 +239,22 @@ public class Main extends Common implements Listener
 		super.onDisable();
 	}
 	
+	@EventHandler(priority =  EventPriority.LOWEST)
+	public void a(PluginEnableEvent e)
+	{
+		if(e.getPlugin().getName().equals("Citizens"))
+		{
+			new BukkitRunnable()
+			{
+				@Override
+				public void run()
+				{
+					CitizensAPI.getNPCRegistry().deregisterAll();
+					Bukkit.getConsoleSender().sendMessage("deregistering all!");
+				}
+			}.runTaskLater(this, 100L);
+		}
+	}
 	@EventHandler
 	public void a(WorldSaveEvent e)
 	{
@@ -309,7 +334,7 @@ public class Main extends Common implements Listener
 		
 		ItemStack item = e.getItem();
 		
-		if(item.getType() != Material.INK_SACK || item.getDurability() != 15 || item.getAmount() <= 0)
+		if(item == null || item.getType() != Material.INK_SACK || item.getDurability() != 15 || item.getAmount() <= 0)
 		{
 			return;
 		}

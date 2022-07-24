@@ -269,7 +269,7 @@ public abstract class Warp implements Listener
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void b(BlockPlaceEvent e)
 	{
 		Block b = e.getBlock();
@@ -757,6 +757,24 @@ public abstract class Warp implements Listener
 	
 	public Location getSpawnLocation()
 	{
+		return null;
+	}
+	
+	public World getWorld()
+	{
+		return w;
+	}
+	
+	public static World getWorld(Class<? extends Warp> type)
+	{
+		for(Warp warp : MAP.values())
+		{
+			if(type.isInstance(warp))
+			{
+				return warp.w;
+			}
+		}
+		
 		return null;
 	}
 }

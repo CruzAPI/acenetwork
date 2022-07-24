@@ -25,7 +25,7 @@ public enum JackpotItem
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
-			double prize = Jackpot.getInstance().getJackpot();
+			double prize = Jackpot.getInstance().getJackpotPrize();
 			
 			if(prize > 0.0D)
 			{

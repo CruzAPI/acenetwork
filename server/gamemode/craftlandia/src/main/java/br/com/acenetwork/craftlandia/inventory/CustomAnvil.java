@@ -294,7 +294,7 @@ public class CustomAnvil extends GUI
 			rename = null;
 		}
 		
-		inv.setItem(32, left.getType() == Material.AIR ? blackGlass : rename == null ? renameItem : clearRename);
+		inv.setItem(32, left.getType() == Material.AIR || SpecialItems.getInstance().isSpecial(left) ? blackGlass : rename == null ? renameItem : clearRename);
 		
 		ItemStack result = left.clone();
 		
@@ -319,7 +319,11 @@ public class CustomAnvil extends GUI
 			}
 			
 			cost = leftCost + rightCost + repairCost + enchantmentCost + renameCost;
-			Util.setCommodity(result, worstRarity);
+			
+			if(!SpecialItems.getInstance().isSpecial(result))
+			{
+				Util.setCommodity(result, worstRarity);
+			}
 			
 			
 			Repairable resultMeta = (Repairable) result.getItemMeta();
@@ -382,6 +386,25 @@ public class CustomAnvil extends GUI
 			return 0;
 		}
 		
+		if(SpecialItems.getInstance().isSpecial(target))
+		{
+			if(!SpecialItems.getInstance().isContainmentPickaxe(target)
+					|| !CommonsUtil.compareUUID(sacrifice, CommonsUtil.getHiddenUUIDs(target).get(0)))
+			{
+				return 0;
+			}
+			
+			float targetChance = SpecialItems.getInstance().getContainmentPickaxeChance(target);
+			float sacrificeChance = SpecialItems.getInstance().getContainmentPickaxeChance(sacrifice);
+			
+			float f = (1.0F - (1.0F - targetChance / 100.0F) * (1.0F - sacrificeChance / 100.0F)) * 100.0F;
+			
+			CommonsUtil.setItemCopyOf(result, SpecialItems.getInstance().getContainmentPickaxeSupplier().get(null, f));
+			
+			materials = 1;
+			return 2;
+		}
+		
 		if(target.getType() == sacrifice.getType())
 		{
 			result.setDurability((short) Math.max(0, target.getDurability() 
@@ -414,7 +437,9 @@ public class CustomAnvil extends GUI
 		
 		if(target.getType() == Material.AIR || sacrificeEnchants.isEmpty() 
 				|| sacrifice.getType().getMaxDurability() == 0 && sacrifice.getType() != Material.ENCHANTED_BOOK
-				|| target.getType() != sacrifice.getType() && sacrifice.getType() != Material.ENCHANTED_BOOK)
+				|| target.getType() != sacrifice.getType() && sacrifice.getType() != Material.ENCHANTED_BOOK
+				|| SpecialItems.getInstance().isSpecial(target)
+				|| SpecialItems.getInstance().isSpecial(sacrifice))
 		{
 			return 0;
 		}

@@ -4,7 +4,13 @@ import static br.com.acenetwork.craftlandia.Rarity.COMMON;
 import static br.com.acenetwork.craftlandia.Rarity.LEGENDARY;
 import static br.com.acenetwork.craftlandia.Rarity.RARE;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
@@ -38,11 +44,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.metadata.FixedMetadataValue;
 
+import com.google.common.io.ByteStreams;
+
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
+import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.warp.Warp;
 
 public class Util
@@ -61,6 +70,44 @@ public class Util
 		default:
 			return COMMON;
 		}
+	}
+	
+	public static UUID getUUID(File file)
+	{
+		UUID uuid;
+		
+		if(file.length() > 0L)
+		{
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					DataInputStream in = new DataInputStream(streamIn))
+			{
+				uuid = new UUID(in.readLong(), in.readLong());
+			}
+			catch(IOException ex)
+			{
+				throw new RuntimeException(ex);
+			}
+		}
+		else
+		{
+			uuid = UUID.randomUUID();
+			
+			try(FileOutputStream fileOut = new FileOutputStream(file);
+					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+					DataOutputStream out = new DataOutputStream(streamOut))
+			{
+				out.writeLong(uuid.getMostSignificantBits());
+				out.writeLong(uuid.getLeastSignificantBits());
+				fileOut.write(streamOut.toByteArray());
+			}
+			catch(IOException ex)
+			{
+				throw new RuntimeException(ex);
+			}
+		}
+		
+		return uuid;
 	}
 	
 	public static byte[] toByteArray(short x)
