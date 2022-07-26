@@ -14,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.BundleSupplier;
-import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 import net.md_5.bungee.api.ChatColor;
@@ -30,7 +29,7 @@ public class SpecialItems
 	{
 		instance = this;
 		
-		containmentPickaxeUUID = Util.getUUID(Config.getFile(Type.CONTAINMENT_PICKAXE_UUID, true));
+		containmentPickaxeUUID = CommonsUtil.getUUID(Config.getFile(Type.CONTAINMENT_PICKAXE_UUID, true));
 		
 		containmentPickaxeSupplier = new BundleSupplier<ItemStack>()
 		{
@@ -73,7 +72,7 @@ public class SpecialItems
 	
 	public boolean isContainmentPickaxe(ItemStack item)
 	{
-		return CommonsUtil.compareUUID(item, containmentPickaxeUUID);
+		return CommonsUtil.containsUUID(item, containmentPickaxeUUID);
 	}
 	
 	public float getContainmentPickaxeChance(ItemStack item)
@@ -130,6 +129,6 @@ public class SpecialItems
 	
 	public boolean isSpecial(ItemStack item)
 	{
-		return CommonsUtil.compareUUID(item, containmentPickaxeUUID);
+		return CommonsUtil.containsUUID(item, containmentPickaxeUUID);
 	}
 }

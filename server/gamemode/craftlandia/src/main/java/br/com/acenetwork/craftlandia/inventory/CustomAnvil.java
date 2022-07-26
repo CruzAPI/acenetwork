@@ -389,7 +389,7 @@ public class CustomAnvil extends GUI
 		if(SpecialItems.getInstance().isSpecial(target))
 		{
 			if(!SpecialItems.getInstance().isContainmentPickaxe(target)
-					|| !CommonsUtil.compareUUID(sacrifice, CommonsUtil.getHiddenUUIDs(target).get(0)))
+					|| !CommonsUtil.containsUUID(sacrifice, CommonsUtil.getHiddenUUIDs(target).get(0)))
 			{
 				return 0;
 			}

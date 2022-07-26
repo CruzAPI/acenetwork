@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,17 +21,11 @@ public class BlockData implements Serializable
 	private Rarity rarity;
 	private Set<Property> properties;
 	private UUID player;
+	private Set<UUID> bed;
 	
 	public BlockData()
 	{
 		
-	}
-	
-	public BlockData(Rarity rarity, Set<Property> properties, UUID player)
-	{
-		this.rarity = rarity;
-		this.properties = properties;
-		this.player = player;
 	}
 	
 	public BlockData(byte[] b) throws IOException
@@ -55,11 +50,34 @@ public class BlockData implements Serializable
 			{
 				player = new UUID(in.readLong(), in.readLong());
 			}
+			
+			if((main & 0x10) == 0x10)
+			{
+				bed = new HashSet<>();
+				
+				int size = in.readInt();
+				
+				for(int i = 0; i < size; i++)
+				{
+					bed.add(new UUID(in.readLong(), in.readLong()));
+				}
+			}
 		}
 		catch(IOException e)
 		{
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public Set<UUID> setBed(Set<UUID> bed)
+	{
+		this.bed = bed;
+		return this.bed;
+	}
+	
+	public Set<UUID> getBed()
+	{
+		return bed;
 	}
 	
 	public void setRarity(Rarity rarity)
@@ -104,6 +122,7 @@ public class BlockData implements Serializable
 		b[0] |= rarity != null ? 0x80 : 0x00;
 		b[0] |= properties != null && !properties.isEmpty() ? 0x40 : 0x00;
 		b[0] |= player != null ? 0x20 : 0x00;
+		b[0] |= bed != null && !bed.isEmpty() ? 0x10 : 0x00;
 		
 		return b;
 	}
@@ -133,6 +152,17 @@ public class BlockData implements Serializable
 				out.writeLong(player.getLeastSignificantBits());
 			}
 			
+			if((main[0] & 0x10) == 0x10)
+			{
+				out.writeInt(bed.size());
+				
+				for(UUID uuid : bed)
+				{
+					out.writeLong(uuid.getMostSignificantBits());
+					out.writeLong(uuid.getLeastSignificantBits());
+				}
+			}
+			
 			return streamOut.toByteArray();
 		}
 		catch(IOException e)
@@ -146,6 +176,7 @@ public class BlockData implements Serializable
 	{
 		return "BlockData [rarity=" + rarity + ChatColor.RESET 
 				+ ", properties=" + properties + ChatColor.RESET 
-				+ ", player=" + player + ChatColor.RESET + "]";
+				+ ", player=" + player + ChatColor.RESET
+				+ ", bed=" + bed + ChatColor.RESET + "] " + Integer.toHexString(hashCode());
 	}
 }

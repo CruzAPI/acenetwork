@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.manager.BundleSupplier;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
@@ -462,7 +463,7 @@ public enum JackpotItem
 			{
 				item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
 				meta = item.getItemMeta();
-				CommonsUtil.setCustomSkull((SkullMeta) meta, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDVjNmRjMmJiZjUxYzM2Y2ZjNzcxNDU4NWE2YTU2ODNlZjJiMTRkNDdkOGZmNzE0NjU0YTg5M2Y1ZGE2MjIifX19");
+				CommonsUtil.setCustomSkull((SkullMeta) meta, VipChest.SKIN_VALUE);
 			}
 			else
 			{

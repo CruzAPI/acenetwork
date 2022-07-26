@@ -46,6 +46,7 @@ public class WarpLand extends Warp
 {
 	public final Map<UUID, LandEntityData> map;
 	private final Location spawnLocation;
+	private final Location portalLocation;
 	
 	public WarpLand(World w)
 	{
@@ -72,7 +73,8 @@ public class WarpLand extends Warp
 		}
 		
 		spawnLocation = new Location(w, 0.5D, 69.0D, 0.5D, 0.0F, 0.0F);
-		
+		portalLocation = new Location(w, 13.5D, 88.0D, -7.5D, 0.0F, 0.0F);
+
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
 			loop:for(CommonPlayer cp : getCommonPlayers())
@@ -277,5 +279,11 @@ public class WarpLand extends Warp
 		{
 			ex.printStackTrace();
 		}
+	}
+	
+	@Override
+	public Location getPortalLocation()
+	{
+		return portalLocation;
 	}
 }

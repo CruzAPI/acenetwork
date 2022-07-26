@@ -1,30 +1,88 @@
 package br.com.acenetwork.craftlandia.warp;
 
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.weather.WeatherChangeEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.player.CommonPlayer;
+import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.manager.BlockData;
+import net.md_5.bungee.api.ChatColor;
 
 public class Newbie extends Warp
 {
 	private final Location spawnLocation;
+	private final Location portalLocation;
+	private boolean pvp;
 	
 	public Newbie(World w)
 	{
 		super(w);
 		
 		spawnLocation = new Location(w, 0.5D, 69.0D, 0.5D, 0.0F, 0.0F);
+		portalLocation = new Location(w, 13.5D, 88.0D, -7.5D, 0.0F, 0.0F);
+		
+		pvp = isDay() && !w.hasStorm();
+		
+		new BukkitRunnable()
+		{
+			@Override
+			public void run()
+			{
+				if(w.hasStorm())
+				{
+					pvp = true;
+					return;
+				}
+				
+				if(pvp != (pvp = !isDay()))
+				{
+					for(CommonPlayer cp : getCommonPlayers())
+					{
+						Player p = cp.getPlayer();
+						ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+						
+						if(pvp)
+						{
+							p.sendMessage(ChatColor.RED + bundle.getString("newbie.dusk")
+							+ " " + ChatColor.DARK_RED + ChatColor.BOLD + "PVP ON!");
+						}
+						else
+						{
+							p.sendMessage(ChatColor.GREEN + bundle.getString("newbie.dawn")
+							+ " " + ChatColor.DARK_GREEN + ChatColor.BOLD + "PVP OFF!");
+						}
+					}
+				}
+			}
+		}.runTaskTimer(Main.getPlugin(), 1L, 1L);
+	}
+	
+	private boolean isDay()
+	{
+		return w.getTime() < 12000L;
 	}
 	
 	@Override
@@ -51,9 +109,95 @@ public class Newbie extends Warp
 		return 1024;
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void entityDamage(EntityDamageEvent e)
+	{
+		Entity entity = e.getEntity();
+		
+		if(entity.getWorld() != w)
+		{
+			return;
+		}
+		
+		if(!(entity instanceof Player))
+		{
+			return;
+		}
+		
+		if(isSafeZone(entity.getLocation()))
+		{
+			e.setCancelled(true);
+			return;
+		}
+		
+		if(CommonsUtil.isPVP(e))
+		{
+			e.setCancelled(!pvp);
+			return;
+		}
+		
+		e.setCancelled(false);
+	}
+	
+	@EventHandler
+	public void aasd(WeatherChangeEvent e)
+	{
+		if(e.getWorld() != w)
+		{
+			return;
+		}
+		
+		boolean changed = false;
+		
+		if(w.hasStorm())
+		{
+			if(isDay())
+			{
+				changed = pvp != (pvp = false);
+			}
+		}
+		else
+		{
+			changed = pvp != (pvp = true);
+		}
+		
+		if(!changed)
+		{
+			return;
+		}
+		
+		for(CommonPlayer cp : getCommonPlayers())
+		{
+			Player p = cp.getPlayer();
+			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+			
+			if(pvp)
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("newbie.started-raining")
+						+ " " + ChatColor.DARK_RED + ChatColor.BOLD + "PVP ON!");
+			}
+			else
+			{
+				p.sendMessage(ChatColor.GREEN + bundle.getString("newbie.stoped-raining")
+						+ " " + ChatColor.DARK_GREEN + ChatColor.BOLD + "PVP OFF!");
+			}
+		}
+	}
+	
+	@Override
+	public boolean isSafeZone(Location l)
+	{
+		return Math.abs(l.getBlockX()) <= 65 && Math.abs(l.getBlockZ()) <= 65;
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void c(BlockPlaceEvent e)
 	{
+		if(e.getBlock().getWorld() != w)
+		{
+			return;
+		}
+		
 		super.c(e);
 		
 		Player p = e.getPlayer();
@@ -151,5 +295,11 @@ public class Newbie extends Warp
 		{
 			Util.writeBlock(e.getBlock(), data);
 		}
+	}
+	
+	@Override
+	public Location getPortalLocation()
+	{
+		return portalLocation;
 	}
 }

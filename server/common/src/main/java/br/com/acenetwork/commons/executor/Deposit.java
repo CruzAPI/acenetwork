@@ -33,7 +33,7 @@ import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.manager.Message;
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
@@ -139,7 +139,13 @@ public class Deposit implements TabExecutor, Listener
 				Bukkit.getScheduler().cancelTask(taskId);
 			}
 			
-			if(amount <= 0)
+			if(amount == -2)
+			{
+				Wallet.messageWalletNotFound(bundle, p);
+				return;
+			}
+			
+			if(amount == -1)
 			{
 				if(bundle != null)
 				{
@@ -153,13 +159,13 @@ public class Deposit implements TabExecutor, Listener
 			{
 				try
 				{
-					PlayerData pdMemory = PlayerData.load(p.getUniqueId());
-					PlayerData pdDisk = new PlayerData(pdMemory);
+					CommonPlayerData pdMemory = CommonPlayerData.load(p.getUniqueId());
+					CommonPlayerData pdDisk = new CommonPlayerData(pdMemory);
 					pdDisk.setBTA(pdDisk.getBTA() + amount);
 					
-					Map<UUID, PlayerData> map = new HashMap<>();
+					Map<UUID, CommonPlayerData> map = new HashMap<>();
 					map.put(p.getUniqueId(), pdDisk);
-					PlayerData.save(map);
+					CommonPlayerData.save(map);
 					
 					pdMemory.setBTA(pdMemory.getBTA() + amount);
 					

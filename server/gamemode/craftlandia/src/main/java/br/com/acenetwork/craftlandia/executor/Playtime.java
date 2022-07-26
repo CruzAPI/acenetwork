@@ -216,7 +216,7 @@ public class Playtime implements TabExecutor, Listener
 				{
 					ItemStack item = inv.getItem(i);
 					
-					if(!CommonsUtil.compareUUID(item, uuid))
+					if(!CommonsUtil.containsUUID(item, uuid))
 					{
 						continue;
 					}
@@ -532,7 +532,7 @@ public class Playtime implements TabExecutor, Listener
 		{
 			ItemStack item = inv.getItem(i);
 			
-			if(CommonsUtil.compareUUID(item, wbtaUUID))
+			if(CommonsUtil.containsUUID(item, wbtaUUID))
 			{
 				CommonsUtil.setItemCopyOf(item, burnedWBTA);
 			}
@@ -553,7 +553,7 @@ public class Playtime implements TabExecutor, Listener
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		ItemStack item = e.getItem();
 		
-		if(CommonsUtil.compareUUID(item, wbtaUUID))
+		if(CommonsUtil.containsUUID(item, wbtaUUID))
 		{
 			UUID uuid = CommonsUtil.getHiddenUUIDs(item).get(1);
 			WBTA wbta = itemMap.get(uuid);
@@ -630,9 +630,9 @@ public class Playtime implements TabExecutor, Listener
 		ItemStack hotbar = e.getHotbarButton() != -1 ? p.getInventory().getItem(e.getHotbarButton()) : null;
 		
 		if((cp.hasInvincibility() || cp.hasPVPInvincibility()) && 
-				(CommonsUtil.compareUUID(current, wbtaUUID)
-				|| CommonsUtil.compareUUID(cursor, wbtaUUID)
-				|| CommonsUtil.compareUUID(hotbar, wbtaUUID)))
+				(CommonsUtil.containsUUID(current, wbtaUUID)
+				|| CommonsUtil.containsUUID(cursor, wbtaUUID)
+				|| CommonsUtil.containsUUID(hotbar, wbtaUUID)))
 		{
 			e.setCancelled(true);
 		}
@@ -652,7 +652,7 @@ public class Playtime implements TabExecutor, Listener
 		
 		InventoryAction action = e.getAction();
 		
-		if(CommonsUtil.compareUUID(current, wbtaUUID))
+		if(CommonsUtil.containsUUID(current, wbtaUUID))
 		{
 			UUID uuid = CommonsUtil.getHiddenUUIDs(current).get(1);
 			
@@ -686,7 +686,7 @@ public class Playtime implements TabExecutor, Listener
 			}
 		}
 		
-		if(CommonsUtil.compareUUID(cursor, wbtaUUID))
+		if(CommonsUtil.containsUUID(cursor, wbtaUUID))
 		{
 			UUID uuid = CommonsUtil.getHiddenUUIDs(cursor).get(1);
 					
@@ -710,7 +710,7 @@ public class Playtime implements TabExecutor, Listener
 			}
 		}
 		
-		if(CommonsUtil.compareUUID(hotbar, wbtaUUID))
+		if(CommonsUtil.containsUUID(hotbar, wbtaUUID))
 		{
 			UUID uuid = CommonsUtil.getHiddenUUIDs(hotbar).get(1);
 			
@@ -737,7 +737,7 @@ public class Playtime implements TabExecutor, Listener
 	{
 		ItemStack itemStack = e.getItemDrop().getItemStack();
 		
-		if(!CommonsUtil.compareUUID(itemStack, wbtaUUID))
+		if(!CommonsUtil.containsUUID(itemStack, wbtaUUID))
 		{
 			return;
 		}
@@ -758,7 +758,7 @@ public class Playtime implements TabExecutor, Listener
 	{
 		ItemStack itemStack = e.getItem().getItemStack();
 		
-		if(!CommonsUtil.compareUUID(itemStack, wbtaUUID))
+		if(!CommonsUtil.containsUUID(itemStack, wbtaUUID))
 		{
 			return;
 		}
@@ -777,7 +777,7 @@ public class Playtime implements TabExecutor, Listener
 	{
 		ItemStack itemStack = e.getItem().getItemStack();
 		
-		if(!CommonsUtil.compareUUID(itemStack, wbtaUUID))
+		if(!CommonsUtil.containsUUID(itemStack, wbtaUUID))
 		{
 			return;
 		}
@@ -806,7 +806,7 @@ public class Playtime implements TabExecutor, Listener
 	{
 		ItemStack item = e.getItem();
 		
-		if(!CommonsUtil.compareUUID(item, wbtaUUID))
+		if(!CommonsUtil.containsUUID(item, wbtaUUID))
 		{
 			return;
 		}
@@ -864,7 +864,7 @@ public class Playtime implements TabExecutor, Listener
 			{
 				ItemStack item = inv.getItem(0);
 				
-				if(CommonsUtil.compareUUID(item, wbtaUUID))
+				if(CommonsUtil.containsUUID(item, wbtaUUID))
 				{
 					ResourceBundle bundle = ResourceBundle.getBundle("message", CommonsUtil.getLocaleFromMinecraft(p.spigot().getLocale()));
 					p.sendMessage(ChatColor.RED + bundle.getString("cmd.playtime.can-not-spawn"));
@@ -880,7 +880,7 @@ public class Playtime implements TabExecutor, Listener
 	{
 		ItemStack itemStack = e.getItem().getItemStack();
 		
-		if(!CommonsUtil.compareUUID(itemStack, wbtaUUID))
+		if(!CommonsUtil.containsUUID(itemStack, wbtaUUID))
 		{
 			return;
 		}

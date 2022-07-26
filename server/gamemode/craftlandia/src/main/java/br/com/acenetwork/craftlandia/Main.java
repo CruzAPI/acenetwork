@@ -5,13 +5,12 @@ import static org.bukkit.block.BlockFace.NORTH;
 import static org.bukkit.block.BlockFace.SOUTH;
 import static org.bukkit.block.BlockFace.WEST;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -42,9 +41,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wither;
-import org.bukkit.entity.WitherSkull;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -64,7 +61,6 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
@@ -79,6 +75,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -91,7 +88,6 @@ import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -108,10 +104,11 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.Common;
-import br.com.acenetwork.commons.manager.CommonsConfig;
-import br.com.acenetwork.commons.manager.CommonsConfig.Type;
+import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
+import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
 import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
 import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
@@ -131,7 +128,9 @@ import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
+import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
+import br.com.acenetwork.craftlandia.listener.PlayerData;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.listener.TestListener;
@@ -146,9 +145,6 @@ import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.event.CitizensPreReloadEvent;
-import net.citizensnpcs.api.event.CitizensReloadEvent;
-import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
@@ -161,8 +157,6 @@ public class Main extends Common implements Listener
 	public void onEnable()
 	{
 		instance = this;
-		
-//		CitizensAPI.getNPCRegistry().deregisterAll();
 		
 		registerCommand(new Give(), "give");
 		
@@ -239,6 +233,33 @@ public class Main extends Common implements Listener
 		super.onDisable();
 	}
 	
+	@EventHandler
+	public void a(BreakNaturallyEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(b.getType() != Material.BED_BLOCK)
+		{
+			return;
+		}
+		
+		BlockData data = Util.readBlock(b);
+		
+		if(data == null || data.getBed() == null)
+		{
+			return;
+		}
+		
+		for(UUID uuid : data.getBed())
+		{
+			PlayerData pd = PlayerData.load(uuid);
+			
+			pd.getBedHomes().remove(b.getWorld().getUID(), new int[] {b.getX(), b.getY(), b.getZ()});
+		}
+		
+		data.setBed(null);
+	}
+	
 	@EventHandler(priority =  EventPriority.LOWEST)
 	public void a(PluginEnableEvent e)
 	{
@@ -255,6 +276,7 @@ public class Main extends Common implements Listener
 			}.runTaskLater(this, 100L);
 		}
 	}
+	
 	@EventHandler
 	public void a(WorldSaveEvent e)
 	{
@@ -263,7 +285,9 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		PlayerData.save();
 		LandData.save();
+		VipChest.getInstance().save();
 		Home.getInstance().save();
 		Portal.getInstance().save();
 		Playtime.getInstance().save();
@@ -709,89 +733,42 @@ public class Main extends Common implements Listener
 		}
 	}
 	
-
-//	@EventHandler
-//	public void a(BlockPhysicsEvent e)
-//	{
-//		Block b = e.getBlock();
-//		World w = b.getWorld();
-//		
-//		if(b.getType() == Material.SUGAR_CANE_BLOCK)
-//		{
-//			e.setCancelled(true);
-//			
-//			Block down = b.getRelative(BlockFace.DOWN);
-//			
-//			if(down.getType() == Material.SUGAR_CANE_BLOCK)
-//			{
-//				return;
-//			}
-//			
-//			if(down.getType() == Material.SAND || down.getType() == Material.DIRT || down.getType() == Material.GRASS)
-//			{
-//				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
-//				
-//				for(BlockFace face : directions)
-//				{
-//					if(down.getRelative(face).getType() == Material.WATER || down.getRelative(face).getType() == Material.STATIONARY_WATER)
-//					{
-//						return;
-//					}
-//				}
-//			}
-//			
-//			b.setType(Material.AIR, true);
-//			
-//			ItemStack item = new ItemStack(Material.SUGAR_CANE, 1);
-//			ItemMeta meta = item.getItemMeta();
-//			meta.setLore(Util.getLore(b));
-//			item.setItemMeta(meta);
-//			
-//			Util.writeBlock(b, null);
-//			
-//			w.dropItemNaturally(b.getLocation(), item);
-//		}
-//		else if(b.getType() == Material.CACTUS)
-//		{
-//			e.setCancelled(true);
-//		
-//			Block down = b.getRelative(BlockFace.DOWN);
-//			
-//			boolean toBreak = true;
-//			
-//			if(down.getType() == Material.CACTUS || down.getType() == Material.SAND)
-//			{
-//				toBreak = false;
-//				
-//				BlockFace[] directions = new BlockFace[] {NORTH, SOUTH, EAST, WEST};
-//				
-//				for(BlockFace face : directions)
-//				{
-//					if(b.getRelative(face).getType().isSolid())
-//					{
-//						toBreak = true;
-//						break;
-//					}
-//				}
-//			}
-//			
-//			if(!toBreak)
-//			{
-//				return;
-//			}
-//			
-//			b.setType(Material.AIR, true);
-//			
-//			ItemStack item = new ItemStack(Material.CACTUS, 1);
-//			ItemMeta meta = item.getItemMeta();
-//			meta.setLore(Util.getLore(b));
-//			item.setItemMeta(meta);
-//			
-//			Util.writeBlock(b, null);
-//			
-//			w.dropItemNaturally(b.getLocation(), item);
-//		}
-//	}
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void loseCommodity(PlayerChangedWorldEvent e)
+	{
+		if(!e.getPlayer().getWorld().getName().contains("newbie"))
+		{
+			return;
+		}
+		
+		Player p = e.getPlayer();
+		
+		for(int i = 0; i < p.getInventory().getSize() + 4; i++)
+		{
+			ItemStack item = p.getInventory().getItem(i);
+			
+			if(Util.getRarity(item) == Rarity.RARE)
+			{
+				loseCommodity(item);
+			}
+		}
+	}
+	
+	private void loseCommodity(ItemStack item)
+	{
+		Util.setCommodity(item, Rarity.COMMON);
+		
+		for(Entry<Enchantment, Integer> entry : CommonsUtil.getEnchants(item).entrySet())
+		{
+			int maxLevel = Util.getMaxLevel(entry.getKey(), Rarity.COMMON);
+			
+			if(entry.getValue() > maxLevel) 
+			{
+				CommonsUtil.removeEnchant(item, entry.getKey());
+				CommonsUtil.addEnchant(item, entry.getKey(), maxLevel, true);
+			}
+		}
+	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(BlockGrowEvent e)
@@ -1411,19 +1388,26 @@ public class Main extends Common implements Listener
 	public void a(BlockBreakEvent e)
 	{
 		Player p = e.getPlayer();
+		Block b = e.getBlock();
 		
 		if(p.getGameMode() == GameMode.CREATIVE)
 		{
+			Util.writeBlock(b, null);
 			return;
 		}
-		
-		Block b = e.getBlock();
 		
 		e.setCancelled(true);
 		
 		ItemStack tool = p.getItemInHand();
 		
 		BlockUtil.breakNaturally(b, tool);
+		
+		if(SpecialItems.getInstance().isContainmentPickaxe(tool))
+		{
+			p.playSound(p.getLocation(), Sound.ITEM_BREAK, 1.0F, 1.0F);
+			p.setItemInHand(null);
+			return;
+		}
 		
 		short damage;
 		

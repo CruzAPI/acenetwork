@@ -27,6 +27,7 @@ import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import net.md_5.bungee.api.ChatColor;
 
 public class Temp implements TabExecutor
 {
@@ -240,9 +241,16 @@ public class Temp implements TabExecutor
 			
 			if(args.length == 1)
 			{
-				NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "test");
-				npc.spawn(new Location(p.getWorld(), 0.5D, 83.0D, 37.5D, -180.0F, 0.0F));
-				npc.data().setPersistent("jackpot", true);
+				if(args[0].equalsIgnoreCase("land"))
+				{
+					NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "" 
+							+ ChatColor.YELLOW + ChatColor.BOLD + "SKIP PARKOUR");
+					npc.spawn(new Location(p.getWorld(), -1.5D, 69.0D, 2.5D, -135.0F, 0.0F));
+					return true;
+				}
+				
+				NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "" + ChatColor.BOLD + "CLICK TO PLAY");
+				npc.spawn(new Location(p.getWorld(), 0.5D, 83.0D, 34.0D, 180.0F, 0.0F));
 				return true;
 			}
 			

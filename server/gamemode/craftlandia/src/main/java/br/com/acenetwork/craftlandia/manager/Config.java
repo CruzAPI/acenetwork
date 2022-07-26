@@ -20,7 +20,8 @@ public class Config
 		BOT, 
 		COMBATLOG, 
 		PRICE, 
-		PLAYER_INFO, WRAPPED_BTA_MAP, PORTALS, LANDS, LINKS, LAND_SCHEM, LAND_ENTITY_DATA, CONTAINMENT_PICKAXE_UUID
+		PLAYER_INFO, WRAPPED_BTA_MAP, PORTALS, LANDS, LINKS, LAND_SCHEM, LAND_ENTITY_DATA, 
+		CONTAINMENT_PICKAXE_UUID, RANDOM_ITEM_SET, PLAYER_DATA
 		;
 	}
 	
@@ -31,6 +32,9 @@ public class Config
 
 		switch(type)
 		{
+		case PLAYER_DATA:
+			file = new File(Main.getInstance().getDataFolder() + "/player_data", args[0] + ".dat");
+			break;
 		case LAND_ENTITY_DATA:
 			file = new File(Main.getInstance().getDataFolder() + "/lands", "entities.dat");
 			break;
@@ -53,16 +57,19 @@ public class Config
 			file = new File(Main.getInstance().getDataFolder(), "portals.dat");
 			break;
 		case RANDOM_ITEM_UUID:
-			file = new File(Main.getInstance().getDataFolder() + "/item_uuid", "random_item_uuid.dat");
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", "random_item_uuid.dat");
+			break;
+		case RANDOM_ITEM_SET:
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", "random_item_set.dat");
 			break;
 		case CONTAINMENT_PICKAXE_UUID:
-			file = new File(Main.getInstance().getDataFolder() + "/item_uuid", "containment_pickaxe_uuid.dat");
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", "containment_pickaxe_uuid.dat");
 			break;
 		case WRAPPED_BTA_UUID:
-			file = new File(Main.getInstance().getDataFolder() + "/item_uuid", "wrapped_bta.dat");
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", "wrapped_bta.dat");
 			break;
 		case WRAPPED_BTA_MAP:
-			file = new File(Main.getInstance().getDataFolder() + "/wrapped_bta", "map.dat");
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", "wrapped_bta_map.dat");
 			break;
 		case JACKPOT:
 			file = new File(Main.getInstance().getDataFolder(), "jackpot.dat");

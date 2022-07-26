@@ -6,21 +6,28 @@ import net.md_5.bungee.api.ChatColor;
 
 public enum Rarity implements ItemTag
 {
-	COMMON("" + ChatColor.GREEN + ChatColor.BOLD, (byte) 1), 
-	RARE("" + ChatColor.DARK_PURPLE + ChatColor.BOLD, (byte) 2), 
-	LEGENDARY("" + ChatColor.GOLD + ChatColor.BOLD, (byte) 3), 
+	COMMON("" + ChatColor.GREEN + ChatColor.BOLD, (byte) 1, 1), 
+	RARE("" + ChatColor.DARK_PURPLE + ChatColor.BOLD, (byte) 2, 10), 
+	LEGENDARY("" + ChatColor.GOLD + ChatColor.BOLD, (byte) 3, 100), 
 	;
 	
 	private final String tag;
 	private final byte data;
 	private final String color;
+	private final int multiplierAdminShop;
 	
-	Rarity(String color, byte data)
+	Rarity(String color, byte data, int multiplierAdminShop)
 	{
 		tag = color + name();
 		this.color = color;
 		this.data = data;
+		this.multiplierAdminShop = multiplierAdminShop;
 		SET.add(this);
+	}
+	
+	public int getMultiplierAdminShop()
+	{
+		return multiplierAdminShop;
 	}
 	
 	@Override

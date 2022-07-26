@@ -34,7 +34,7 @@ import org.bukkit.inventory.meta.Repairable;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Currency;
 import br.com.acenetwork.commons.manager.Message;
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
@@ -148,16 +148,25 @@ public class Shop implements TabExecutor, Listener
 			else if(args.length == 8)
 			{
 				Material type;
+				String special = null;
 				
 				try
 				{
-					try
+					if(args[0].equalsIgnoreCase("vip") || args[0].equalsIgnoreCase("random_item"))
 					{
-						type = Material.getMaterial(Integer.valueOf(args[0]));
+						type = Material.SKULL_ITEM;
+						special = args[0];
 					}
-					catch(NumberFormatException e)
+					else
 					{
-						type = Material.valueOf(args[0].toUpperCase());
+						try
+						{
+							type = Material.getMaterial(Integer.valueOf(args[0]));
+						}
+						catch(NumberFormatException e)
+						{
+							type = Material.valueOf(args[0].toUpperCase());
+						}
 					}
 				}
 				catch(IllegalArgumentException e)
@@ -261,16 +270,25 @@ public class Shop implements TabExecutor, Listener
 				ItemStack sign = new ItemStack(Material.SIGN);
 				ItemMeta meta = sign.getItemMeta();
 				
-				String line1 = "" + type.getId();
+				String line1;
 				
-				if(data != 0)
+				if(special != null)
 				{
-					line1 += ":" + data;
+					line1 = special.toUpperCase().replace('_', ' ');
 				}
-				
-				if(enchantId != 0)
+				else
 				{
-					line1 += "#" + enchantId;
+					line1 = "" + type.getId();
+					
+					if(data != 0)
+					{
+						line1 += ":" + data;
+					}
+					
+					if(enchantId != 0)
+					{
+						line1 += "#" + enchantId;
+					}
 				}
 				
 				meta.setDisplayName(rarity.getColor() + line1);
@@ -312,9 +330,9 @@ public class Shop implements TabExecutor, Listener
 				}
 			}
 			
-			TextComponent text = Message.getTextComponent(bundle.getString("cmds.invalid-argument-here"), array);
-			text.setColor(ChatColor.RED);
-			p.spigot().sendMessage(text);
+			p.sendMessage(ChatColor.RED + bundle.getString("cmds.invalid-argument-here"));
+			p.spigot().sendMessage(array[0]);
+			p.sendMessage("");
 			p.spigot().sendMessage(e.getText());
 		}
 	
@@ -733,7 +751,7 @@ public class Shop implements TabExecutor, Listener
 				return;
 			}
 			
-			PlayerData ownerPD = PlayerData.load(owner);
+			CommonPlayerData ownerPD = CommonPlayerData.load(owner);
 			double playerBalance;
 			double ownerBalance;
 			

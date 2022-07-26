@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import javax.accessibility.AccessibleKeyBinding;
@@ -30,11 +31,14 @@ import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
+import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.event.SellItemEvent;
 import br.com.acenetwork.craftlandia.manager.AmountPrice;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 import br.com.acenetwork.craftlandia.manager.CryptoInfo;
+import br.com.acenetwork.craftlandia.manager.IdDataRarity;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;
@@ -95,7 +99,7 @@ public class Sell implements TabExecutor
 
 		double balance = cp.getBalance();
 		
-		Map<IdData, AmountPrice> map = new HashMap<>();
+		Map<IdDataRarity, AmountPrice> map = new HashMap<>();
 		
 		List<ItemStack> itemsToSell = new ArrayList<>();
 		
@@ -118,6 +122,7 @@ public class Sell implements TabExecutor
 		for(int i = 0; i < itemsToSell.size(); i++)
 		{
 			ItemStack item = itemsToSell.get(i);
+			Rarity rarity = Optional.ofNullable(Util.getRarity(item)).orElse(Rarity.COMMON);
 			
 			if(item == null || item.getType() == Material.AIR)
 			{
@@ -135,7 +140,8 @@ public class Sell implements TabExecutor
 			final int id = item.getTypeId();
 			final short data = item.getData().getData();
 			
-			IdData idData = new IdData(id, data);
+			IdDataRarity idDataRarity = new IdDataRarity(id, data, rarity);
+			IdData idData = idDataRarity.getIdData();
 			Map<IdData, CryptoInfo> priceMap = Price.getPriceMap();
 			
 			if(!priceMap.containsKey(idData))
@@ -156,7 +162,7 @@ public class Sell implements TabExecutor
 			final double oldCirculatingSupply = cryptoInfo.getCirculatingSupply();
 			double circulatingSupply = oldCirculatingSupply;
 			
-			final int amountToSell = item.getAmount();
+			final int amountToSell = item.getAmount() * rarity.getMultiplierAdminShop();
 			
 			if(sellType == SellType.HAND)
 			{
@@ -184,14 +190,14 @@ public class Sell implements TabExecutor
 			
 			total += shards;
 			
-			AmountPrice ap = map.containsKey(idData) ? map.get(idData) : new AmountPrice();
+			AmountPrice ap = map.containsKey(idDataRarity) ? map.get(idDataRarity) : new AmountPrice();
 			
-			ap.amount += amountToSell;
+			ap.amount += item.getAmount();
 			ap.price += shards;
 			
-			map.put(idData, ap);
+			map.put(idDataRarity, ap);
 			
-			events.add(new SellItemEvent(p, idData, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
+			events.add(new SellItemEvent(p, idDataRarity, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
 		}
 		
 		events.forEach(x -> Bukkit.getPluginManager().callEvent(x));
@@ -209,16 +215,16 @@ public class Sell implements TabExecutor
 			df.setGroupingSize(3);
 			df.setGroupingUsed(true);
 			
-			for(Entry<IdData, AmountPrice> entry : map.entrySet())
+			for(Entry<IdDataRarity, AmountPrice> entry : map.entrySet())
 			{
-				IdData idData = entry.getKey();
+				IdDataRarity idData = entry.getKey();
 				AmountPrice ap = entry.getValue();
 				
 				TextComponent[] extra = new TextComponent[2];
 				
-				extra[0] = new TextComponent(ap.amount + " ");
-				extra[0].addExtra(CommonsUtil.getTranslation(idData, minecraftBundle));
-				extra[0].setColor(ChatColor.YELLOW);
+				extra[0] = new TextComponent("");
+				extra[0].addExtra(idData.getRarity().getColor() + ap.amount + " "
+						+ CommonsUtil.getTranslation(idData.getId(), idData.getData(), minecraftBundle));
 				
 				extra[1] = new TextComponent(df.format(ap.price));
 				extra[1].setColor(ChatColor.YELLOW);

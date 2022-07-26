@@ -93,7 +93,7 @@ public class JackpotPercentage extends GUI
 				ChatColor.GRAY + df.format(Jackpot.PERCENT * 100.0D) + "% jackpot prize ≃ " + df.format(avgJackpot * Jackpot.PERCENT)));
 		info.setItemMeta(meta);
 		
-		inv.setItem(inv.getSize() - 1, info);
+//		inv.setItem(inv.getSize() - 1, info);
 	}
 	
 	@EventHandler

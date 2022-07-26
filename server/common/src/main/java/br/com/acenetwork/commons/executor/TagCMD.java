@@ -83,7 +83,7 @@ public class TagCMD implements TabExecutor
 			
 			TextComponent[] extra = new TextComponent[1];
 			
-			extra[0] = new TextComponent();
+			extra[0] = new TextComponent("");
 			extra[0].addExtra(tags);
 			
 			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.tag.your-tags"), extra);
@@ -102,7 +102,7 @@ public class TagCMD implements TabExecutor
 					
 					TextComponent[] extra = new TextComponent[1];
 					
-					extra[0] = new TextComponent();
+					extra[0] = new TextComponent("");
 					extra[0].addExtra(tag.getName());
 					
 					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.tag.tag-selected"), extra);

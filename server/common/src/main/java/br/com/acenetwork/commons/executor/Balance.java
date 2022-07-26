@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.CommonsConfig;
 import br.com.acenetwork.commons.manager.Message;
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -107,7 +107,7 @@ public class Balance implements TabExecutor
 			return true;
 		}
 		
-		PlayerData pd = PlayerData.load(op.getUniqueId());
+		CommonPlayerData pd = CommonPlayerData.load(op.getUniqueId());
 		
 		double balance = pd.getBalance();
 		

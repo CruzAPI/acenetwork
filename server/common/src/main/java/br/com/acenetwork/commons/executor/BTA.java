@@ -129,7 +129,6 @@ public class BTA implements TabExecutor, Listener
 				try
 				{
 					double btaOnMinecraft = cp.getBTA();
-					double btaOnSite = Double.valueOf(args[4]);
 					
 					extra[0] = new TextComponent(df.format(btaOnMinecraft) + " $BTA ");
 					extra[0].setColor(ChatColor.DARK_PURPLE);
@@ -143,6 +142,8 @@ public class BTA implements TabExecutor, Listener
 					text.setColor(ChatColor.LIGHT_PURPLE);
 					p.spigot().sendMessage(text);
 					
+					double btaOnSite = Double.valueOf(args[4]);
+					
 					extra[0] = new TextComponent(df.format(btaOnSite) + " $BTA ");
 					extra[0].setColor(ChatColor.DARK_PURPLE);
 					
@@ -154,21 +155,13 @@ public class BTA implements TabExecutor, Listener
 					text = Message.getTextComponent(bundle.getString("commons.cmd.bta.on-site"), extra);
 					text.setColor(ChatColor.LIGHT_PURPLE);
 					p.spigot().sendMessage(text);
-					p.sendMessage("");
 				}
 				catch(NumberFormatException ex)
 				{
-					p.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.wallet.do-not-have-any-wallet"));
 					
-					extra = new TextComponent[1];
-					
-					extra[0] = new TextComponent("/wallet <" + bundle.getString("commons.words.address").toLowerCase() + ">");
-					extra[0].setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/wallet "));
-					
-					TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.wallet.to-link-your-wallet-type"), extra);
-					text.setColor(ChatColor.RED);
-					p.spigot().sendMessage(text);
 				}
+				
+				p.sendMessage("");
 			}
 		}
 	}

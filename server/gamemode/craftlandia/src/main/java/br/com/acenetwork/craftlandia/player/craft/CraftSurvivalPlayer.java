@@ -1,11 +1,18 @@
 package br.com.acenetwork.craftlandia.player.craft;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.World.Environment;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,16 +20,23 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 
+import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.craftlandia.listener.PlayerData;
+import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.ChannelCommand;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import br.com.acenetwork.craftlandia.warp.Warp;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -31,10 +45,12 @@ public class CraftSurvivalPlayer extends CraftCommonPlayer implements SurvivalPl
 	private int channelTaskId;
 	private long channelTaskTicks;
 	private long channelTaskTotalTicks;
-	
+	private PlayerData playerData;
+
 	public CraftSurvivalPlayer(Player p)
 	{
 		super(p);
+		playerData = PlayerData.load(p.getUniqueId());
 	}
 	
 	@Override
@@ -231,5 +247,72 @@ public class CraftSurvivalPlayer extends CraftCommonPlayer implements SurvivalPl
 		}
 		
 		cancelChannel(true);
+	}
+	
+	@Override
+	public PlayerData getPlayerData()
+	{
+		return playerData;
+	}
+	
+	@Override
+	public void setPlayerData(PlayerData playerData)
+	{
+		this.playerData = playerData;
+	}
+	
+	@EventHandler
+	public void a(PlayerRespawnEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		int[] coords = playerData.getBedHomes().get(p.getWorld().getUID());
+		
+		Warp warp = Warp.getByWorld(p.getWorld());
+		Block b = coords == null || coords.length != 3 ? null : p.getWorld().getBlockAt(coords[0], coords[1], coords[2]);
+		
+		if(p.getBedSpawnLocation() == null)
+		{
+			p.setBedSpawnLocation(warp.getSpawnLocation(), true);
+		}
+		
+		if(CommonsUtil.isBedObstructed(b))
+		{
+			p.sendMessage("BED OBSTRUCTED OR NOT FOUND!");
+			e.setRespawnLocation(warp.getSpawnLocation());
+			setInvincibility(true);
+			setPVPInvincibility(true);
+			return;
+		}
+		
+		e.setRespawnLocation(new Location(b.getWorld(), b.getX() + 0.5D, b.getY() + 0.5625, b.getZ() + 0.5D));
+	}
+	
+	@EventHandler(priority =  EventPriority.MONITOR, ignoreCancelled = true)
+	public void a(PlayerBedEnterEvent e)
+	{
+		if(e.getPlayer() != p)
+		{
+			return;
+		}
+		
+		Block bed = e.getBed();
+		World w = bed.getWorld();
+		
+		if(w.getEnvironment() != Environment.NORMAL)
+		{
+			return;
+		}
+		
+		Bukkit.broadcastMessage(bed.getX() + " " + bed.getY() + " " + bed.getZ());
+		
+		BlockData data = Optional.ofNullable(Util.readBlock(bed)).orElse(new BlockData());
+		Set<UUID> bedPlayers = Optional.ofNullable(data.getBed()).orElse(data.setBed(new HashSet<>()));
+		bedPlayers.add(p.getUniqueId());
+		Util.writeBlock(bed, data);
+		playerData.getBedHomes().put(w.getUID(), new int[] {bed.getX(), bed.getY(), bed.getZ()});
 	}
 }

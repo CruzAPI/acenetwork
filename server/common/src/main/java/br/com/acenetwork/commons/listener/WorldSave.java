@@ -4,7 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldSaveEvent;
 
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 
 public class WorldSave implements Listener
 {
@@ -16,6 +16,6 @@ public class WorldSave implements Listener
 			return;
 		}
 		
-		PlayerData.save();
+		CommonPlayerData.save();
 	}
 }

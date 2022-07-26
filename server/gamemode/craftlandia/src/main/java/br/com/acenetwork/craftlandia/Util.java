@@ -72,44 +72,6 @@ public class Util
 		}
 	}
 	
-	public static UUID getUUID(File file)
-	{
-		UUID uuid;
-		
-		if(file.length() > 0L)
-		{
-			try(FileInputStream fileIn = new FileInputStream(file);
-					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
-					DataInputStream in = new DataInputStream(streamIn))
-			{
-				uuid = new UUID(in.readLong(), in.readLong());
-			}
-			catch(IOException ex)
-			{
-				throw new RuntimeException(ex);
-			}
-		}
-		else
-		{
-			uuid = UUID.randomUUID();
-			
-			try(FileOutputStream fileOut = new FileOutputStream(file);
-					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-					DataOutputStream out = new DataOutputStream(streamOut))
-			{
-				out.writeLong(uuid.getMostSignificantBits());
-				out.writeLong(uuid.getLeastSignificantBits());
-				fileOut.write(streamOut.toByteArray());
-			}
-			catch(IOException ex)
-			{
-				throw new RuntimeException(ex);
-			}
-		}
-		
-		return uuid;
-	}
-	
 	public static byte[] toByteArray(short x)
 	{
 	    return new byte[] {(byte) (x >> 8), (byte) x};
@@ -191,9 +153,9 @@ public class Util
 		return Warp.MAP.get(b.getWorld().getUID()).readBlock(b);
 	}
 	
-	public static void writeBlock(Block b, BlockData data)
+	public static BlockData writeBlock(Block b, BlockData data)
 	{
-		Warp.MAP.get(b.getWorld().getUID()).writeBlock(b, data);
+		return Warp.MAP.get(b.getWorld().getUID()).writeBlock(b, data);
 	}
 	
 	public static byte[] copyArrays(byte[]... arrays)
@@ -545,7 +507,7 @@ public class Util
 	public static Set<Property> getProperties(ItemStack item)
 	{
 		ItemMeta meta = item.getItemMeta();
-		List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+		List<String> lore = meta != null && meta.hasLore() ? meta.getLore() : new ArrayList<>();
 		return Arrays.stream(Property.values()).filter(x -> lore.contains(x.toString())).collect(Collectors.toSet());
 	}
 	

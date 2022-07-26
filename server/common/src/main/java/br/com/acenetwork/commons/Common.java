@@ -60,6 +60,7 @@ import br.com.acenetwork.commons.listener.PlayerJoin;
 import br.com.acenetwork.commons.listener.PlayerLogin;
 import br.com.acenetwork.commons.listener.PlayerQuit;
 import br.com.acenetwork.commons.listener.SocketListener;
+import br.com.acenetwork.commons.listener.SoupListener;
 import br.com.acenetwork.commons.listener.WorldSave;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
@@ -103,6 +104,7 @@ public class Common extends JavaPlugin
 		Bukkit.getPluginManager().registerEvents(new PlayerQuit(), this);
 		Bukkit.getPluginManager().registerEvents(new SocketListener(), this);
 		Bukkit.getPluginManager().registerEvents(new WorldSave(), this);
+		Bukkit.getPluginManager().registerEvents(new SoupListener(), this);
 		
 		permission = new Permission();
 		

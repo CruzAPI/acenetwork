@@ -3,6 +3,7 @@ package br.com.acenetwork.craftlandia.inventory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
@@ -19,12 +20,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.player.CommonPlayer;
+import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import net.md_5.bungee.api.ChatColor;
 
 public class EnchantSelector extends GUI
 {
 	private ItemStack enchantedItem;
+	private Rarity rarity;
 	
 	private final String commandLine;
 	private final List<Enchantment> enchantmentList = new ArrayList<>();
@@ -41,10 +45,33 @@ public class EnchantSelector extends GUI
 		
 		String[] args = commandLine.split(" ");
 		
-		int id = Integer.valueOf(args[1]);
-		short data = Short.valueOf(args[2]);
+		int id;
+		short data;
+		
+		try
+		{
+			id = Integer.valueOf(args[1]);
+			data = Short.valueOf(args[2]);
+		}
+		catch(NumberFormatException ex)
+		{
+			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.invalid-number-format"));
+			return;
+		}
+		
+		try
+		{
+			rarity = Rarity.valueOf(args[4].toUpperCase());
+		}
+		catch(IllegalArgumentException e)
+		{
+			rarity = Rarity.COMMON;
+		}
 		
 		enchantedItem = new ItemStack(id, 1, data);
+		
+		Util.setCommodity(enchantedItem, rarity);
 		
 		inv.setItem(4, enchantedItem);
 		
@@ -110,7 +137,7 @@ public class EnchantSelector extends GUI
 		
 		Enchantment enchantment = enchantmentList.get(i);
 		int level = current.getItemMeta().hasEnchant(enchantment) ? current.getItemMeta().getEnchantLevel(enchantment) : 0;
-		int maxLevel = enchantment.getMaxLevel();
+		int maxLevel = Util.getMaxLevel(enchantment, rarity);
 		
 		for(Enchantment enchants : enchantedItem.getItemMeta().getEnchants().keySet())
 		{
@@ -138,27 +165,15 @@ public class EnchantSelector extends GUI
 			level = 0;
 		}
 		
-		ItemMeta meta;
-		
 		if(level == 0)
 		{
-			meta = enchantedItem.getItemMeta();
-			meta.removeEnchant(enchantment);
-			enchantedItem.setItemMeta(meta);
-			
-			meta = current.getItemMeta();
-			meta.removeEnchant(enchantment);
-			current.setItemMeta(meta);
+			CommonsUtil.removeEnchant(enchantedItem, enchantment);
+			CommonsUtil.removeEnchant(current, enchantment);
 		}
 		else
 		{
-			meta = enchantedItem.getItemMeta();
-			meta.addEnchant(enchantment, level, true);
-			enchantedItem.setItemMeta(meta);
-			
-			meta = current.getItemMeta();
-			meta.addEnchant(enchantment, level, true);
-			current.setItemMeta(meta);
+			CommonsUtil.addEnchant(enchantedItem, enchantment, level, true);
+			CommonsUtil.addEnchant(current, enchantment, level, true);
 		}
 		
 		inv.setItem(4, enchantedItem);

@@ -8,18 +8,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -27,8 +29,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionType;
 
 import com.google.common.io.ByteStreams;
 
@@ -37,7 +37,6 @@ import br.com.acenetwork.commons.manager.BundleSupplier;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
@@ -52,41 +51,31 @@ public class RandomItem implements Listener
 	
 	private final BundleSupplier<ItemStack> itemSupplier;
 	public static final String SKIN_VALUE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjViOTVkYTEyODE2NDJkYWE1ZDAyMmFkYmQzZTdjYjY5ZGMwOTQyYzgxY2Q2M2JlOWMzODU3ZDIyMmUxYzhkOSJ9fX0=";
+	private final Set<UUID> set;
 	
 	public RandomItem()
 	{
 		instance = this;
-		File file = Config.getFile(Type.RANDOM_ITEM_UUID, true);
+		uuid = CommonsUtil.getUUID(Config.getFile(Type.RANDOM_ITEM_UUID, true));
 		
-		if(file.length() > 0L)
+		File file = Config.getFile(Type.RANDOM_ITEM_SET, false);
+		
+		if(file.exists() && file.length() > 0L)
 		{
 			try(FileInputStream fileIn = new FileInputStream(file);
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
-					DataInputStream in = new DataInputStream(streamIn))
+					ObjectInputStream in = new ObjectInputStream(streamIn))
 			{
-				uuid = new UUID(in.readLong(), in.readLong());
+				set = (Set<UUID>) in.readObject();
 			}
-			catch(IOException ex)
+			catch(IOException | ClassNotFoundException ex)
 			{
 				throw new RuntimeException(ex);
 			}
 		}
 		else
 		{
-			uuid = UUID.randomUUID();
-			
-			try(FileOutputStream fileOut = new FileOutputStream(file);
-					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-					DataOutputStream out = new DataOutputStream(streamOut))
-			{
-				out.writeLong(uuid.getMostSignificantBits());
-				out.writeLong(uuid.getLeastSignificantBits());
-				fileOut.write(streamOut.toByteArray());
-			}
-			catch(IOException ex)
-			{
-				throw new RuntimeException(ex);
-			}
+			set = new HashSet<>();
 		}
 		
 		itemSupplier = new BundleSupplier<ItemStack>()
@@ -94,7 +83,7 @@ public class RandomItem implements Listener
 			@Override
 			public ItemStack get(ResourceBundle bundle, Object... args)
 			{
-				int version = args.length > 1 ? (int) args[1] : 47;
+				int version = args.length >= 1 ? (int) args[0] : 47;
 				ItemStack item;
 				ItemMeta meta;
 				
@@ -112,12 +101,42 @@ public class RandomItem implements Listener
 					meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 				}
 				
-				meta.setDisplayName(CommonsUtil.hideUUID(uuid) + ChatColor.WHITE + ChatColor.BOLD + "RANDOM ITEM");
+				UUID random;
+				
+				if(args.length >= 2)
+				{
+					random = (UUID) args[1];
+				}
+				else
+				{
+					random = UUID.randomUUID();
+					set.add(random);
+				}
+				
+				meta.setDisplayName(CommonsUtil.hideUUID(uuid) + ChatColor.RESET + CommonsUtil.hideUUID(random)
+						+ ChatColor.WHITE + ChatColor.BOLD + "RANDOM ITEM");
 				item.setItemMeta(meta);
 				
 				return item;
 			}
 		};
+	}
+	
+	public void save()
+	{
+		File file = Config.getFile(Type.RANDOM_ITEM_SET, true);
+		
+		try(FileOutputStream fileOut = new FileOutputStream(file);
+				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+				ObjectOutputStream out = new ObjectOutputStream(outStream))
+		{
+			out.writeObject(set);
+			fileOut.write(outStream.toByteArray());
+		}
+		catch(IOException ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 	
 	public BundleSupplier<ItemStack> getItemSupplier()
@@ -130,7 +149,8 @@ public class RandomItem implements Listener
 		return instance;
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
+	@SuppressWarnings("deprecation")
 	public void a(PlayerInteractEvent e)
 	{
 		Player p = e.getPlayer();
@@ -144,8 +164,23 @@ public class RandomItem implements Listener
 		
 		Random r = new Random(System.currentTimeMillis());
 		
-		if(CommonsUtil.compareUUID(item, uuid))
+		List<UUID> list = CommonsUtil.getHiddenUUIDs(item);
+		
+		if(list.size() != 2)
 		{
+			return;
+		}
+		
+		if(uuid.equals(list.get(0)))
+		{
+			e.setCancelled(true);
+			
+			if(!set.remove(list.get(1)))
+			{
+				p.setItemInHand(null);
+				return;
+			}
+			
 			int nextInt = r.nextInt(20);
 			int n = 0;
 			
@@ -168,7 +203,7 @@ public class RandomItem implements Listener
 			double d = 0.0D;
 			
 			ItemStack nextItem = new ItemStack(Material.STONE);
-			ItemMeta meta;
+//			ItemMeta meta;
 			
 			boolean setCommodity = true;
 			

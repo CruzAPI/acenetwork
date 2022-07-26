@@ -22,6 +22,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class ItemSelector extends Scroller
 {
 	private ItemStack itemSearch;
+	private ItemStack specialItems;
 	private ItemStack clearSearch;
 	private String search;
 	
@@ -56,7 +57,6 @@ public class ItemSelector extends Scroller
 		ResourceBundle minecraftBundle = ResourceBundle.getBundle("minecraft", cp.getLocale());
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
-		itemList.add(new TranslatedItem(new ItemStack(1, 1, (short) 0), minecraftBundle));
 		itemList.add(new TranslatedItem(new ItemStack(1, 1, (short) 1), minecraftBundle));
 		itemList.add(new TranslatedItem(new ItemStack(1, 1, (short) 2), minecraftBundle));
 		itemList.add(new TranslatedItem(new ItemStack(1, 1, (short) 3), minecraftBundle));
@@ -672,6 +672,12 @@ public class ItemSelector extends Scroller
 			inv.setItem(2, clearSearch);
 		}
 		
+		specialItems = new ItemStack(Material.NETHER_STAR);
+		meta = specialItems.getItemMeta();
+		meta.setDisplayName(ChatColor.AQUA + bundle.getString("inv.item-selector.special-items"));
+		specialItems.setItemMeta(meta);		
+		inv.setItem(1, specialItems);
+		
 		itemSearch = new ItemStack(Material.NAME_TAG);
 		meta = itemSearch.getItemMeta();
 		meta.setDisplayName(ChatColor.WHITE + bundle.getString("inv.item-selector.search-item"));
@@ -696,7 +702,11 @@ public class ItemSelector extends Scroller
 		ClickType click = e.getClick();
 		ItemStack current = e.getCurrentItem();
 		
-		if(CommonsUtil.compareDisplayName(current, itemSearch) && click == ClickType.LEFT)
+		if(CommonsUtil.compareDisplayName(current, specialItems) && click == ClickType.LEFT)
+		{
+			new SpecialItemSelector(cp);
+		}
+		else if(CommonsUtil.compareDisplayName(current, itemSearch) && click == ClickType.LEFT)
 		{
 			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 			

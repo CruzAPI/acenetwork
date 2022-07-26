@@ -4,18 +4,19 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 
 import br.com.acenetwork.commons.manager.IdData;
+import br.com.acenetwork.craftlandia.manager.IdDataRarity;
 
 public abstract class ItemEvent extends Event
 {
 	final CommandSender sender;
-	final IdData idData;
+	final IdDataRarity idData;
 	final int amount;
 	final double oldMarketCap;
 	final double newMarketCap;
 	final double oldCirculatingSupply;
 	final double newCirculatingSupply;
 	
-	public ItemEvent(CommandSender sender, IdData idData, int amount, double oldMarketCap, double newMarketCap, double oldCirculatingSupply, double newCirculatingSupply)
+	public ItemEvent(CommandSender sender, IdDataRarity idData, int amount, double oldMarketCap, double newMarketCap, double oldCirculatingSupply, double newCirculatingSupply)
 	{
 		this.sender = sender;
 		this.idData = idData;
@@ -31,7 +32,7 @@ public abstract class ItemEvent extends Event
 		return sender;
 	}
 	
-	public IdData getIdData()
+	public IdDataRarity getIdData()
 	{
 		return idData;
 	}

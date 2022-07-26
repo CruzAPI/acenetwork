@@ -1,5 +1,13 @@
 package br.com.acenetwork.commons;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -17,9 +25,14 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -36,6 +49,44 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommonsUtil
 {
+	public static UUID getUUID(File file)
+	{
+		UUID uuid;
+		
+		if(file.exists() && file.length() > 0L)
+		{
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					DataInputStream in = new DataInputStream(streamIn))
+			{
+				uuid = new UUID(in.readLong(), in.readLong());
+			}
+			catch(IOException ex)
+			{
+				throw new RuntimeException(ex);
+			}
+		}
+		else
+		{
+			uuid = UUID.randomUUID();
+			
+			try(FileOutputStream fileOut = new FileOutputStream(file);
+					ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+					DataOutputStream out = new DataOutputStream(streamOut))
+			{
+				out.writeLong(uuid.getMostSignificantBits());
+				out.writeLong(uuid.getLeastSignificantBits());
+				fileOut.write(streamOut.toByteArray());
+			}
+			catch(IOException ex)
+			{
+				throw new RuntimeException(ex);
+			}
+		}
+		
+		return uuid;
+	}
+	
 	public static boolean addEnchant(ItemStack item, Enchantment ench, int level, boolean ignoreLevelRestriction)
 	{
 		ItemMeta meta = item.getItemMeta();
@@ -357,6 +408,11 @@ public class CommonsUtil
 		{
 			return new Locale(split[0], split[1]);
 		}
+	}
+	
+	public static String getTranslation(int id, short data, ResourceBundle bundle)
+	{
+		return getTranslation(Material.getMaterial(id), data, bundle);
 	}
 	
 	public static String getTranslation(IdData key, ResourceBundle bundle)
@@ -2041,11 +2097,19 @@ public class CommonsUtil
 	{
 		List<UUID> list = new ArrayList<>();
 		
-		if(!item.hasItemMeta() || !item.getItemMeta().hasDisplayName())
+		if(item == null)
 		{
 			return list;
 		}
-		String displayName = item.getItemMeta().getDisplayName();
+		
+		ItemMeta meta = item.getItemMeta();
+		
+		if(meta == null || !meta.hasDisplayName())
+		{
+			return list;
+		}
+		
+		String displayName = meta.getDisplayName();
 		
 		for(int i = 0; ; i += 66)
 		{
@@ -2094,12 +2158,12 @@ public class CommonsUtil
 		i1.setItemMeta(i2.getItemMeta());
 	}
 	
-	public static boolean compareUUID(ItemStack i, UUID uuid)
+	public static boolean containsUUID(ItemStack i, UUID uuid)
 	{
-		return uuid == null ? false : compareUUID(i, hideUUID(uuid));
+		return uuid == null ? false : containsUUID(i, hideUUID(uuid));
 	}
 	
-	public static boolean compareUUID(ItemStack i, String hiddenData)
+	public static boolean containsUUID(ItemStack i, String hiddenData)
 	{
 		if(i == null || hiddenData == null)
 		{
@@ -2261,5 +2325,44 @@ public class CommonsUtil
 		default:
 			return false;
 		}
+	}
+
+	public static boolean isPVP(EntityDamageEvent e)
+	{
+		if(!(e instanceof EntityDamageByEntityEvent))
+		{
+			return false;
+		}
+		
+		EntityDamageByEntityEvent ee = (EntityDamageByEntityEvent) e;
+		
+		if(ee.getDamager() instanceof Player)
+		{
+			return true;
+		}
+		
+		if(ee.getDamager() instanceof Projectile && ((Projectile) ee.getDamager()).getShooter() instanceof Player)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static boolean isBedObstructed(Block b)
+	{
+		if(b == null || b.getType() != Material.BED_BLOCK)
+		{
+			return true;
+		}
+		
+		return b.getRelative(BlockFace.UP).getType() != Material.AIR;
+	}
+	
+	public static Item dropItem(Player p, ItemStack itemStack)
+	{
+		Item item = p.getWorld().dropItem(p.getLocation().add(0.0D, 1.25D, 0.0D), itemStack);
+		item.setVelocity(p.getLocation().getDirection().multiply(0.35D));
+		return item;
 	}
 }

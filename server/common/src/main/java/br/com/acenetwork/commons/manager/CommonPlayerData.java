@@ -17,25 +17,31 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.Inventory;
 
 import com.google.common.io.ByteStreams;
 
+import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 
-public class PlayerData implements Listener, Serializable, Cloneable
+public class CommonPlayerData implements Listener, Serializable, Cloneable
 {
-	private static final long serialVersionUID = 5240858812052753505L;
+	private static final long serialVersionUID = -1358069840285451923L;
 
-	public static final Map<UUID, PlayerData> MAP = new HashMap<>();
+	public static final Map<UUID, CommonPlayerData> MAP = new HashMap<>();
 	
 	private double balance;
 	private double bta;
 	private boolean invincibility;
+	private int vip;
+	private UUID[] vipInvContents;
 	private transient double diskBalance;
 	private transient double diskBTA;
 	private transient boolean diskInvincibility;
+	private transient int diskVip;
+	private transient UUID[] diskVipInvContents;
 	
-	public PlayerData()
+	public CommonPlayerData()
 	{
 		
 	}
@@ -46,19 +52,28 @@ public class PlayerData implements Listener, Serializable, Cloneable
 		return super.clone();
 	}
 	
-	public PlayerData(PlayerData pd)
+	public CommonPlayerData(CommonPlayerData pd)
 	{
-		this(pd.diskBalance , pd.diskBTA, pd.diskInvincibility);
+		this(pd.diskBalance , pd.diskBTA, pd.diskInvincibility, pd.diskVip, pd.vipInvContents);
 	}
 	
-	public PlayerData(double balance, double bta, boolean invincibility)
+	public CommonPlayerData(double balance, double bta, boolean invincibility, int vip, UUID[] vipInvContents)
 	{
 		this.balance = balance;
 		this.bta = bta;
 		this.invincibility = invincibility;
+		this.vip = vip;
+		this.vipInvContents = vipInvContents;
 		this.diskBalance = balance;
 		this.diskBTA = bta;
 		this.diskInvincibility = invincibility;
+		this.diskVip = vip;
+		this.diskVipInvContents = vipInvContents;
+	}
+	
+	public void setVipInvContents(UUID[] vipInvContents)
+	{
+		this.vipInvContents = vipInvContents;
 	}
 	
 	public boolean hasInvincibility()
@@ -116,17 +131,37 @@ public class PlayerData implements Listener, Serializable, Cloneable
 		this.bta = bta;
 	}
 	
+	public int getVip()
+	{
+		return vip;
+	}
+	
+	public void setVip(int vip)
+	{
+		if(vip < 0)
+		{
+			throw new InsufficientBalanceException();
+		}
+		
+		this.vip = vip;
+	}
+	
+	public UUID[] getVipInvContents()
+	{
+		return vipInvContents;
+	}
+	
 	public static void save()
 	{
 		save(MAP);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static void save(Map<UUID, PlayerData> toSave)
+	public static void save(Map<UUID, CommonPlayerData> toSave)
 	{
 		File file = CommonsConfig.getFile(Type.PLAYERS_DATA, true);
 		
-		Map<UUID, PlayerData> diskMap;
+		Map<UUID, CommonPlayerData> diskMap;
 		
 		if(file.length() > 0L)
 		{
@@ -134,11 +169,12 @@ public class PlayerData implements Listener, Serializable, Cloneable
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					ObjectInputStream in = new ObjectInputStream(streamIn);)
 			{
-				diskMap = (Map<UUID, PlayerData>) in.readObject();
+				diskMap = (Map<UUID, CommonPlayerData>) in.readObject();
 			}
 			catch(ClassNotFoundException | IOException ex)
 			{
-				throw new RuntimeException(ex);
+				ex.printStackTrace();
+				return;
 			}
 		}
 		else
@@ -155,17 +191,18 @@ public class PlayerData implements Listener, Serializable, Cloneable
 		}
 		catch(IOException ex)
 		{
-			throw new RuntimeException(ex);
+			ex.printStackTrace();
+			return;
 		}
 		
-		Iterator<Entry<UUID, PlayerData>> iterator = toSave.entrySet().iterator();
+		Iterator<Entry<UUID, CommonPlayerData>> iterator = toSave.entrySet().iterator();
 		
 		while(iterator.hasNext())
 		{
-			Entry<UUID, PlayerData> entry = iterator.next();
+			Entry<UUID, CommonPlayerData> entry = iterator.next();
 			
 			UUID uuid = entry.getKey();
-			PlayerData pd = entry.getValue();
+			CommonPlayerData pd = entry.getValue();
 			file = CommonsConfig.getFile(Type.PLAYER_DATA, true, uuid);
 			
 			try(FileOutputStream fileOut = new FileOutputStream(file);
@@ -183,12 +220,12 @@ public class PlayerData implements Listener, Serializable, Cloneable
 			}
 			catch(IOException ex)
 			{
-				throw new RuntimeException(ex);
+				ex.printStackTrace();
 			}
 		}
 	}
 	
-	public static PlayerData load(UUID uuid) throws RuntimeException
+	public static CommonPlayerData load(UUID uuid) throws RuntimeException
 	{
 		if(MAP.containsKey(uuid))
 		{
@@ -196,13 +233,13 @@ public class PlayerData implements Listener, Serializable, Cloneable
 		}
 		
 		File file = CommonsConfig.getFile(Type.PLAYER_DATA, false, uuid);
-		PlayerData pd = null;
+		CommonPlayerData pd = null;
 		
 		try
 		{
 			if(!file.exists() || file.length() == 0L)
 			{
-				MAP.put(uuid, pd = new PlayerData());
+				MAP.put(uuid, pd = new CommonPlayerData());
 				return pd;
 			}
 			
@@ -210,7 +247,7 @@ public class PlayerData implements Listener, Serializable, Cloneable
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					ObjectInputStream in = new ObjectInputStream(streamIn))
 			{
-				MAP.put(uuid, pd = (PlayerData) in.readObject());
+				MAP.put(uuid, pd = (CommonPlayerData) in.readObject());
 				return pd;
 			}
 			catch(ClassNotFoundException | IOException e)

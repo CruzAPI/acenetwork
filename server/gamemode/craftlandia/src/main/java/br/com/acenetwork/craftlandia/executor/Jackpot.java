@@ -155,7 +155,7 @@ public class Jackpot implements TabExecutor, Listener
 		
 		Entity clicked = e.getRightClicked();
 		
-		if(CitizensAPI.getNPCRegistry().isNPC(clicked) && clicked.getName().equals("test"))
+		if(CitizensAPI.getNPCRegistry().isNPC(clicked) && clicked.getName().contains("CLICK TO PLAY"))
 		{
 			run(CraftCommonPlayer.get(p));
 		}
@@ -241,22 +241,22 @@ public class Jackpot implements TabExecutor, Listener
 	
 	public static double getValueInShards(double bet, ItemStack item)
 	{
-		if(CommonsUtil.compareUUID(item, Jackpot.JACKPOT_UUID))
+		if(CommonsUtil.containsUUID(item, Jackpot.JACKPOT_UUID))
 		{
 			return Math.max(0.0D, instance.getJackpotPrize());
 		}
 		
-		if(CommonsUtil.compareUUID(item, Jackpot.SHARDS_UUID))
+		if(CommonsUtil.containsUUID(item, Jackpot.SHARDS_UUID))
 		{
 			return bet * getMultiplier(item);
 		}
 		
-		if(CommonsUtil.compareUUID(item, Jackpot.$BTA_UUID))
+		if(CommonsUtil.containsUUID(item, Jackpot.$BTA_UUID))
 		{
 			return bet * getMultiplier(item) * $BTA_TO_SHARDS;
 		}
 		
-		if(CommonsUtil.compareUUID(item, Jackpot.VIP_UUID))
+		if(CommonsUtil.containsUUID(item, Jackpot.VIP_UUID))
 		{
 			return 10000;
 		}
@@ -266,7 +266,7 @@ public class Jackpot implements TabExecutor, Listener
 	
 	public static double getValueInShardsTheoretically(double bet, ItemStack item)
 	{
-		if(CommonsUtil.compareUUID(item, JACKPOT_UUID))
+		if(CommonsUtil.containsUUID(item, JACKPOT_UUID))
 		{
 			return 0;
 		}

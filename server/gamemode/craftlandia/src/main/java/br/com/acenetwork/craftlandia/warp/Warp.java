@@ -8,6 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,6 +24,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -80,6 +83,7 @@ import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.ChunkLocation;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import net.citizensnpcs.api.CitizensAPI;
 import net.md_5.bungee.api.ChatColor;
 
 public abstract class Warp implements Listener
@@ -101,6 +105,11 @@ public abstract class Warp implements Listener
 		this.worldName = w.getName();
 		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
 		MAP.put(w.getUID(), this);
+	}
+	
+	public static Warp getByWorld(World w)
+	{
+		return MAP.get(w.getUID());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -256,7 +265,7 @@ public abstract class Warp implements Listener
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void b(BlockBreakEvent e)
 	{
 		Block b = e.getBlock();
@@ -287,6 +296,11 @@ public abstract class Warp implements Listener
 	{
 		Block b = e.getBlock();
 		
+		if(b.getWorld() != w)
+		{
+			return;
+		}
+		
 		BlockData data = new BlockData();
 		
 		data.setRarity(Optional.ofNullable(Util.getRarity(e.getItemInHand())).orElse(Rarity.COMMON));
@@ -294,7 +308,6 @@ public abstract class Warp implements Listener
 		
 		if(b.getType() == Material.WALL_SIGN)
 		{
-			Bukkit.broadcastMessage("WALL_SIGN");
 			data.setPlayer(e.getPlayer().getUniqueId());
 		}
 		
@@ -603,6 +616,44 @@ public abstract class Warp implements Listener
 	}
 	
 	@EventHandler
+	public void skipParkour(PlayerInteractEntityEvent e)
+	{
+		Entity clicked = e.getRightClicked();
+		Player p = e.getPlayer();
+		
+		if(p.getWorld() != w)
+		{
+			return;
+		}
+		
+		if(!CitizensAPI.getNPCRegistry().isNPC(clicked) || !clicked.getName().contains("SKIP PARKOUR"))
+		{
+			return;
+		}
+		
+		Warp warp = Warp.getByWorld(p.getWorld());
+		
+		if(warp.getPortalLocation() == null)
+		{
+			return;
+		}
+		
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(cp.getLocale()));
+		
+		double cost = Math.min(25.0D, cp.getBalance());
+		
+		if(cost > 0.0D)
+		{
+			cp.setBalance(Math.max(0.0D, cp.getBalance() - cost));
+			p.sendMessage(ChatColor.DARK_RED + "(-" + df.format(cost) + " SHARDS)");
+		}
+		
+		p.teleport(warp.getPortalLocation());
+		p.playSound(p.getLocation(), Sound.PORTAL_TRAVEL, 0.25F, 1.0F);
+	}
+	
+	@EventHandler
 	public void a(WorldSaveEvent e)
 	{
 		if(e.getWorld() != w)
@@ -627,11 +678,11 @@ public abstract class Warp implements Listener
 		return map.get(coords);
 	}
 	
-	public void writeBlock(Block b, BlockData bd)
+	public BlockData writeBlock(Block b, BlockData bd)
 	{
 		if(b.getWorld() != w)
 		{
-			return;
+			return MAP.get(b.getWorld().getUID()).writeBlock(b, bd);
 		}
 		
 		Chunk c = b.getChunk();
@@ -646,6 +697,8 @@ public abstract class Warp implements Listener
 		{
 			map.put(coords, bd);
 		}
+		
+		return bd;
 	}
 	
 	private void saveChunks()
@@ -727,10 +780,15 @@ public abstract class Warp implements Listener
 	
 	public Set<CommonPlayer> getCommonPlayers()
 	{
-		return w.getPlayers().stream().map(x -> CraftCommonPlayer.get(x)).collect(Collectors.toSet());
+		return w.getPlayers().stream().map(x -> CraftCommonPlayer.get(x)).filter(x -> x != null).collect(Collectors.toSet());
 	}
 	
 	public boolean isSpawnProtection(Location l)
+	{
+		return true;
+	}
+	
+	public boolean isSafeZone(Location l)
 	{
 		return true;
 	}
@@ -763,6 +821,11 @@ public abstract class Warp implements Listener
 	public World getWorld()
 	{
 		return w;
+	}
+	
+	public Location getPortalLocation()
+	{
+		return null;
 	}
 	
 	public static World getWorld(Class<? extends Warp> type)

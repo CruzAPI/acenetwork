@@ -3,7 +3,9 @@ package br.com.acenetwork.commons.player.craft;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -14,8 +16,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -33,6 +37,7 @@ import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -44,15 +49,16 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.event.PlayerInvincibilityChangeEvent;
 import br.com.acenetwork.commons.event.PlayerModeChangeEvent;
-import br.com.acenetwork.commons.executor.Balance;
 import br.com.acenetwork.commons.executor.VipChest;
-import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.inventory.GUI;
+import br.com.acenetwork.commons.inventory.VipChestGUI;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.manager.CommonsConfig;
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
@@ -74,10 +80,9 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	private boolean invis;
 	private boolean ignoreInvisAndSpecs;
 	private String walletAddress;
-	private Inventory vipChest;
 	public int taskRequest;
 	private boolean isJackpoting;
-	private PlayerData playerData;
+	private CommonPlayerData playerData;
 	private boolean pvpInvincibility;
 	
 	public CraftCommonPlayer(Player p)
@@ -90,7 +95,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		if(previous != null)	
 		{
-			playerData = previous.getPlayerData();
+			playerData = previous.getCommonPlayerData();
 			specs = previous.canSpecs();
 			commonsScoreboard = previous.getCommonsScoreboard();
 			pvpInvincibility = previous.hasPVPInvincibility();
@@ -98,7 +103,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		}
 		else
 		{
-			playerData = PlayerData.load(p.getUniqueId());
+			playerData = CommonPlayerData.load(p.getUniqueId());
 		}
 		
 		reset();
@@ -295,8 +300,8 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		setCommonsScoreboard(null);
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void asdasd(EntityDamageEvent e)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void checkInvincibility(EntityDamageEvent e)
 	{
 		if(e.getEntity() != p)
 		{
@@ -623,165 +628,6 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	}
 	
 	@Override
-	public Inventory getVipChest()
-	{
-		return vipChest;
-	}
-	
-	@EventHandler
-	public void aasda(WorldSaveEvent e)
-	{
-		if(!e.getWorld().getName().equals("world"))
-		{
-			return;
-		}
-		
-		try
-		{
-			writeVipChest();
-		}
-		catch(IOException e1)
-		{
-			e1.printStackTrace();
-		}
-	}
-	
-	@Override
-	public void readVipChest() throws IOException
-	{
-		if(Bukkit.getScheduler().isQueued(taskRequest))
-		{
-			return;
-		}
-		
-		writeVipChest();
-		
-		Runtime.getRuntime().exec(String.format("node %s/reset/vip %s %s %s", System.getProperty("user.home"),
-				Common.getSocketPort(), 
-				requestDatabase(), 
-				p.getUniqueId().version() == 4 ? p.getUniqueId() : p.getName()));
-	}
-	
-	@Override
-	public void writeVipChest() throws IOException
-	{
-		if(vipChest == null)
-		{
-			return;
-		}
-		
-		File file = CommonsConfig.getFile(Type.CHEST_VIP, true, p.getUniqueId());
-		YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-		
-		try
-		{
-			config.set("inventory", vipChest.getContents());
-			config.save(file);
-		}
-		catch(IOException ex)
-		{
-			throw ex;
-		}
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void vipActivation(PlayerInteractEvent e)
-	{
-		if(e.getPlayer() != p)
-		{
-			return;
-		}
-		
-		ItemStack item = e.getItem();
-		
-		if(!VipChestGUI.isItemStackVIP(item))
-		{
-			return;
-		}
-		
-		ItemStack clone = item.clone();
-		
-		boolean isValid = VipChestGUI.isValidItemStackVIP(item);
-		
-		e.setCancelled(true);
-		
-		if(!e.getAction().name().contains("RIGHT"))
-		{
-			return;
-		}
-		
-		int amount = item.getAmount();
-		
-		if(amount <= 0)
-		{
-			return;
-		}
-		
-		item.setAmount(--amount);
-		
-		if(amount <= 0 || !isValid)
-		{
-			p.setItemInHand(null);
-		}
-		
-		if(!isValid)
-		{
-			p.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "INVALID VIP ITEM");
-			return;
-		}
-		
-		File file = CommonsConfig.getFile(Type.ACTIVATED_VIPS, true);
-		
-		try(RandomAccessFile access = new RandomAccessFile(file, "rw"))
-		{
-			UUID vipUUID = CommonsUtil.convertHiddenUUID(CommonsUtil.getHiddenLastUUID(clone));
-			access.seek(access.length());
-			access.writeChars(vipUUID.toString());
-			
-			VipChest.ACTIVATED_VIPS.add(vipUUID);
-			Bukkit.getWorlds().forEach(x -> x.save());
-			
-			Bukkit.broadcastMessage(" Um Troxa (" + p.getDisplayName() + ChatColor.WHITE + ")  ativou VIP");
-			
-			p.setFallDistance(-9999.9F);
-			p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 20 * 5, 5));
-			p.getWorld().createExplosion(p.getLocation(), 6.0F);
-			
-			Firework f = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
-			FireworkMeta meta = f.getFireworkMeta();
-			
-			meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.GRAY).build());
-			meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE).withColor(Color.AQUA).build());
-			meta.setPower(1);
-			
-			ItemStack[] armor = new ItemStack[] 
-			{
-				new ItemStack(Material.DIAMOND_HELMET),
-				new ItemStack(Material.DIAMOND_CHESTPLATE),
-				new ItemStack(Material.DIAMOND_LEGGINGS),
-				new ItemStack(Material.DIAMOND_BOOTS)
-			};
-			
-			for(ItemStack values : p.getInventory().addItem(armor).values())
-			{
-				p.getWorld().dropItemNaturally(p.getLocation(), values);
-			}
-			
-			f.setFireworkMeta(meta);
-		}
-		catch(Exception ex)
-		{
-			ex.printStackTrace();
-		}
-	}
-	
-	@Override
-	public void setVipChest(Inventory inv)
-	{
-		this.vipChest = inv;
-	}
-	
-	@Override
 	public Locale getLocale()
 	{
 		return CommonsUtil.getLocaleFromMinecraft(p.spigot().getLocale());
@@ -824,7 +670,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	}
 	
 	@Override
-	public PlayerData getPlayerData()
+	public CommonPlayerData getCommonPlayerData()
 	{
 		return playerData;
 	}
@@ -842,7 +688,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	}
 	
 	@Override
-	public void setPlayerData(PlayerData playerData)
+	public void setCommonPlayerData(CommonPlayerData playerData)
 	{
 		this.playerData = playerData;
 	}

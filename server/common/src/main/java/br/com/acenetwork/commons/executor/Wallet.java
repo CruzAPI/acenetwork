@@ -202,16 +202,21 @@ public class Wallet implements TabExecutor, Listener
 		}
 		else
 		{
-			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.wallet.do-not-have-any-wallet"));
-			
-			TextComponent[] extra = new TextComponent[1];
-			
-			extra[0] = new TextComponent("/wallet <" + bundle.getString("commons.words.address").toLowerCase() + ">");
-			extra[0].setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/wallet "));
-			
-			TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.wallet.to-link-your-wallet-type"), extra);
-			text.setColor(ChatColor.RED);
-			p.spigot().sendMessage(text);
+			messageWalletNotFound(bundle, p);
 		}
+	}
+	
+	public static void messageWalletNotFound(ResourceBundle bundle, Player p)
+	{
+		p.sendMessage(ChatColor.RED + bundle.getString("commons.cmd.wallet.do-not-have-any-wallet"));
+		
+		TextComponent[] extra = new TextComponent[1];
+		
+		extra[0] = new TextComponent("/wallet <" + bundle.getString("commons.words.address").toLowerCase() + ">");
+		extra[0].setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/wallet "));
+		
+		TextComponent text = Message.getTextComponent(bundle.getString("commons.cmd.wallet.to-link-your-wallet-type"), extra);
+		text.setColor(ChatColor.RED);
+		p.spigot().sendMessage(text);
 	}
 }

@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.Message;
-import br.com.acenetwork.commons.manager.PlayerData;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import net.md_5.bungee.api.ChatColor;
@@ -186,20 +186,20 @@ public class Withdraw implements TabExecutor
 				
 				new Thread(() -> 
 				{
-					PlayerData cloneMemoryPD = null;
+					CommonPlayerData cloneMemoryPD = null;
 					
 					try
 					{
-						PlayerData memoryPD = cp.getPlayerData();
-						cloneMemoryPD = (PlayerData) memoryPD.clone();
-						PlayerData diskPD = new PlayerData(memoryPD);
+						CommonPlayerData memoryPD = cp.getCommonPlayerData();
+						cloneMemoryPD = (CommonPlayerData) memoryPD.clone();
+						CommonPlayerData diskPD = new CommonPlayerData(memoryPD);
 						diskPD.setBTA(diskPD.getBTA() - order.amount);
 						
 						memoryPD.setBTA(memoryPD.getBTA() - order.amount);
 						
-						Map<UUID, PlayerData> map = new HashMap<>();
+						Map<UUID, CommonPlayerData> map = new HashMap<>();
 						map.put(p.getUniqueId(), diskPD);
-						PlayerData.save(map);
+						CommonPlayerData.save(map);
 						
 						TextComponent[] extra1;
 						TextComponent text1;
@@ -242,7 +242,7 @@ public class Withdraw implements TabExecutor
 					{
 						if(cloneMemoryPD != null)
 						{
-							cp.setPlayerData(cloneMemoryPD);
+							cp.setCommonPlayerData(cloneMemoryPD);
 						}
 						
 						p.sendMessage(ChatColor.RED + bundle.getString("commons.unexpected-error"));

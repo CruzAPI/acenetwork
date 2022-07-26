@@ -1,14 +1,9 @@
 package br.com.acenetwork.craftlandia.warp;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -23,12 +18,14 @@ import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
 public class Factions extends Warp
 {
 	private final Location spawnLocation;
+	private final Location portalLocation;
 	
 	public Factions(World w)
 	{
 		super(w);
 		
 		spawnLocation = new Location(w, 0.5D, 69.0D, 0.5D, 0.0F, 0.0F);
+		portalLocation = new Location(w, -13.5D, 88.0D, 12.5D, 180.0F, 0.0F);
 		
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
 		{
@@ -113,7 +110,8 @@ public class Factions extends Warp
 		cp.setPVPInvincibility(false);
 	}
 	
-	private boolean isSafeZone(Location l)
+	@Override
+	public boolean isSafeZone(Location l)
 	{
 		return Math.abs(l.getBlockX()) < 70 && Math.abs(l.getBlockZ()) < 70;
 	}
@@ -171,6 +169,12 @@ public class Factions extends Warp
 		}
 		
 		return Result.ALLOW;
+	}
+	
+	@Override
+	public Location getPortalLocation()
+	{
+		return portalLocation;
 	}
 	
 	@Override

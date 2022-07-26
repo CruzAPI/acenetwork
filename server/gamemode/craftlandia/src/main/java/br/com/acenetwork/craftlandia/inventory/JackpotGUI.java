@@ -222,7 +222,7 @@ public class JackpotGUI extends GUI
 			TextComponent tag = new TextComponent("[" + bundle.getString("noun.jackpot").toUpperCase() + "]");
 			tag.setColor(ChatColor.AQUA);
 			
-			if(CommonsUtil.compareUUID(item, Jackpot.JACKPOT_UUID) && jackpotPrize > 0.0D)
+			if(CommonsUtil.containsUUID(item, Jackpot.JACKPOT_UUID) && jackpotPrize > 0.0D)
 			{
 				cp.setBalance(cp.getBalance() + jackpotPrize);
 				jackpot.setJackpotTotal(0.0D);
@@ -304,20 +304,20 @@ public class JackpotGUI extends GUI
 				
 				return;
 			}
-			else if(CommonsUtil.compareUUID(item, Jackpot.$BTA_UUID))
+			else if(CommonsUtil.containsUUID(item, Jackpot.$BTA_UUID))
 			{
 				double bta = bet * 0.001D * item.getAmount();
 				
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - Jackpot.$BTA_TO_SHARDS * bta);
 				cp.setBTA(cp.getBTA() + bta);
 			}
-			else if(CommonsUtil.compareUUID(item, Jackpot.VIP_UUID))
+			else if(CommonsUtil.containsUUID(item, Jackpot.VIP_UUID))
 			{
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - 10.000D);
 				p.getInventory().addItem(VipChestGUI.getVipItem()).values()
 						.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
 			}
-			else if(CommonsUtil.compareUUID(item, Jackpot.SHARDS_UUID))
+			else if(CommonsUtil.containsUUID(item, Jackpot.SHARDS_UUID))
 			{
 				p.playSound(p.getLocation(), Sound.NOTE_PLING, 1.0F, 1.5F);
 				
@@ -343,7 +343,7 @@ public class JackpotGUI extends GUI
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - prize); 
 				cp.setBalance(cp.getBalance() + prize);
 			}
-			else if(CommonsUtil.compareUUID(item, Jackpot.RANDOM_ITEM_UUID))
+			else if(CommonsUtil.containsUUID(item, Jackpot.RANDOM_ITEM_UUID))
 			{
 				p.getInventory().addItem(RandomItem.getInstance().getItemSupplier().get(bundle, version)).values()
 						.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));

@@ -15,6 +15,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Leaves;
 import org.bukkit.material.Tree;
 
+import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
+import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 
 public class BlockUtil
@@ -334,12 +336,7 @@ public class BlockUtil
 			
 			Block up = base.getRelative(BlockFace.UP);
 			
-			Bukkit.broadcastMessage(base.getData() + " baseData");
-			Bukkit.broadcastMessage(b.getData() + " bData");
-			
 			short durability = (short) (base.getData() - 1);
-			
-			Bukkit.broadcastMessage("durability = " + durability);
 			
 			if(tool != null && tool.getType() == Material.SHEARS)
 			{
@@ -483,10 +480,30 @@ public class BlockUtil
 			{
 				items.add(new ItemStack(Material.VINE));
 			}
+		case MOB_SPAWNER:
+			if(tool != null)
+			{
+				if(!SpecialItems.getInstance().isContainmentPickaxe(tool))
+				{
+					return;
+				}
+				
+				float chance = SpecialItems.getInstance().getContainmentPickaxeChance(tool);
+				
+				next = r.nextInt(100) + r.nextDouble();
+				
+				if(next <= chance)
+				{
+					items.add(new ItemStack(Material.MOB_SPAWNER));
+				}
+			}
+			break;
 		default:
 			items.addAll(b.getDrops());
 			break;
 		}
+		
+		Bukkit.getPluginManager().callEvent(new BreakNaturallyEvent(b));
 		
 		b.setType(Material.AIR);
 		

@@ -61,7 +61,7 @@ public class PriceSelector extends GUI
 		{
 			ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 			meta = item.getItemMeta();
-			meta.setDisplayName(ChatColor.GRAY + "0");
+			meta.setDisplayName("" + ChatColor.GRAY + 0);
 			item.setItemMeta(meta);
 			inv.setItem(i, item);
 		}
@@ -161,7 +161,18 @@ public class PriceSelector extends GUI
 	{
 		int price = getPrice();
 		
-		ItemMeta meta = itemConfirm.getItemMeta();
+		ItemMeta meta;
+		
+		for(int i = 1; i < 8; i++)
+		{
+			ItemStack item = inv.getItem(i);
+			meta = item.getItemMeta();
+			meta.setDisplayName("" + (item.getDurability() == 10 ? ChatColor.GREEN : ChatColor.GRAY ) + getPrice());
+			item.setItemMeta(meta);
+//			inv.setItem(i, item);
+		}
+		
+		meta = itemConfirm.getItemMeta();
 		
 		if(price == 0)
 		{
