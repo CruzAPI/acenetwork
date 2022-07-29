@@ -31,7 +31,7 @@ public class TagCMD implements TabExecutor
 
 		Player p = (Player) sender;
 		CommonPlayer cp = CraftCommonPlayer.get(p);
-
+		
 		if(args.length == 1)
 		{
 			for(Tag tag : Tag.values())

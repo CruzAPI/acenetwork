@@ -36,6 +36,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
@@ -56,7 +57,9 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -65,6 +68,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -74,6 +78,7 @@ import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
+import br.com.acenetwork.commons.manager.Pitch;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
@@ -103,7 +108,7 @@ public abstract class Warp implements Listener
 	{
 		this.w = w;
 		this.worldName = w.getName();
-		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 		MAP.put(w.getUID(), this);
 	}
 	
@@ -521,6 +526,19 @@ public abstract class Warp implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void a(BlockBurnEvent e)
+	{
+		Block b = e.getBlock();
+		
+		if(b.getWorld() != w)
+		{
+			return;
+		}
+		
+		e.setCancelled(isSpawnProtection(b.getLocation()));
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void a(EntityChangeBlockEvent e)
 	{
 		Block b = e.getBlock();
@@ -602,7 +620,7 @@ public abstract class Warp implements Listener
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void a(BlockIgniteEvent e)
 	{
 		Block b = e.getBlock();
@@ -615,7 +633,7 @@ public abstract class Warp implements Listener
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
 	
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void skipParkour(PlayerInteractEntityEvent e)
 	{
 		Entity clicked = e.getRightClicked();
@@ -641,7 +659,7 @@ public abstract class Warp implements Listener
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(cp.getLocale()));
 		
-		double cost = Math.min(25.0D, cp.getBalance());
+		double cost = cp.hasPermission("skip.parkour") ? 0.0D : Math.min(100.0D, cp.getBalance());
 		
 		if(cost > 0.0D)
 		{
@@ -650,7 +668,7 @@ public abstract class Warp implements Listener
 		}
 		
 		p.teleport(warp.getPortalLocation());
-		p.playSound(p.getLocation(), Sound.PORTAL_TRAVEL, 0.25F, 1.0F);
+		p.playSound(p.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, Pitch.F2);
 	}
 	
 	@EventHandler
@@ -662,6 +680,60 @@ public abstract class Warp implements Listener
 		}
 		
 		saveChunks();
+	}
+	
+	@EventHandler
+	public void foodLevel(FoodLevelChangeEvent e)
+	{
+		Player p = (Player) e.getEntity();
+		
+		if(p.getWorld() != w
+				|| e.getFoodLevel() >= p.getFoodLevel())
+		{
+			return;
+		}
+		
+		if(!isSafeZone(p.getLocation()))
+		{
+			return;
+		}
+		
+		e.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onEntityDamage(EntityDamageEvent e)
+	{
+		Entity entity = e.getEntity();
+		
+		if(entity.getWorld() != w)
+		{
+			return;
+		}
+		
+		if(isSafeZone(entity.getLocation()))
+		{
+			e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void teleportOnVoid(EntityDamageEvent e)
+	{
+		if(e.getEntity().getWorld() != w)
+		{
+			return;
+		}
+		
+		if(!isSafeZone(e.getEntity().getLocation()))
+		{
+			return;
+		}
+		
+		if(e.getEntity() instanceof Player && e.getCause() == DamageCause.VOID)
+		{
+			e.getEntity().teleport(getSpawnLocation(), TeleportCause.PLUGIN);
+		}
 	}
 	
 	public BlockData readBlock(Block b)
@@ -825,6 +897,19 @@ public abstract class Warp implements Listener
 	
 	public Location getPortalLocation()
 	{
+		return null;
+	}
+	
+	public static <T extends Warp> T getInstance(Class<T> type)
+	{
+		for(Warp warp : MAP.values())
+		{
+			if(type.isInstance(warp))
+			{
+				return type.cast(warp);
+			}
+		}
+		
 		return null;
 	}
 	

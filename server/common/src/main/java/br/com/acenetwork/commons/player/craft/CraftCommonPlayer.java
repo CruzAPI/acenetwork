@@ -1,29 +1,17 @@
 package br.com.acenetwork.commons.player.craft;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -31,15 +19,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.world.WorldSaveEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import br.com.acenetwork.commons.Common;
@@ -49,16 +30,13 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.event.PlayerInvincibilityChangeEvent;
 import br.com.acenetwork.commons.event.PlayerModeChangeEvent;
-import br.com.acenetwork.commons.executor.VipChest;
+import br.com.acenetwork.commons.event.PlayerSuccessLoginEvent;
 import br.com.acenetwork.commons.inventory.GUI;
-import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.manager.CommonsConfig;
-import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
@@ -84,6 +62,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	private boolean isJackpoting;
 	private CommonPlayerData playerData;
 	private boolean pvpInvincibility;
+	private boolean logged;
 	
 	public CraftCommonPlayer(Player p)
 	{
@@ -96,20 +75,23 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		if(previous != null)	
 		{
 			playerData = previous.getCommonPlayerData();
+			logged = previous.isLogged();
 			specs = previous.canSpecs();
+			tag = previous.getTag();
 			commonsScoreboard = previous.getCommonsScoreboard();
 			pvpInvincibility = previous.hasPVPInvincibility();
 			previous.delete();
 		}
 		else
 		{
+			logged = p.getUniqueId().version() == 4;
 			playerData = CommonPlayerData.load(p.getUniqueId());
 		}
 		
 		reset();
 		
 		Bukkit.getPluginManager().callEvent(new PlayerModeChangeEvent(this));
-		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Common.getInstance());
 	}
 	
 	public static <T extends CommonPlayer> Set<T> getAll(Class<T> type)
@@ -142,7 +124,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		ResourceBundle bundle = ResourceBundle.getBundle("message", getLocale());
 		
 //		p.sendMessage(ChatColor.GREEN + bundle.getString("commons.cmds.checking-database"));
-		taskRequest = Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+		taskRequest = Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getInstance(), () ->
 		{
 			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.request-timed-out"));
 		}, timeout);
@@ -300,39 +282,10 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		setCommonsScoreboard(null);
 	}
 	
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	public void checkInvincibility(EntityDamageEvent e)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void login(EntityDamageEvent e)
 	{
-		if(e.getEntity() != p)
-		{
-			return;
-		}
 		
-		if(hasInvincibility())
-		{
-			e.setCancelled(true);
-			return;
-		}
-		
-		if(pvpInvincibility)
-		{
-			if(e instanceof EntityDamageByEntityEvent)
-			{
-				EntityDamageByEntityEvent ee = (EntityDamageByEntityEvent) e;
-				
-				if(ee.getDamager() instanceof Player)
-				{
-					e.setCancelled(true);
-					return;
-				}
-				
-				if(ee.getDamager() instanceof Projectile && ((Projectile) ee.getDamager()).getShooter() instanceof Player)
-				{
-					e.setCancelled(true);
-					return;
-				}
-			}
-		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -400,64 +353,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 	@Override
 	public boolean hasPermission(String perm)
 	{
-		return CommonsUtil.hasPermission(p.getUniqueId(), perm);
-//		perm = perm.replace('.', ':');
-//
-//		File userFile = CommonsConfig.getFile(Type.USER, true, getUniqueID());
-//		YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
-//
-//		ConfigurationSection userPermissions = userConfig.getConfigurationSection("permission");
-//
-//		if(userPermissions != null)
-//		{
-//			for(String key : userPermissions.getKeys(false))
-//			{
-//				long value = userConfig.getLong("permission." + key);
-//				boolean valid = value == 0 || value > System.currentTimeMillis();
-//
-//				if(valid && (key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)) || 
-//					perm.equals(key)))
-//				{
-//					return true;
-//				}
-//			}
-//		}
-//		
-//		ConfigurationSection userGroups = userConfig.getConfigurationSection("group");
-//		
-//		if(userGroups != null)
-//		{
-//			for(String key : userGroups.getKeys(false))
-//			{
-//				long value = userConfig.getLong("group." + key);
-//				boolean valid = value == 0 || value > System.currentTimeMillis();
-//
-//				if(valid)
-//				{
-//					File groupFile = CommonsConfig.getFile(Type.GROUP, true, key);
-//					YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-//
-//					ConfigurationSection groupPermissions = groupConfig.getConfigurationSection("permission");
-//
-//					if(groupPermissions != null)
-//					{
-//						for(String key1 : groupPermissions.getKeys(false))
-//						{
-//							value = groupConfig.getLong("permisison." + key1);
-//							valid = value == 0 || value > System.currentTimeMillis();
-//							
-//							if(valid && (key1.endsWith("*") && perm.startsWith(key1.substring(0, key1.length() - 1)) || 
-//								perm.equals(key1)))
-//							{
-//								return true;
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		return false;
+		return CommonsUtil.hasPermission(p, perm);
 	}
 	
 	@Override
@@ -498,7 +394,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		if((this.gui = gui) != null)
 		{
-			Bukkit.getPluginManager().registerEvents(this.gui, Common.getPlugin());
+			Bukkit.getPluginManager().registerEvents(this.gui, Common.getInstance());
 		}
 	}
 
@@ -518,7 +414,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		if((this.commonsScoreboard = commonsScoreboard) != null)
 		{
-			Bukkit.getPluginManager().registerEvents(this.commonsScoreboard, Common.getPlugin());
+			Bukkit.getPluginManager().registerEvents(this.commonsScoreboard, Common.getInstance());
 			p.setScoreboard(commonsScoreboard.getScoreboard());
 		}
 		else
@@ -543,7 +439,7 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		
 		if((this.commonsHotbar = commonsHotbar) != null)
 		{
-			Bukkit.getPluginManager().registerEvents(this.commonsHotbar, Common.getPlugin());
+			Bukkit.getPluginManager().registerEvents(this.commonsHotbar, Common.getInstance());
 		}
 	}
 	
@@ -726,5 +622,20 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 		IChatBaseComponent icbc = ChatSerializer.a("{\"text\": \"" + msg + "\"}");
 		PacketPlayOutChat bar = new PacketPlayOutChat(icbc, (byte) 2);
 		((CraftPlayer) p).getHandle().playerConnection.sendPacket(bar);
+	}
+	
+	@Override
+	public boolean isLogged()
+	{
+		return logged;
+	}
+	
+	@Override
+	public void setLogged(boolean logged)
+	{
+		if(this.logged != (this.logged = logged) && logged)
+		{
+			Bukkit.getPluginManager().callEvent(new PlayerSuccessLoginEvent(p));
+		}
 	}
 }

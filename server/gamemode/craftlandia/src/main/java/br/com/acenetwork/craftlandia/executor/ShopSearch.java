@@ -1,5 +1,6 @@
 package br.com.acenetwork.craftlandia.executor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -15,11 +16,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class ShopSearch implements TabExecutor
 {
-
 	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
+	{
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -37,6 +37,12 @@ public class ShopSearch implements TabExecutor
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		
+		if(!cp.hasPermission("cmd.shop"))
+		{
+			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
+			return true;
+		}
 		
 		String search = "";
 		

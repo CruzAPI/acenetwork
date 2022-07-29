@@ -19,6 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -30,15 +31,22 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.WorldSaveEvent;
 
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.md_5.bungee.api.ChatColor;
 import br.com.acenetwork.craftlandia.manager.Land;
 import br.com.acenetwork.craftlandia.manager.LandEntityData;
 
@@ -136,6 +144,14 @@ public class WarpLand extends Warp
 				}
 			}
 		}, 10L, 10L);
+	}
+	
+	@EventHandler
+	public void a(NPCLoadEvent e)
+	{
+		NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "" 
+				+ ChatColor.YELLOW + ChatColor.BOLD + "SKIP PARKOUR");
+		npc.spawn(new Location(w, -1.5D, 69.0D, 2.5D, -135.0F, 0.0F));
 	}
 	
 	@Override
@@ -279,6 +295,12 @@ public class WarpLand extends Warp
 		{
 			ex.printStackTrace();
 		}
+	}
+	
+	@Override
+	public boolean isSafeZone(Location l)
+	{
+		return Math.abs(l.getBlockX()) <= 65 && Math.abs(l.getBlockX()) <= 65;
 	}
 	
 	@Override

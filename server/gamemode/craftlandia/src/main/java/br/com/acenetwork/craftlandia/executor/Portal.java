@@ -117,7 +117,7 @@ public class Portal implements TabExecutor, Listener
 			set = new HashSet<>();
 		}
 		
-		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
 	
 	@Override
@@ -338,7 +338,6 @@ public class Portal implements TabExecutor, Listener
 		
 		if(target == null)
 		{
-			p.sendMessage("target == null");
 			return;
 		}
 		

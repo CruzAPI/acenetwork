@@ -17,16 +17,15 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
 
 import com.google.common.io.ByteStreams;
 
-import br.com.acenetwork.commons.executor.VipChest;
+import br.com.acenetwork.commons.executor.Withdraw;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 
 public class CommonPlayerData implements Listener, Serializable, Cloneable
 {
-	private static final long serialVersionUID = -1358069840285451923L;
+	private static final long serialVersionUID = -3520240238114155686L;
 
 	public static final Map<UUID, CommonPlayerData> MAP = new HashMap<>();
 	
@@ -35,15 +34,20 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 	private boolean invincibility;
 	private int vip;
 	private UUID[] vipInvContents;
+	private long withdrawCooldown;
+	private byte[] password;
 	private transient double diskBalance;
 	private transient double diskBTA;
 	private transient boolean diskInvincibility;
 	private transient int diskVip;
 	private transient UUID[] diskVipInvContents;
+	private transient long diskWithdrawCooldown;
+	private transient byte[] diskPassword;
 	
 	public CommonPlayerData()
 	{
-		
+		withdrawCooldown = System.currentTimeMillis() + Withdraw.COOLDOWN_MILLIS;
+		diskWithdrawCooldown = withdrawCooldown;
 	}
 	
 	@Override
@@ -54,21 +58,45 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 	
 	public CommonPlayerData(CommonPlayerData pd)
 	{
-		this(pd.diskBalance , pd.diskBTA, pd.diskInvincibility, pd.diskVip, pd.vipInvContents);
+		this(pd.diskBalance , pd.diskBTA, pd.diskInvincibility, pd.diskVip, pd.diskVipInvContents, pd.diskWithdrawCooldown, pd.diskPassword);
 	}
 	
-	public CommonPlayerData(double balance, double bta, boolean invincibility, int vip, UUID[] vipInvContents)
+	public byte[] getPassword()
+	{
+		return password;
+	}
+	
+	public void setPassword(byte[] password)
+	{
+		this.password = password;
+	}
+	
+	public CommonPlayerData(double balance, double bta, boolean invincibility, int vip, UUID[] vipInvContents, long withdrawCooldown, byte[] password)
 	{
 		this.balance = balance;
 		this.bta = bta;
 		this.invincibility = invincibility;
 		this.vip = vip;
 		this.vipInvContents = vipInvContents;
+		this.withdrawCooldown = withdrawCooldown;
+		this.password = password;
 		this.diskBalance = balance;
 		this.diskBTA = bta;
 		this.diskInvincibility = invincibility;
 		this.diskVip = vip;
 		this.diskVipInvContents = vipInvContents;
+		this.diskWithdrawCooldown = withdrawCooldown;
+		this.diskPassword = password;
+	}
+	
+	public long getWithdrawCooldown()
+	{
+		return withdrawCooldown;
+	}
+	
+	public void setWithdrawCooldown(long withdrawCooldown)
+	{
+		this.withdrawCooldown = withdrawCooldown;
 	}
 	
 	public void setVipInvContents(UUID[] vipInvContents)

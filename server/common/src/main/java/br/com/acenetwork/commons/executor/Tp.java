@@ -13,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.Message;
@@ -94,7 +95,11 @@ public class Tp implements TabExecutor
 				return true;
 			}
 			
-			t1.teleport(t2);
+			if(!t1.teleport(t2, TeleportCause.COMMAND))
+			{
+				sender.sendMessage(ChatColor.RED + bundle.getString("raid.cmds.teleport-cancelled"));
+				return true;
+			}
 			
 			TextComponent[] extra = new TextComponent[2];
 			
@@ -136,7 +141,11 @@ public class Tp implements TabExecutor
 				double y = Double.parseDouble(args[args.length - 2]);
 				double z = Double.parseDouble(args[args.length - 1]);
 				
-				t.teleport(new Location(w, x, y, z));
+				if(!t.teleport(new Location(w, x, y, z), TeleportCause.COMMAND))
+				{
+					sender.sendMessage(ChatColor.RED + bundle.getString("raid.cmds.teleport-cancelled"));
+					return true;
+				}
 				
 				TextComponent[] extra = new TextComponent[4];
 				

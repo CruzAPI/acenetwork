@@ -113,7 +113,7 @@ public class Jackpot implements TabExecutor, Listener
 		COAL_MAP.put($BTA_5.getId(), -size + (size += 200));
 		COAL_MAP.put(NONE.getId(), -size + (size += Math.max(0, maxSize - size)));
 		
-		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
 	
 	@Override

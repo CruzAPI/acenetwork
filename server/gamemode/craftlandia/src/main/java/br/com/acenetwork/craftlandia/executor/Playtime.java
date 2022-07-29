@@ -183,7 +183,7 @@ public class Playtime implements TabExecutor, Listener
 		
 		long delay = 20L;
 		
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
 			for(Entry<UUID, WBTA> entry : itemMap.entrySet())
 			{
@@ -268,7 +268,7 @@ public class Playtime implements TabExecutor, Listener
 			}
 		}, delay, delay);
 		
-		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
 	
 	private class Time
@@ -279,7 +279,7 @@ public class Playtime implements TabExecutor, Listener
 		
 		public Time(Player p)
 		{
-			this.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
+			this.taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 			{
 				if(!p.isDead() && (ticks -= 20) <= 0L)
 				{

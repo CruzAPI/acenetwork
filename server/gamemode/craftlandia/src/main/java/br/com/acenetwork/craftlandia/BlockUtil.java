@@ -1,6 +1,5 @@
 package br.com.acenetwork.craftlandia;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,7 +11,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Leaves;
 import org.bukkit.material.Tree;
 
 import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
@@ -485,7 +483,7 @@ public class BlockUtil
 			{
 				if(!SpecialItems.getInstance().isContainmentPickaxe(tool))
 				{
-					return;
+					break;
 				}
 				
 				float chance = SpecialItems.getInstance().getContainmentPickaxeChance(tool);
@@ -499,7 +497,14 @@ public class BlockUtil
 			}
 			break;
 		default:
-			items.addAll(b.getDrops());
+			if(tool == null)
+			{
+				items.addAll(b.getDrops());
+			}
+			else
+			{
+				items.addAll(b.getDrops(tool));
+			}
 			break;
 		}
 		
@@ -517,7 +522,7 @@ public class BlockUtil
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			
-			Bukkit.getScheduler().runTask(Main.getPlugin(), () ->
+			Bukkit.getScheduler().runTask(Main.getInstance(), () ->
 			{
 				b.getWorld().dropItem(b.getLocation(), item);
 			});

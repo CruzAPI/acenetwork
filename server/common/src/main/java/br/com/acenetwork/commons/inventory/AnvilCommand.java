@@ -49,7 +49,7 @@ public class AnvilCommand extends GUI
 			inv.setItem(0, item);
 		}
 		
-		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Common.getPlugin(), () ->
+		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Common.getInstance(), () ->
 		{
 			ItemStack item = inv.getItem(2);
 			
@@ -122,7 +122,7 @@ public class AnvilCommand extends GUI
 		
 		if(rawSlot == 2)
 		{
-			Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
+			Bukkit.getScheduler().runTask(Common.getInstance(), () ->
 			{
 				p.setLevel(p.getLevel());
 			});

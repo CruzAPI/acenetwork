@@ -45,7 +45,7 @@ public class RenameItem extends AnvilCommand
 					return;
 				}
 			}
-		}.runTaskTimer(Main.getPlugin(), 0L, 1L).getTaskId();
+		}.runTaskTimer(Main.getInstance(), 0L, 1L).getTaskId();
 		
 		inv.setItem(0, contents[0]);
 		

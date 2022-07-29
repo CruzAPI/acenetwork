@@ -1,17 +1,13 @@
 package br.com.acenetwork.craftlandia.executor;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -120,55 +116,55 @@ public class LandCMD implements TabExecutor, Listener
 		
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
-		if(args.length == 1 && args[0].equalsIgnoreCase("schem"))
-		{
-			for(Land land : Land.SET)
-			{
-				World w = land.getWorld();
-				int maxHeight = w.getMaxHeight();
-				
-				BlockSerializable[][][] blocks = new BlockSerializable[land.getSize()][maxHeight][land.getSize()];
-				
-				for(int x = 0; x < blocks.length; x++)
-				{
-					for(int y = 0; y < blocks[x].length; y++)
-					{
-						for(int z = 0; z < blocks[x][y].length; z++)
-						{
-							Block b = w.getBlockAt(land.getMinX() + x, y, land.getMinZ() + z);
-							
-							blocks[x][y][z] = new BlockSerializable(b.getTypeId(), b.getData());
-						}
-					}
-				}
-				
-				SchematicSerializable ss = new SchematicSerializable(0, 0, 0, blocks);
-				
-				File file = Config.getFile(Type.LAND_SCHEM, true, land.getId());
-				
-				try(FileOutputStream fileOut = new FileOutputStream(file);
-						ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
-						ObjectOutputStream out = new ObjectOutputStream(streamOut))
-				{
-					out.writeObject(ss);
-					fileOut.write(streamOut.toByteArray());
-				}
-				catch(IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-			
-			return true;
-		}
-		
-		if(args.length == 3 && args[0].equalsIgnoreCase("test"))
-		{
-			Land land = Land.getById(Integer.valueOf(args[1]));
-			OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(args[2]);
-			land.setOwner(op == null ? null : op.getUniqueId());
-			return true;
-		}
+//		if(args.length == 1 && args[0].equalsIgnoreCase("schem"))
+//		{
+//			for(Land land : Land.SET)
+//			{
+//				World w = land.getWorld();
+//				int maxHeight = w.getMaxHeight();
+//				
+//				BlockSerializable[][][] blocks = new BlockSerializable[land.getSize()][maxHeight][land.getSize()];
+//				
+//				for(int x = 0; x < blocks.length; x++)
+//				{
+//					for(int y = 0; y < blocks[x].length; y++)
+//					{
+//						for(int z = 0; z < blocks[x][y].length; z++)
+//						{
+//							Block b = w.getBlockAt(land.getMinX() + x, y, land.getMinZ() + z);
+//							
+//							blocks[x][y][z] = new BlockSerializable(b.getTypeId(), b.getData());
+//						}
+//					}
+//				}
+//				
+//				SchematicSerializable ss = new SchematicSerializable(0, 0, 0, blocks);
+//				
+//				File file = Config.getFile(Type.LAND_SCHEM, true, land.getId());
+//				
+//				try(FileOutputStream fileOut = new FileOutputStream(file);
+//						ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
+//						ObjectOutputStream out = new ObjectOutputStream(streamOut))
+//				{
+//					out.writeObject(ss);
+//					fileOut.write(streamOut.toByteArray());
+//				}
+//				catch(IOException e)
+//				{
+//					e.printStackTrace();
+//				}
+//			}
+//			
+//			return true;
+//		}
+//		
+//		if(args.length == 3 && args[0].equalsIgnoreCase("test"))
+//		{
+//			Land land = Land.getById(Integer.valueOf(args[1]));
+//			OfflinePlayer op = CommonsUtil.getOfflinePlayerIfCached(args[2]);
+//			land.setOwner(op == null ? null : op.getUniqueId());
+//			return true;
+//		}
 		
 		if(args.length == 2 && args[1].equalsIgnoreCase("trust"))
 		{
@@ -469,7 +465,7 @@ public class LandCMD implements TabExecutor, Listener
 				return true;
 			}
 			
-			int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+			int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Main.getInstance(), () ->
 			{
 				MAP.remove(p.getUniqueId());
 			}, 20L * 10L);
@@ -624,7 +620,7 @@ public class LandCMD implements TabExecutor, Listener
 			{
 				Land land = iterator.next();
 				
-				if(land.isPublic())
+				if(land.isPublic() && land.hasOwner())
 				{
 					if(publicCount++ > 0)
 					{
@@ -971,10 +967,13 @@ public class LandCMD implements TabExecutor, Listener
 			{
 				Bukkit.getScheduler().cancelTask(taskId);
 				
-				if(op.isOnline())
+				Bukkit.getScheduler().runTask(Main.getInstance(), () ->
 				{
-					Bukkit.dispatchCommand(op.getPlayer(), "land");
-				}
+					if(op.isOnline())
+					{
+						Bukkit.dispatchCommand(op.getPlayer(), "land");
+					}
+				});
 			}
 		}
 	}

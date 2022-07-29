@@ -1,5 +1,7 @@
 package br.com.acenetwork.craftlandia.manager;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -49,7 +51,11 @@ public class LandData implements Serializable
 	
 	public void setOwner(UUID ownerUUID)
 	{
-		if(this.ownerUUID != (this.ownerUUID = ownerUUID))
+		try
+		{
+			assertEquals(this.ownerUUID, (this.ownerUUID = ownerUUID));
+		}
+		catch(AssertionError e)
 		{
 			Bukkit.broadcastMessage("!=");
 			trustedPlayers = new HashSet<>();

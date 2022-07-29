@@ -225,7 +225,7 @@ public class Land implements Listener
 	
 	public boolean isPublic()
 	{
-		return landData.isPublic();
+		return landData.getOwner() == null || landData.isPublic();
 	}
 	
 	public boolean setPublic(boolean isPublic)
@@ -284,7 +284,7 @@ public class Land implements Listener
 		
 		int maxHeight = w.getMaxHeight();
 		
-		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), new Runnable()
+		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable()
 		{
 			int y = 63;
 			

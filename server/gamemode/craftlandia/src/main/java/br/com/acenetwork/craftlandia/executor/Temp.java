@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -234,6 +235,7 @@ public class Temp implements TabExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
+		Bukkit.broadcastMessage("temp");
 		if(sender instanceof Player)
 		{
 			Player p = (Player) sender;

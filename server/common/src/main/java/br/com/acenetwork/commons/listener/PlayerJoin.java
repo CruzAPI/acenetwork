@@ -33,8 +33,6 @@ public class PlayerJoin implements Listener
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void on(PlayerJoinEvent e)
 	{
-		Bukkit.broadcastMessage("test");
-		
 		Player p = e.getPlayer();
 			
 		File playerFile = CommonsConfig.getFile(Type.PLAYER, true, p.getUniqueId());
@@ -51,11 +49,11 @@ public class PlayerJoin implements Listener
 			ex.printStackTrace();
 		}
 		
-		if(CommonsUtil.hasPermission(p.getUniqueId(), "cmd.admin"))
+		if(CommonsUtil.hasPermission(p, "cmd.admin"))
 		{
 			new CraftCommonAdmin(p);
 		}
-		else if(CommonsUtil.hasPermission(p.getUniqueId(), "cmd.watch"))
+		else if(CommonsUtil.hasPermission(p, "cmd.watch"))
 		{
 			new CraftCommonWatcher(p);
 		}
@@ -125,24 +123,24 @@ public class PlayerJoin implements Listener
 	@EventHandler
 	public void asdads(SocketEvent e)
 	{
-		String[] args = e.getArgs();
-		
-		String cmd = args[0];
-		
-		if(cmd.equals("isbetatester"))
-		{
-			Player p = Bukkit.getPlayer(UUID.fromString(args[1]));
-			CommonPlayer cp = CraftCommonPlayer.get(p);
-			boolean isBetaTester = Boolean.valueOf(args[2]);
-			
-			if(cp != null && isBetaTester)
-			{
-				Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
-				{
-					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex group mod user add " + p.getName());
-					cp.setTag(cp.getBestTag());
-				});
-			}
-		}
+//		String[] args = e.getArgs();
+//		
+//		String cmd = args[0];
+//		
+//		if(cmd.equals("isbetatester"))
+//		{
+//			Player p = Bukkit.getPlayer(UUID.fromString(args[1]));
+//			CommonPlayer cp = CraftCommonPlayer.get(p);
+//			boolean isBetaTester = Boolean.valueOf(args[2]);
+//			
+//			if(cp != null && isBetaTester)
+//			{
+//				Bukkit.getScheduler().runTask(Common.getInstance(), () ->
+//				{
+//					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex group mod user add " + p.getName());
+//					cp.setTag(cp.getBestTag());
+//				});
+//			}
+//		}
 	}
 }

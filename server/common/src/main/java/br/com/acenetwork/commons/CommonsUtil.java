@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.UUID;
@@ -43,6 +44,7 @@ import com.google.common.io.ByteStreams;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
+import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.manager.IdData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -1808,66 +1810,47 @@ public class CommonsUtil
 		}
 	}
 	
-	public static boolean hasPermission(UUID uuid, String perm)
+	public static boolean hasPermission(OfflinePlayer op, String perm)
 	{
-		return true;
-//		perm = perm.replace('.', ':');
-//
-//		File userFile = CommonsConfig.getFile(Type.USER, true, uuid);
-//		YamlConfiguration userConfig = YamlConfiguration.loadConfiguration(userFile);
-//
-//		ConfigurationSection userPermissions = userConfig.getConfigurationSection("permission");
-//
-//		if(userPermissions != null)
-//		{
-//			for(String key : userPermissions.getKeys(false))
-//			{
-//				long value = userConfig.getLong("permission." + key);
-//				boolean valid = value == 0 || value > System.currentTimeMillis();
-//
-//				if(valid && (key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)) || 
-//					perm.equals(key)))
-//				{
-//					return true;
-//				}
-//			}
-//		}
-//		
-//		ConfigurationSection userGroups = userConfig.getConfigurationSection("group");
-//		
-//		if(userGroups != null)
-//		{
-//			for(String key : userGroups.getKeys(false))
-//			{
-//				long value = userConfig.getLong("group." + key);
-//				boolean valid = value == 0 || value > System.currentTimeMillis();
-//
-//				if(valid)
-//				{
-//					File groupFile = CommonsConfig.getFile(Type.GROUP, true, key);
-//					YamlConfiguration groupConfig = YamlConfiguration.loadConfiguration(groupFile);
-//
-//					ConfigurationSection groupPermissions = groupConfig.getConfigurationSection("permission");
-//
-//					if(groupPermissions != null)
-//					{
-//						for(String key1 : groupPermissions.getKeys(false))
-//						{
-//							value = groupConfig.getLong("permisison." + key1);
-//							valid = value == 0 || value > System.currentTimeMillis();
-//							
-//							if(valid && (key1.endsWith("*") && perm.startsWith(key1.substring(0, key1.length() - 1)) || 
-//								perm.equals(key1)))
-//							{
-//								return true;
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//
-//		return false;
+		Permission pex = Permission.getInstance();
+		
+		for(Entry<String, Long> entry : pex.loadUser(op.getUniqueId()).entrySet())
+		{
+			String key = entry.getKey();
+			long value = entry.getValue();
+			
+			if((value == 0 || value - System.currentTimeMillis() > 0L) 
+					&& ((key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)))
+					|| perm.equals(key)))
+			{
+				return true;
+			}
+		}
+		
+		Map<String, Map<String, Long>> gp = pex.getGroupPermission();
+		
+		for(String group : pex.getUserGroupList(op).keySet())
+		{
+			if(!gp.containsKey(group))
+			{
+				continue;
+			}
+			
+			for(Entry<String, Long> entry : gp.get(group).entrySet())
+			{
+				String key = entry.getKey();
+				long value = entry.getValue();
+				
+				if((value == 0 || value - System.currentTimeMillis() > 0L) 
+						&& ((key.endsWith("*") && perm.startsWith(key.substring(0, key.length() - 1)))
+						|| perm.equals(key)))
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	public static boolean permissionSyntaxIsValid(String perm)
@@ -1901,7 +1884,7 @@ public class CommonsUtil
 		out.writeUTF(playerName);
 		out.writeUTF(kickMessage);
 		
-		Bukkit.getServer().sendPluginMessage(Common.getPlugin(), "commons:commons", out.toByteArray());
+		Bukkit.getServer().sendPluginMessage(Common.getInstance(), "commons:commons", out.toByteArray());
 	}
 	
 	public static boolean compareDisplayName(ItemStack i1, ItemStack i2)
@@ -1919,7 +1902,7 @@ public class CommonsUtil
 		out.writeUTF(playerName);
 		out.writeUTF(serverInfo);
 		
-		Bukkit.getServer().sendPluginMessage(Common.getPlugin(), "commons:commons", out.toByteArray());
+		Bukkit.getServer().sendPluginMessage(Common.getInstance(), "commons:commons", out.toByteArray());
 	}
 	
 	public static boolean groupSyntaxIsValid(String group)

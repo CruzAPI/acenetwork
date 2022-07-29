@@ -5,35 +5,18 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
-import org.bukkit.event.hanging.HangingBreakEvent;
-import org.bukkit.event.hanging.HangingPlaceEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 
 import br.com.acenetwork.craftlandia.Main;
 
@@ -54,6 +37,12 @@ public class Farm extends Warp
 			}
 		}
 	
+	}
+	
+	@Override
+	public boolean isSafeZone(Location l)
+	{
+		return false;
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -82,15 +71,15 @@ public class Farm extends Warp
 	
 	private void startTask(LivingEntity entity)
 	{
-		entity.setMetadata("task", new FixedMetadataValue(Main.getPlugin(), 
-				Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
+		entity.setMetadata("task", new FixedMetadataValue(Main.getInstance(), 
+				Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
 			if(entity.isDead() || !entity.hasMetadata("spawner") || !entity.hasMetadata("spawner"))
 			{
 				if(entity.hasMetadata("task"))
 				{
 					Bukkit.getScheduler().cancelTask(entity.getMetadata("task").get(0).asInt());
-					entity.removeMetadata("task", Main.getPlugin());
+					entity.removeMetadata("task", Main.getInstance());
 				}
 				
 				return;
@@ -164,11 +153,11 @@ public class Farm extends Warp
 		
 		Random r = new Random();
 		
-		if(r.nextInt(6) != 0)
-		{
-			e.setCancelled(true);
-			return;
-		}
+//		if(r.nextInt(6) != 0)
+//		{
+//			e.setCancelled(true);
+//			return;
+//		}
 		
 		e.getEntity().setMetadata("spawner", new FixedMetadataValue(Main.getInstance(), e.getSpawner().getLocation()));
 		e.getEntity().setMetadata("spawn", new FixedMetadataValue(Main.getInstance(), e.getLocation()));

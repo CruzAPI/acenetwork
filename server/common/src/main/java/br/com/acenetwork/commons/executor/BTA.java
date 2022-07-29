@@ -35,7 +35,7 @@ public class BTA implements TabExecutor, Listener
 {
 	public BTA()
 	{
-		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Common.getInstance());
 	}
 	
 	@Override

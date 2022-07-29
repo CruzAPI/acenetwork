@@ -112,7 +112,7 @@ public class VipChestGUI extends GUI
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void monitor(InventoryDragEvent e)
 	{
-		Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
+		Bukkit.getScheduler().runTask(Common.getInstance(), () ->
 		{
 			update();
 		});
@@ -126,7 +126,7 @@ public class VipChestGUI extends GUI
 			return;
 		}
 		
-		Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
+		Bukkit.getScheduler().runTask(Common.getInstance(), () ->
 		{
 			update();
 		});

@@ -1,22 +1,20 @@
 package br.com.acenetwork.commons.player;
 
-import java.io.IOException;
 import java.util.Locale;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
 
 import br.com.acenetwork.commons.CommonsHotbar;
 import br.com.acenetwork.commons.CommonsScoreboard;
 import br.com.acenetwork.commons.constants.Tag;
-import br.com.acenetwork.commons.executor.VipChest;
-import br.com.acenetwork.commons.inventory.VipChestGUI;
-import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.inventory.GUI;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 
 public interface CommonPlayer extends Listener
 {
+	boolean isLogged();
+	void setLogged(boolean logged);
 	void reset(boolean clearInventory);
 	boolean hasInvincibility();
 	void setInvincibility(boolean value);

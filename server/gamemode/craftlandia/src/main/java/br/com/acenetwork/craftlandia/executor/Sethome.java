@@ -21,7 +21,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class Sethome implements TabExecutor
 {
 	private static final int MAX_HOME = 3;
-	private static final int VIP_MAX_HOME = 100;
+	private static final int VIP_MAX_HOME = 50;
 	
 	@Override
 	public List<String> onTabComplete(CommandSender arg0, Command arg1, String arg2, String[] arg3)
@@ -99,7 +99,7 @@ public class Sethome implements TabExecutor
 				return true;
 			}
 			
-			int maxHome = MAX_HOME; //TODO
+			int maxHome = cp.hasPermission("vip.sethome") ? VIP_MAX_HOME : MAX_HOME;
 			
 			if(homeMap.size() >= maxHome)
 			{

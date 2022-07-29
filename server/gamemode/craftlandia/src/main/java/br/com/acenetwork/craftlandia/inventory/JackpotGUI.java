@@ -129,7 +129,7 @@ public class JackpotGUI extends GUI
 		
 		targetTimes = 50 + r.nextInt(50);
 		
-		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
+		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
 			if(!inv.equals(p.getOpenInventory().getTopInventory()) && !finished)
 			{
@@ -282,7 +282,7 @@ public class JackpotGUI extends GUI
 					sender.sendMessage("");
 				}
 				
-				taskB = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), new Runnable()
+				taskB = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), new Runnable()
 				{
 					int times = 0;
 					

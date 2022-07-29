@@ -1,34 +1,31 @@
 package br.com.acenetwork.craftlandia.warp;
 
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockMultiPlaceEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
 import br.com.acenetwork.craftlandia.manager.BlockData;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 
 public class Newbie extends Warp
@@ -77,7 +74,7 @@ public class Newbie extends Warp
 					}
 				}
 			}
-		}.runTaskTimer(Main.getPlugin(), 1L, 1L);
+		}.runTaskTimer(Main.getInstance(), 1L, 1L);
 	}
 	
 	private boolean isDay()
@@ -109,6 +106,14 @@ public class Newbie extends Warp
 		return 1024;
 	}
 	
+	@EventHandler
+	public void a(NPCLoadEvent e)
+	{
+		NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "" 
+				+ ChatColor.YELLOW + ChatColor.BOLD + "SKIP PARKOUR");
+		npc.spawn(new Location(w, -1.5D, 69.0D, 2.5D, -135.0F, 0.0F));
+	}
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void entityDamage(EntityDamageEvent e)
 	{
@@ -121,12 +126,6 @@ public class Newbie extends Warp
 		
 		if(!(entity instanceof Player))
 		{
-			return;
-		}
-		
-		if(isSafeZone(entity.getLocation()))
-		{
-			e.setCancelled(true);
 			return;
 		}
 		

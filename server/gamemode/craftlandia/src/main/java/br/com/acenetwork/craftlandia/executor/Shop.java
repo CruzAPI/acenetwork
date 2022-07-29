@@ -1,5 +1,6 @@
 package br.com.acenetwork.craftlandia.executor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -55,13 +56,13 @@ public class Shop implements TabExecutor, Listener
 {
 	public Shop()
 	{
-		Bukkit.getPluginManager().registerEvents(this, Main.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
 	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args)
 	{
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -79,6 +80,12 @@ public class Shop implements TabExecutor, Listener
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		
 		bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		
+		if(!cp.hasPermission("cmd.shop"))
+		{
+			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
+			return true;
+		}
 		
 		String commandLine = "shop ";
 		
@@ -123,7 +130,7 @@ public class Shop implements TabExecutor, Listener
 						extra[0].setColor(ChatColor.GOLD);
 						
 						String currencyName = ChatColor.YELLOW + "(" + bundle.getString("shards") + ")";
-						String key = args.length == 6 ? "inv.price-selector.sell-price-type" : "inv.price-selector.buy-price-type"; 
+						String key = args.length == 7 ? "inv.price-selector.sell-price-type" : "inv.price-selector.buy-price-type"; 
 						new PriceSelector(cp, key, commandLine, currencyName, extra);
 					}
 					else if(currency == Currency.$BTA)
@@ -134,7 +141,7 @@ public class Shop implements TabExecutor, Listener
 						extra[0].setColor(ChatColor.DARK_PURPLE);
 						
 						String currencyName = ChatColor.LIGHT_PURPLE + "($BTA)";
-						String key = args.length == 6 ? "inv.price-selector.sell-price-type" : "inv.price-selector.buy-price-type";
+						String key = args.length == 7 ? "inv.price-selector.sell-price-type" : "inv.price-selector.buy-price-type";
 						new PriceSelector(cp, key, commandLine, currencyName, extra);
 					}
 				}
@@ -514,11 +521,6 @@ public class Shop implements TabExecutor, Listener
 				return;
 			}
 			
-			if(!CommonsUtil.hasPermission(owner, "chestshop"))
-			{
-				return;
-			}
-			
 			if(!(b.getState().getData() instanceof org.bukkit.material.Sign))
 			{
 				return;
@@ -774,7 +776,7 @@ public class Shop implements TabExecutor, Listener
 			ownerBalance -= value;
 			
 			OfflinePlayer op = Bukkit.getOfflinePlayer(owner);
-			
+
 			if(playerBalance <= 0 || ownerBalance <= 0)
 			{
 				c.getInventory().setContents(chestContents);

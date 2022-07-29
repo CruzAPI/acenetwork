@@ -33,6 +33,7 @@ public class Withdraw implements TabExecutor
 {
 	private static final double TAX = 10.0D;
 	private static final Map<UUID, Order> MAP = new HashMap<>();
+	public static final long COOLDOWN_MILLIS = 15L * 24L * 60L * 60L * 1000L;
 	
 	private class Order
 	{
@@ -79,6 +80,16 @@ public class Withdraw implements TabExecutor
 		TextComponent text;
 		
 		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+		
+		long time = cp.getCommonPlayerData().getWithdrawCooldown() - System.currentTimeMillis();
+		
+		if(time > 0L)
+		{
+			text = getCooldownText(time, bundle);
+			p.sendMessage(text.toLegacyText());
+			return true;
+		}
+		
 		try
 		{
 			if(args.length == 0)
@@ -182,6 +193,9 @@ public class Withdraw implements TabExecutor
 					return true;
 				}
 				
+				long oldCooldown = cp.getCommonPlayerData().getWithdrawCooldown();
+				cp.getCommonPlayerData().setWithdrawCooldown(System.currentTimeMillis() + COOLDOWN_MILLIS);
+				
 				final double finalAmount = order.amount - TAX;
 				
 				new Thread(() -> 
@@ -192,8 +206,10 @@ public class Withdraw implements TabExecutor
 					{
 						CommonPlayerData memoryPD = cp.getCommonPlayerData();
 						cloneMemoryPD = (CommonPlayerData) memoryPD.clone();
+						cloneMemoryPD.setWithdrawCooldown(oldCooldown);
 						CommonPlayerData diskPD = new CommonPlayerData(memoryPD);
 						diskPD.setBTA(diskPD.getBTA() - order.amount);
+						diskPD.setWithdrawCooldown(memoryPD.getWithdrawCooldown());
 						
 						memoryPD.setBTA(memoryPD.getBTA() - order.amount);
 						
@@ -214,11 +230,18 @@ public class Withdraw implements TabExecutor
 						
 						try
 						{
-							Runtime.getRuntime().exec(String.format("node %s/reset/withdraw %s %s %s %s", System.getProperty("user.home"),
+							int exitCode = Runtime.getRuntime().exec(String.format("node %s/reset/withdraw %s %s %s %s", System.getProperty("user.home"),
 									Common.getSocketPort(), 
 									-1, 
 									p.getUniqueId(), 
-									finalAmount));
+									finalAmount)).exitValue();
+							
+							if(exitCode == 1)
+							{
+								cp.setCommonPlayerData(cloneMemoryPD);
+								Wallet.messageWalletNotFound(bundle, p);
+								return;
+							}
 							
 							df.setDecimalFormatSymbols(new DecimalFormatSymbols(bundle.getLocale()));
 							
@@ -281,7 +304,7 @@ public class Withdraw implements TabExecutor
 					return true;
 				}
 				
-				int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getPlugin(), () ->
+				int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(Common.getInstance(), () ->
 				{
 					MAP.remove(p.getUniqueId());
 				}, 20L * 10L);
@@ -368,5 +391,46 @@ public class Withdraw implements TabExecutor
 			p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.invalid-number-format"));
 		}
 		return true;
+	}
+	
+	private TextComponent getCooldownText(long time, ResourceBundle bundle)
+	{
+		time += 1000L;
+		long seconds = time / 1000L % 60L;
+		long minutes = time / (60L * 1000L) % 60L;
+		long hours = time / (60L * 60L * 1000L) % 24L;
+		long days = time / (24L * 60L * 60L * 1000L);
+		
+		String d = bundle.getString("commons.words.day").substring(0, 1);
+		String h = bundle.getString("commons.words.hour").substring(0, 1);
+		String m = bundle.getString("commons.words.minute").substring(0, 1);
+		String s = bundle.getString("commons.words.second").substring(0, 1);
+		
+		String msg = "";
+		
+		if(days != 0L)
+		{
+			msg = days + d + " " + hours + h + " " + minutes + m + " " + seconds + s;
+		}
+		else if(hours != 0L)
+		{
+			msg = hours + h + " " + minutes + m + " " + seconds + s;
+		}
+		else if(minutes != 0L)
+		{
+			msg = minutes + m + " " + seconds + s;
+		}
+		else
+		{
+			msg = seconds + s;
+		}
+		
+		TextComponent[] extra = new TextComponent[1];
+		
+		extra[0] = new TextComponent(msg);
+		
+		TextComponent text = Message.getTextComponent(bundle.getString("cmd.withdraw.cooldown"), extra);
+		text.setColor(ChatColor.RED);
+		return text;
 	}
 }

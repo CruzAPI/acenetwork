@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
@@ -34,12 +35,15 @@ import br.com.acenetwork.commons.executor.Give;
 import br.com.acenetwork.commons.executor.Ignore;
 import br.com.acenetwork.commons.executor.Invis;
 import br.com.acenetwork.commons.executor.Invsee;
+import br.com.acenetwork.commons.executor.Login;
 import br.com.acenetwork.commons.executor.MuteCMD;
 import br.com.acenetwork.commons.executor.Mutebroadcast;
 import br.com.acenetwork.commons.executor.Pardon;
 import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.Ping;
+import br.com.acenetwork.commons.executor.Register;
 import br.com.acenetwork.commons.executor.Reply;
+import br.com.acenetwork.commons.executor.Setip;
 import br.com.acenetwork.commons.executor.Specs;
 import br.com.acenetwork.commons.executor.Stop;
 import br.com.acenetwork.commons.executor.TagCMD;
@@ -70,24 +74,14 @@ public class Common extends JavaPlugin
 	private static Common instance;
 	private static JavaPlugin plugin;
 	private static boolean restarting;
-	public static final boolean TEST = !new File(System.getProperty("user.dir")).getParentFile().getName().equals("acenetwork");
 	
-	private Permission permission;
-	//
 	public void onEnable()
 	{
 		instance = this;
 		
 		Locale.setDefault(new Locale("en", "US"));
 		
-		if(TEST)
-		{
-			Bukkit.getConsoleSender().sendMessage("§dServer is in test mode!!!!!!!!!!!!!");
-		}
-		else
-		{
-			Bukkit.getConsoleSender().sendMessage("§aServer is in production!");
-		}
+		Bukkit.getConsoleSender().sendMessage("§aServer is in production!");
 		
 		Bukkit.getConsoleSender().sendMessage("§aListening socket port on " + getSocketPort());
 		
@@ -97,7 +91,7 @@ public class Common extends JavaPlugin
 		Bukkit.getPluginManager().registerEvents(new CustomListener(), this);
 		Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
 		Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
-		Bukkit.getPluginManager().registerEvents(new PlayerChat(), this);
+//		Bukkit.getPluginManager().registerEvents(new PlayerChat(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerDeath(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerJoin(), this);
 		Bukkit.getPluginManager().registerEvents(new PlayerLogin(), this);
@@ -106,7 +100,6 @@ public class Common extends JavaPlugin
 		Bukkit.getPluginManager().registerEvents(new WorldSave(), this);
 		Bukkit.getPluginManager().registerEvents(new SoupListener(), this);
 		
-		permission = new Permission();
 		
 		registerCommand(new AdminCMD(), "admin");
 		registerCommand(new Balance(), "balance", "bal", "points", "coins");
@@ -115,30 +108,33 @@ public class Common extends JavaPlugin
 		registerCommand(new Build(), "build");
 		registerCommand(new BTA(), "bta");
 		registerCommand(new ChatClean(), "chatclean", "cc");
-		registerCommand(new ChatCMD(), "chat");
 		registerCommand(new Deposit(), "deposit");
 		registerCommand(new Give(), "give");
-		registerCommand(new Ignore(), "ignore");
+//		registerCommand(new ChatCMD(), "chat");
+//		registerCommand(new Ignore(), "ignore");
+//		registerCommand(new MuteCMD(), "mute");
+//		registerCommand(new Reply(), "reply", "r");
+//		registerCommand(new Tell(), "tell", "msg", "t", "w", "whisper");
+//		registerCommand(new Unmute(), "unmute");
 		registerCommand(new Invis(), "invis", "v", "vanish");
 		registerCommand(new Invis(), "vis");
 		registerCommand(new Invsee(), "invsee");
 		registerCommand(new Mutebroadcast(), "mutebroadcast");
-		registerCommand(new MuteCMD(), "mute");
 		registerCommand(new Pardon(), "pardon");
-		registerCommand(permission, "permission", "pex", "perm");
+		registerCommand(new Permission(), "permission", "pex", "perm");
 		registerCommand(new Ping(), "ping");
-		registerCommand(new Reply(), "reply", "r");
 		registerCommand(new Specs(), "specs");
+		registerCommand(new Setip(), "setip");
 		registerCommand(new Stop(), "stop");
 		registerCommand(new TagCMD(), "tag");
-		registerCommand(new Tell(), "tell", "msg", "t", "w", "whisper");
 		registerCommand(new Test(), "test");
 		registerCommand(new Tp(), "teleport", "tp");
-		registerCommand(new Unmute(), "unmute");
 		registerCommand(new VipChest(), "vipchest");
 		registerCommand(new WatchCMD(), "watch");
 		registerCommand(new Wallet(), "wallet");
 		registerCommand(new Withdraw(), "withdraw");
+		registerCommand(new Login(), "login");
+		registerCommand(new Register(), "register");
 		
 		for(Player all : Bukkit.getOnlinePlayers())
 		{
@@ -191,7 +187,7 @@ public class Common extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		permission.save();
+		
 	}
 	
 	public static int getSocketPort()
@@ -227,7 +223,7 @@ public class Common extends JavaPlugin
 		}
 	}
 	
-	public static Common getPlugin()
+	public static Common getInstance()
 	{
 		return instance;
 	}

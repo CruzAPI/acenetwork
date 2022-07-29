@@ -21,7 +21,7 @@ public class FallingBlockChecker implements Listener
 	
 	public FallingBlockChecker()
 	{
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getPlugin(), () ->
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
 			Iterator<FallingBlock> iterator = SET.iterator();
 			

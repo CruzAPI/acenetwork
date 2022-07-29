@@ -74,7 +74,7 @@ public class Stop implements TabExecutor
 		Bukkit.getOnlinePlayers().forEach(x -> CommonsUtil.bungeeSendPlayer(x.getName(), "lobby"));
 	 	Bukkit.getWorlds().forEach(x -> x.save());
 		
-	 	Bukkit.getScheduler().runTask(Common.getPlugin(), () ->
+	 	Bukkit.getScheduler().runTask(Common.getInstance(), () ->
 		{
 			Bukkit.shutdown();
 		});

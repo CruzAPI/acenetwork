@@ -31,6 +31,6 @@ public class LocationSerializable implements Serializable
 	
 	public Location getLocation()
 	{
-		return new Location(Bukkit.getWorld(new UUID(mostSigBits, leastSigBits)), x, y, z, pitch, yaw);
+		return new Location(Bukkit.getWorld(new UUID(mostSigBits, leastSigBits)), x, y, z, yaw, pitch);
 	}
 }

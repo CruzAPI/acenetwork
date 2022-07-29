@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.listener;
+package br.com.acenetwork.craftlandia.manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -16,23 +16,35 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import com.google.common.io.ByteStreams;
 
-import br.com.acenetwork.craftlandia.manager.Config;
+import br.com.acenetwork.commons.manager.LocationSerializable;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 
 public class PlayerData implements Serializable
 {
-	private static final long serialVersionUID = -1352599961563097422L;
-	
+	private static final long serialVersionUID = 1610626725796897167L;
+
 	private static final Map<UUID, PlayerData> MAP = new HashMap<>();
 	
+	private LocationSerializable lastLocation;
 	private Map<UUID, int[]> bedHomes;
 	
 	public PlayerData()
 	{
 		bedHomes = new HashMap<>();
+	}
+	
+	public Location getLastLocation()
+	{
+		return lastLocation == null ? null : lastLocation.getLocation();
+	}
+	
+	public void setLastLocation(Location lastLocation)
+	{
+		this.lastLocation = lastLocation == null ? null : new LocationSerializable(lastLocation);
 	}
 	
 	public Map<UUID, int[]> getBedHomes()

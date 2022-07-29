@@ -4,15 +4,21 @@ import static org.bukkit.block.BlockFace.EAST;
 import static org.bukkit.block.BlockFace.NORTH;
 import static org.bukkit.block.BlockFace.SOUTH;
 import static org.bukkit.block.BlockFace.WEST;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,8 +30,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.ContainerBlock;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
+import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Cow;
@@ -34,6 +42,7 @@ import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
@@ -59,6 +68,7 @@ import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
@@ -79,7 +89,11 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -90,26 +104,35 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Directional;
 import org.bukkit.material.Door;
+import org.bukkit.material.MonsterEggs;
 import org.bukkit.material.Rails;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
 import org.bukkit.material.TrapDoor;
 import org.bukkit.material.WoodenStep;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.constants.Tag;
+import br.com.acenetwork.commons.event.PlayerSuccessLoginEvent;
+import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.VipChest;
+import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
 import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
+import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
 import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.Home;
@@ -130,22 +153,28 @@ import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
 import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
-import br.com.acenetwork.craftlandia.listener.PlayerData;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.listener.TestListener;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.LandData;
+import br.com.acenetwork.craftlandia.manager.PlayerData;
 import br.com.acenetwork.craftlandia.warp.Factions;
+import br.com.acenetwork.craftlandia.warp.FactionsNether;
+import br.com.acenetwork.craftlandia.warp.FactionsTheEnd;
 import br.com.acenetwork.craftlandia.warp.Farm;
 import br.com.acenetwork.craftlandia.warp.Newbie;
+import br.com.acenetwork.craftlandia.warp.NewbieNether;
+import br.com.acenetwork.craftlandia.warp.NewbieTheEnd;
 import br.com.acenetwork.craftlandia.warp.Portals;
+import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.citizensnpcs.api.CitizensAPI;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 
@@ -158,79 +187,152 @@ public class Main extends Common implements Listener
 	{
 		instance = this;
 		
-		registerCommand(new Give(), "give");
-		
-		super.onEnable();
-		
-		WorldCreator wc;
-		
-		wc = new WorldCreator("factions");
-		wc.environment(Environment.NORMAL);
-		wc.generateStructures(true);
-		new Factions(wc.createWorld());
-		
-		wc = new WorldCreator("newbie");
-		wc.environment(Environment.NORMAL);
-		wc.generateStructures(true);
-		new Newbie(wc.createWorld());
-		
-		wc = new WorldCreator("testtt");
-		wc.environment(Environment.NORMAL);
-		wc.generateStructures(true);
-		wc.createWorld();
-		
-		wc = new WorldCreator("farm");
-		wc.environment(Environment.THE_END);
-		new Farm(wc.createWorld());
-		
-		wc = new WorldCreator("portals");
-		wc.environment(Environment.THE_END);
-		new Portals(wc.createWorld());
-		
-		wc = new WorldCreator("tutorial");
-		wc.environment(Environment.THE_END);
-		new WarpTutorial(wc.createWorld());
-		
-		wc = new WorldCreator("jackpot");
-		wc.environment(Environment.NORMAL);
-		new WarpJackpot(wc.createWorld());
-		
-		wc = new WorldCreator("oldworld");
-		new WarpLand(wc.createWorld());
-		
-		Bukkit.getWorlds().stream().forEach(x -> x.setWeatherDuration(0));
-		
-		getServer().getPluginManager().registerEvents(this, this);
-		getServer().getPluginManager().registerEvents(new PlayerMode(), this);
-		getServer().getPluginManager().registerEvents(new RandomItem(), this);
-		getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
-		getServer().getPluginManager().registerEvents(new TestListener(), this);
-		
-		registerCommand(new Temp(), "temp");
-		
-		registerCommand(new ItemInfo(), "iteminfo");
-		registerCommand(new Jackpot(), "jackpot");
-		registerCommand(new Playtime(), "playtime");
-		registerCommand(new Portal(), "portal");
-		registerCommand(new Price(), "price");
-		registerCommand(new Spawn(), "spawn");
-		registerCommand(new Sell(), "sell");
-		registerCommand(new Sellall(), "sellall");
-		registerCommand(new Shop(), "shop");
-		registerCommand(new ShopSearch(), "shopsearch");
-		
-		registerCommand(new LandCMD(), "land");
-		
-		registerCommand(new Home(), "home");
-		registerCommand(new Sethome(), "sethome");
-		registerCommand(new Delhome(), "delhome");
-		registerCommand(new Visit(), "visit");
+		try
+		{
+			WorldCreator wc;
+			
+			wc = new WorldCreator("world");
+			wc.environment(Environment.NORMAL);
+			wc.generateStructures(true);
+			new Factions(wc.createWorld());
+			
+			wc = new WorldCreator("world_nether");
+			wc.environment(Environment.NETHER);
+			wc.generateStructures(true);
+			new FactionsNether(wc.createWorld());
+			
+			wc = new WorldCreator("world_the_end");
+			wc.environment(Environment.THE_END);
+			wc.generateStructures(true);
+			new FactionsTheEnd(wc.createWorld());
+			
+			wc = new WorldCreator("newbie");
+			wc.environment(Environment.NORMAL);
+			wc.generateStructures(true);
+			new Newbie(wc.createWorld());
+			
+			wc = new WorldCreator("newbie_nether");
+			wc.environment(Environment.NETHER);
+			wc.generateStructures(true);
+			new NewbieNether(wc.createWorld());
+			
+			wc = new WorldCreator("newbie_the_end");
+			wc.environment(Environment.THE_END);
+			wc.generateStructures(true);
+			new NewbieTheEnd(wc.createWorld());
+			
+			wc = new WorldCreator("farm");
+			wc.environment(Environment.THE_END);
+			new Farm(wc.createWorld());
+			
+			wc = new WorldCreator("portals");
+			wc.environment(Environment.THE_END);
+			new Portals(wc.createWorld());
+			
+			wc = new WorldCreator("tutorial");
+			wc.environment(Environment.THE_END);
+			new WarpTutorial(wc.createWorld());
+			
+			wc = new WorldCreator("jackpot");
+			wc.environment(Environment.NORMAL);
+			new WarpJackpot(wc.createWorld());
+			
+			wc = new WorldCreator("land");
+			new WarpLand(wc.createWorld());
+			
+			registerCommand(new Give(), "give");
+			
+			super.onEnable();
+			
+			getServer().getPluginManager().registerEvents(this, this);
+			getServer().getPluginManager().registerEvents(new PlayerMode(), this);
+			getServer().getPluginManager().registerEvents(new RandomItem(), this);
+			getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
+			getServer().getPluginManager().registerEvents(new TestListener(), this);
+			
+			registerCommand(new Temp(), "temp");
+			
+			registerCommand(new ItemInfo(), "iteminfo");
+			registerCommand(new Jackpot(), "jackpot");
+			registerCommand(new Playtime(), "playtime");
+			registerCommand(new Portal(), "portal");
+			registerCommand(new Price(), "price");
+			registerCommand(new Spawn(), "spawn");
+			registerCommand(new Sell(), "sell");
+			registerCommand(new Sellall(), "sellall");
+			registerCommand(new Shop(), "shop");
+			registerCommand(new ShopSearch(), "shopsearch");
+			
+			registerCommand(new LandCMD(), "land");
+			
+			registerCommand(new Home(), "home");
+			registerCommand(new Sethome(), "sethome");
+			registerCommand(new Delhome(), "delhome");
+			registerCommand(new Visit(), "visit");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			Bukkit.shutdown();
+		}
 	}
 	
 	@Override
 	public void onDisable()
 	{
 		super.onDisable();
+	}
+	
+	@EventHandler
+	public void a(PlayerQuitEvent e)
+	{
+		Player p = e.getPlayer();
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		if(!cp.isLogged())
+		{
+			return;
+		}
+		
+		PlayerData data = PlayerData.load(p.getUniqueId());
+		
+		data.setLastLocation(p.getLocation());
+	}
+	
+	@EventHandler
+	public void a(PlayerSuccessLoginEvent e)
+	{
+		Player p = e.getPlayer();
+		PlayerData data = PlayerData.load(p.getUniqueId());
+		
+		Location last = data.getLastLocation();
+		
+		if(last == null)
+		{
+			WarpTutorial tutorial = Warp.getInstance(WarpTutorial.class);
+			p.teleport(tutorial.getSpawnLocation());
+		}
+		else
+		{
+			p.teleport(last);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOW)
+	public void a(PlayerJoinEvent e)
+	{
+		Player p = e.getPlayer();
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		if(cp.isLogged())
+		{
+			return;
+		}
+		
+		Warp warp = Warp.getByWorld(p.getWorld());
+		
+		Location l = Optional.ofNullable(warp.getSpawnLocation()).orElse(new Location(p.getWorld(), 0.5D, 69.0D, 0.5D, 0.0F, 0.0F));
+		p.teleport(l);
 	}
 	
 	@EventHandler
@@ -267,13 +369,29 @@ public class Main extends Common implements Listener
 		{
 			new BukkitRunnable()
 			{
+				private int ticks = 0;
+				
 				@Override
 				public void run()
 				{
-					CitizensAPI.getNPCRegistry().deregisterAll();
-					Bukkit.getConsoleSender().sendMessage("deregistering all!");
+					if(ticks > 60 * 20)
+					{
+						Bukkit.getPluginManager().callEvent(new NPCLoadEvent());
+						cancel();
+						return;
+					}
+					
+					if(CitizensAPI.getNPCRegistry().iterator().hasNext())
+					{
+						CitizensAPI.getNPCRegistry().deregisterAll();
+						Bukkit.getPluginManager().callEvent(new NPCLoadEvent());
+						cancel();
+						return;
+					}
+					
+					ticks++;
 				}
-			}.runTaskLater(this, 100L);
+			}.runTaskTimer(this, 0L, 1L);
 		}
 	}
 	
@@ -285,8 +403,16 @@ public class Main extends Common implements Listener
 			return;
 		}
 		
+		for(Player p : Bukkit.getOnlinePlayers())
+		{
+			PlayerData data = PlayerData.load(p.getUniqueId());
+			
+			data.setLastLocation(p.getLocation());
+		}
+		
 		PlayerData.save();
 		LandData.save();
+		Permission.getInstance().save();
 		VipChest.getInstance().save();
 		Home.getInstance().save();
 		Portal.getInstance().save();
@@ -395,6 +521,7 @@ public class Main extends Common implements Listener
 		e.setCancelled(true);
 	}
 	
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void breakNaturallyOnBlockPhysics(BlockPhysicsEvent e)
 	{
@@ -956,6 +1083,54 @@ public class Main extends Common implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void changeSpawner(PlayerInteractEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		ItemStack item = e.getItem();
+		Block b = e.getClickedBlock();
+		
+		if(b == null || item == null || item.getType() != Material.MONSTER_EGG || b.getType() != Material.MOB_SPAWNER)
+		{
+			return;
+		}
+		
+		e.setCancelled(true);
+		
+		EntityType entityType = EntityType.fromId(item.getDurability());
+		CreatureSpawner spawner = (CreatureSpawner) b.getState();
+		
+		if(spawner.getSpawnedType() == entityType)
+		{
+			return;
+		}
+		
+		spawner.setSpawnedType(entityType);
+		
+		if(spawner.update())
+		{
+			if(p.getGameMode() != GameMode.CREATIVE)
+			{
+				item.setAmount(item.getAmount() - 1);
+				
+				if(item.getAmount() <= 0)
+				{
+					p.setItemInHand(null);
+				}
+			}
+			
+			Rarity itemRarity = Optional.ofNullable(Util.getRarity(item)).orElse(Rarity.COMMON);
+			BlockData data = Optional.ofNullable(Util.readBlock(b)).orElse(new BlockData());
+			Rarity blockRarity = Optional.ofNullable(data.getRarity()).orElse(Util.getRarity(b.getWorld()));
+			
+			Rarity worst = Util.getWorstRarity(itemRarity, blockRarity);
+			
+			data.setRarity(worst);
+			Util.writeBlock(b, data);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void ab(PlayerInteractEvent e)
 	{
 		Player p = e.getPlayer();
@@ -963,7 +1138,7 @@ public class Main extends Common implements Listener
 		ItemStack item = e.getItem();
 		Block b = e.getClickedBlock();
 		
-		if(b == null || item == null || item.getType() != Material.MONSTER_EGG)
+		if(b == null || item == null || item.getType() != Material.MONSTER_EGG || b.getType() == Material.MOB_SPAWNER)
 		{
 			return;
 		}
@@ -1496,24 +1671,6 @@ public class Main extends Common implements Listener
 		}
 	}
 	
-	@EventHandler
-	public void a(PlayerInteractEvent e)
-	{
-		Block b = e.getClickedBlock();
-		
-		if(b == null)
-		{
-			return;
-		}
-		
-		BlockData data = Util.readBlock(b);
-		
-		if(e.getPlayer().isSneaking())
-		{
-			Bukkit.broadcastMessage(data + "");
-		}
-	}
-	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void mushroom(PlayerInteractEntityEvent e)
 	{
@@ -1567,21 +1724,248 @@ public class Main extends Common implements Listener
 		Util.writeBlock(b, Util.readBlock(source));
 	}
 	
-	@EventHandler
-	public void a(BlockBurnEvent e)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void a(EntityDamageEvent e)
 	{
-		e.setCancelled(true);
+		if(!(e.getEntity() instanceof Player))
+		{
+			return;
+		}
+		
+		Player p = (Player) e.getEntity();
+		
+		if(p.getHealth() - e.getFinalDamage() <= 0.0D)
+		{
+			for(int i = 0; i < p.getInventory().getSize(); i++)
+			{
+				if(activateVIP(p, i))
+				{
+					e.setCancelled(true);
+					p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20 * 5, 2));
+					p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 5, 2));
+					break;
+				}
+			}
+		}
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void a(BlockPlaceEvent e)
+	public boolean activateVIP(Player p, int slot)
 	{
-		Block b = e.getBlock();
+		ItemStack item = p.getInventory().getItem(slot);
+		List<UUID> list = CommonsUtil.getHiddenUUIDs(item);
 		
-//		if(b.getType() == Material.LEAVES_2)
-//		{
-//			b.setData((byte) (e.getItemInHand().getData().getData() + 4));
-//		}
+		VipChest vipChest = VipChest.getInstance();
+		
+		if(list.size() != 2 || !list.get(0).equals(vipChest.getUUID()))
+		{
+			return false;
+		}
+		
+		int amount = item.getAmount();
+		
+		if(amount <= 0)
+		{
+			return false;
+		}
+		
+		boolean isValid = vipChest.getValidVips().remove(list.get(1));
+		item.setAmount(--amount);
+		
+		if(amount <= 0 || !isValid)
+		{
+			p.getInventory().setItem(slot, null);
+		}
+		
+		if(!isValid)
+		{
+			return false;
+		}
+		
+		List<CommandSender> senders = new ArrayList<>(Bukkit.getOnlinePlayers());
+		senders.add(Bukkit.getConsoleSender());
+		
+		TextComponent[] extra = new TextComponent[1];
+		
+		extra[0] = new TextComponent(p.getDisplayName());
+		
+		for(CommandSender sender : senders)
+		{
+			ResourceBundle bundle = ResourceBundle.getBundle("message");
+			
+			TextComponent text = Message.getTextComponent(bundle.getString("broadcast.vip-activated"), extra);
+			text.setColor(ChatColor.GOLD);
+			
+			sender.sendMessage("");
+			sender.sendMessage(text.toLegacyText());
+			sender.sendMessage("");
+		}
+		
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex group vip user add +" + (30L * 24L * 60L * 60L));
+		
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		cp.setTag(Tag.VIP);
+		
+		double shards = 10000.0D;
+		cp.setBalance(cp.getBalance() + shards);
+		
+		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
+		
+		p.sendMessage(ChatColor.DARK_GREEN + "(+" + df.format(shards) + " SHARDS)");
+		
+		p.setFallDistance(-256.0F);
+		
+		PotionEffect resistance = null;
+		
+		for(PotionEffect effects : p.getActivePotionEffects())
+		{
+			if(effects.getType() == PotionEffectType.DAMAGE_RESISTANCE)
+			{
+				resistance = effects;
+				break;
+			}
+		}
+		
+		p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1, 5));
+		p.getWorld().createExplosion(p.getLocation(), 6.0F);
+		p.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
+		
+		if(resistance != null)
+		{
+			p.addPotionEffect(resistance);
+		}
+		
+		Firework f = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+		FireworkMeta fireworkMeta = f.getFireworkMeta();
+		
+		fireworkMeta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(Color.GRAY).build());
+		fireworkMeta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE).withColor(Color.AQUA).build());
+		fireworkMeta.setPower(1);
+		
+		List<ItemStack> commonItems = new ArrayList<ItemStack>();
+		
+		ItemStack helmet = new ItemStack(Material.DIAMOND_HELMET);
+		ItemStack chestplate = new ItemStack(Material.DIAMOND_CHESTPLATE);
+		ItemStack leggings = new ItemStack(Material.DIAMOND_LEGGINGS);
+		ItemStack boots = new ItemStack(Material.DIAMOND_BOOTS);
+		
+		commonItems.add(helmet);
+		commonItems.add(chestplate);
+		commonItems.add(leggings);
+		commonItems.add(boots);
+		
+		commonItems.forEach(x -> 
+		{
+			x.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
+			x.addEnchantment(Enchantment.DURABILITY, 3);
+		});
+		
+		ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
+		
+		sword.addEnchantment(Enchantment.DAMAGE_ALL, 2);
+		sword.addEnchantment(Enchantment.DURABILITY, 3);
+		
+		commonItems.add(sword);
+		
+		ItemStack[] tools = new ItemStack[]
+		{
+			new ItemStack(Material.DIAMOND_PICKAXE),	
+			new ItemStack(Material.DIAMOND_AXE),	
+			new ItemStack(Material.DIAMOND_SPADE),	
+		};
+		
+		for(ItemStack tool : tools)
+		{
+			tool.addEnchantment(Enchantment.DIG_SPEED, 2);
+			tool.addEnchantment(Enchantment.DURABILITY, 3);
+			
+			commonItems.add(tool);
+		}
+		
+		commonItems.add(new ItemStack(Material.GOLDEN_APPLE, 2, (short) 1));
+		commonItems.add(new ItemStack(Material.GRILLED_PORK, 32));
+		
+		Random r = new Random();
+		
+		List<ItemStack> rareItems = new ArrayList<ItemStack>();
+		
+		if(r.nextInt(10) < 4)
+		{
+			rareItems.add(new ItemStack(Material.MOB_SPAWNER));
+			
+			short[] array = new short[] {50, 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 65,
+					66, 67, 68, 90, 91, 92, 93, 94, 95, 96, 98, 100, 101, 120};
+			
+			rareItems.add(new ItemStack(Material.MONSTER_EGG, 1, array[r.nextInt(array.length)]));
+		}
+		
+		commonItems.forEach(x -> Util.setCommodity(x, Rarity.COMMON));
+		rareItems.forEach(x -> Util.setCommodity(x, Rarity.RARE));
+		
+		if(p.getInventory().getHelmet() == null)
+		{
+			p.getInventory().setHelmet(helmet);
+			commonItems.remove(helmet);
+		}
+		
+		if(p.getInventory().getChestplate() == null)
+		{
+			p.getInventory().setChestplate(chestplate);
+			commonItems.remove(chestplate);
+		}
+		
+		if(p.getInventory().getLeggings() == null)
+		{
+			p.getInventory().setLeggings(leggings);
+			commonItems.remove(leggings);
+		}
+		
+		if(p.getInventory().getBoots() == null)
+		{
+			p.getInventory().setBoots(boots);
+			commonItems.remove(boots);
+		}
+		
+		List<ItemStack> items = new ArrayList<>();
+		
+		items.addAll(commonItems);
+		items.addAll(rareItems);
+		
+		for(ItemStack itemStack : commonItems)
+		{
+			for(ItemStack drops : p.getInventory().addItem(itemStack).values())
+			{
+				CommonsUtil.dropItem(p, drops);
+				continue;
+			}
+		}
+		
+		f.setFireworkMeta(fireworkMeta);
+		
+		return true;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void a(PlayerTeleportEvent e)
+	{
+		if(e.getCause() == TeleportCause.COMMAND)
+		{
+			return;
+		}
+		
+		if(e.getFrom().getWorld().getName().contains("world") ||
+				!e.getTo().getWorld().getName().contains("world"))
+		{
+			return;
+		}
+		
+		Player p = e.getPlayer();
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		if(p.getUniqueId().version() == 3 && !cp.hasPermission("raid.access"))
+		{
+			e.setCancelled(true);
+		}
 	}
 	
 	@EventHandler
@@ -1660,7 +2044,7 @@ public class Main extends Common implements Listener
 			}
 		});
 	}
-
+	
 	public static Main getInstance()
 	{
 		return instance;

@@ -31,7 +31,7 @@ public abstract class CommonsScoreboard implements Listener
 		
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 		
-		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Common.getInstance());
 	}
 	
 	protected void setScore(int score)

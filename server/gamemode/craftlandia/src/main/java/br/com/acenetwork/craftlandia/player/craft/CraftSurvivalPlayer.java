@@ -32,9 +32,9 @@ import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.listener.PlayerData;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.ChannelCommand;
+import br.com.acenetwork.craftlandia.manager.PlayerData;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import net.md_5.bungee.api.ChatColor;
@@ -281,7 +281,6 @@ public class CraftSurvivalPlayer extends CraftCommonPlayer implements SurvivalPl
 		
 		if(CommonsUtil.isBedObstructed(b))
 		{
-			p.sendMessage("BED OBSTRUCTED OR NOT FOUND!");
 			e.setRespawnLocation(warp.getSpawnLocation());
 			setInvincibility(true);
 			setPVPInvincibility(true);
@@ -306,8 +305,6 @@ public class CraftSurvivalPlayer extends CraftCommonPlayer implements SurvivalPl
 		{
 			return;
 		}
-		
-		Bukkit.broadcastMessage(bed.getX() + " " + bed.getY() + " " + bed.getZ());
 		
 		BlockData data = Optional.ofNullable(Util.readBlock(bed)).orElse(new BlockData());
 		Set<UUID> bedPlayers = Optional.ofNullable(data.getBed()).orElse(data.setBed(new HashSet<>()));

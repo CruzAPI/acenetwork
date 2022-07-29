@@ -30,7 +30,7 @@ public class Wallet implements TabExecutor, Listener
 	
 	public Wallet()
 	{
-		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Common.getInstance());
 	}
 	
 	@Override

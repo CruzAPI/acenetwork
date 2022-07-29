@@ -4,54 +4,25 @@ import static br.com.acenetwork.craftlandia.Rarity.COMMON;
 import static br.com.acenetwork.craftlandia.Rarity.LEGENDARY;
 import static br.com.acenetwork.craftlandia.Rarity.RARE;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
-import org.bukkit.metadata.FixedMetadataValue;
 
-import com.google.common.io.ByteStreams;
-
-import br.com.acenetwork.commons.manager.CommonsConfig;
-import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 import br.com.acenetwork.craftlandia.manager.BlockData;
-import br.com.acenetwork.craftlandia.manager.BreakReason;
-import br.com.acenetwork.craftlandia.manager.ChunkLocation;
-import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.warp.Warp;
 
 public class Util
@@ -60,12 +31,11 @@ public class Util
 	{
 		switch(w.getName())
 		{
-		case "world":
-		case "oldworld":
+		case "land":
 			return LEGENDARY;
-		case "factions":
-		case "factions_nether":
-		case "factions_the_end":
+		case "world":
+		case "world_nether":
+		case "world_the_end":
 			return RARE;
 		default:
 			return COMMON;
@@ -203,17 +173,6 @@ public class Util
 		byte z = (byte) Math.abs(c.getZ() * 16 - b.getZ());
 		
 		return coordsToShort(new byte[] {x, y, z});
-	}
-	
-	private static byte[] getChunkBlockCoords(short s)
-	{
-		byte[] b = toByteArray(s);
-		
-		byte y = b[0];
-		byte x = (byte) (b[1] >> 4 & 0xF);
-		byte z = (byte) (b[1] & 0xF);
-		
-		return new byte[] {x, y, z};
 	}
 	
 	private static short coordsToShort(byte[] coords)
@@ -480,28 +439,6 @@ public class Util
 		
 		Bukkit.broadcastMessage("G");
 		return true;
-	}
-	
-	private static boolean containsItemTag(ItemStack item, ItemTag tag)
-	{
-		ItemMeta meta = item.getItemMeta();
-		
-		List<String> lore = new ArrayList<>();
-		
-		if(meta.hasLore())
-		{
-			lore = meta.getLore();
-		}
-		
-		for(String line : lore)
-		{
-			if(ItemTag.getByTag(line) == tag)
-			{
-				return true;
-			}
-		}
-		
-		return false;
 	}
 	
 	public static Set<Property> getProperties(ItemStack item)

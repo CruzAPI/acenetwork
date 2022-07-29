@@ -96,7 +96,7 @@ public class CustomAnvil extends GUI
 					return;
 				}
 			}
-		}.runTaskTimer(Main.getPlugin(), 0L, 1L).getTaskId();
+		}.runTaskTimer(Main.getInstance(), 0L, 1L).getTaskId();
 		
 		ItemMeta meta;
 		
@@ -191,7 +191,7 @@ public class CustomAnvil extends GUI
 			return;
 		}
 		
-		Bukkit.getScheduler().runTask(Main.getPlugin(), () ->
+		Bukkit.getScheduler().runTask(Main.getInstance(), () ->
 		{
 			refresh();
 		});
@@ -210,7 +210,7 @@ public class CustomAnvil extends GUI
 			return;
 		}
 		
-		Bukkit.getScheduler().runTask(Main.getPlugin(), () ->
+		Bukkit.getScheduler().runTask(Main.getInstance(), () ->
 		{
 			refresh();
 		});

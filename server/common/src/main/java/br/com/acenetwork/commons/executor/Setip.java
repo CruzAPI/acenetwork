@@ -41,7 +41,7 @@ public class Setip implements TabExecutor, Listener
 {
 	public Setip()
 	{
-		Bukkit.getPluginManager().registerEvents(this, Common.getPlugin());
+		Bukkit.getPluginManager().registerEvents(this, Common.getInstance());
 	}
 	
 	@Override

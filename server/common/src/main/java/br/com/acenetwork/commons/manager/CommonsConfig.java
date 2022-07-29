@@ -39,66 +39,66 @@ public class CommonsConfig
 		switch(type)
 		{
 		case ITEM_VIP_UUID:
-			file = new File(Common.getPlugin().getConfigFolder() + "/special_items", "vip_uuid.dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/special_items", "vip_uuid.dat");
 			break;
 		case LINKS:
-			file = new File(Common.getPlugin().getDataFolder(), "links.yml");
+			file = new File(Common.getInstance().getDataFolder(), "links.yml");
 			break;
 		case PLAYER_DATA:
-			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/users/" + args[0], "user.dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/player_data/users/" + args[0], "user.dat");
 			break;
 		case PLAYERS_DATA:
-			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/", "users.dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/player_data/", "users.dat");
 			break;
 		case PLAYER_PERMISSION:
-			file = new File(Common.getPlugin().getConfigFolder() + "/player_data/" + args[0], "permisison.dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/player_data/" + args[0], "permisison.dat");
 		case CONFIG:
-			file = new File(Common.getPlugin().getConfigFolder(), "config.yml");
+			file = new File(Common.getInstance().getConfigFolder(), "config.yml");
 			break;
 		case CHEST_VIP:
-			file = new File(Common.getPlugin().getConfigFolder() + "/chest_vip", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/chest_vip", args[0] + ".yml");
 			break;
 		case ACTIVATED_VIPS:
-			file = new File(Common.getPlugin().getConfigFolder(), "activated_vips.dat");
+			file = new File(Common.getInstance().getConfigFolder(), "activated_vips.dat");
 			break;
 		case ITEM_INFO:
-			file = new File(Common.getPlugin().getConfigFolder() + "/item_info", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/item_info", args[0] + ".yml");
 			break;
 		case ITEM_INFO_FOLDER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/item_info");
+			file = new File(Common.getInstance().getConfigFolder() + "/item_info");
 			break;
 		case WHITELISTED_IP:
-			file = new File(Common.getPlugin().getConfigFolder(), "whitelisted_ips.yml");
+			file = new File(Common.getInstance().getConfigFolder(), "whitelisted_ips.yml");
 			break;
 		case DATABASE:
-			file = new File(Common.getPlugin().getConfigFolder(), "database.yml");
+			file = new File(Common.getInstance().getConfigFolder(), "database.yml");
 			break;
 		case MESSAGE:
-			file = new File(Common.getPlugin().getConfigFolder() + "/messages", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/messages", args[0] + ".yml");
 			break;
 		case MUTED_PLAYERS:
-			file = new File(Common.getPlugin().getConfigFolder() + "/muted-players", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/muted-players", args[0] + ".yml");
 			break;
 		case BANNED_IPS:
-			file = new File(Common.getPlugin().getConfigFolder() + "/banned-ips", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/banned-ips", args[0] + ".yml");
 			break;
 		case BANNED_PLAYERS:
-			file = new File(Common.getPlugin().getConfigFolder() + "/banned-players", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/banned-players", args[0] + ".yml");
 			break;
 		case GROUPS_DAT:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions", "groups.dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/permissions", "groups.dat");
 			break;
 		case USERS_DAT:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions", "users.dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/permissions", "users.dat");
 			break;
 		case USER_DAT:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users", args[0] + ".dat");
+			file = new File(Common.getInstance().getConfigFolder() + "/permissions/users", args[0] + ".dat");
 			break;
 		case USERS_FOLDER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/permissions/users");
+			file = new File(Common.getInstance().getConfigFolder() + "/permissions/users");
 			break;
 		case PLAYER:
-			file = new File(Common.getPlugin().getConfigFolder() + "/players", args[0] + ".yml");
+			file = new File(Common.getInstance().getConfigFolder() + "/players", args[0] + ".yml");
 			break;
 		default:
 			return null;
