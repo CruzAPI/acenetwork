@@ -304,7 +304,7 @@ public class JackpotGUI extends GUI
 			}
 			else if(CommonsUtil.containsUUID(item, Jackpot.$BTA_UUID))
 			{
-				double bta = bet * 0.002D * item.getAmount();
+				double bta = bet * Jackpot.BTA_BET_MULTIPLIER * item.getAmount();
 				
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - Jackpot.$BTA_TO_SHARDS * bta);
 				cp.setBTA(cp.getBTA() + bta);

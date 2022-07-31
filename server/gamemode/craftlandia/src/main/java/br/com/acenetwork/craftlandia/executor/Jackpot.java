@@ -63,6 +63,7 @@ public class Jackpot implements TabExecutor, Listener
 	public static final int $BTA_TO_SHARDS = 200;
 	
 	public static final Map<Byte, Integer> COAL_MAP = new LinkedHashMap<>();
+	public static final double BTA_BET_MULTIPLIER = 0.002D;
 	
 	public Jackpot()
 	{
@@ -281,7 +282,7 @@ public class Jackpot implements TabExecutor, Listener
 			multiplier = 0.1D;
 			break;
 		case NETHER_STAR:
-			multiplier = 0.001D;
+			multiplier = BTA_BET_MULTIPLIER;
 			break;
 		default:
 			return 0.0D;
