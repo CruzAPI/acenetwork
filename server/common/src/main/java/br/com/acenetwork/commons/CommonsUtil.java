@@ -2224,6 +2224,11 @@ public class CommonsUtil
 	
 	public static boolean isInteractable(Material type, short data)
 	{
+		if(type.name().contains("DOOR"))
+		{
+			return true;
+		}
+		
 		switch(type)
 		{
 		case CHEST:

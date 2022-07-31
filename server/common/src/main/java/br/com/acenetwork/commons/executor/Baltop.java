@@ -50,7 +50,7 @@ public class Baltop implements TabExecutor
 			
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
 			
-			p.sendMessage(ChatColor.DARK_GRAY + "============" + ChatColor.DARK_GREEN + ChatColor.BOLD + " BALTOP " + ChatColor.DARK_GRAY + "============");
+			sender.sendMessage(ChatColor.DARK_GRAY + "============" + ChatColor.DARK_GREEN + ChatColor.BOLD + " BALTOP " + ChatColor.DARK_GRAY + "============");
 			
 			for(int i = 0; balTop.hasNext() && i < 10; i++)
 			{
@@ -63,7 +63,7 @@ public class Baltop implements TabExecutor
 				sender.sendMessage((i + 1) + "º " + displayName + " " + ChatColor.YELLOW + df.format(data.getBalance()) + " SHARDS");
 			}
 			
-			p.sendMessage(ChatColor.DARK_GRAY + "=================================");
+			sender.sendMessage(ChatColor.DARK_GRAY + "=================================");
 		}
 		else
 		{

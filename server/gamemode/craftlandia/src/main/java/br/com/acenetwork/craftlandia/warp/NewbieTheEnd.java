@@ -36,7 +36,7 @@ public class NewbieTheEnd extends Warp
 	@Override
 	public boolean isSpawnProtection(Location l)
 	{
-		return Math.abs(l.getBlockX()) < 128 && Math.abs(l.getBlockZ() + CENTER_Z) < 128;
+		return Math.abs(l.getBlockX()) < 128 && Math.abs(l.getBlockZ() - CENTER_Z) < 128;
 	}
 	
 	@Override
@@ -60,7 +60,7 @@ public class NewbieTheEnd extends Warp
 	@Override
 	public boolean isSafeZone(Location l)
 	{
-		return Math.abs(l.getBlockX()) <= 65 && Math.abs(l.getBlockZ() +  + CENTER_Z) <= 65;
+		return Math.abs(l.getBlockX()) <= 65 && Math.abs(l.getBlockZ() - CENTER_Z) <= 65;
 	}
 	
 	@Override

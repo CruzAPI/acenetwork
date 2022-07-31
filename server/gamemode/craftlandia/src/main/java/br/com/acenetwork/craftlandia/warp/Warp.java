@@ -67,6 +67,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldSaveEvent;
@@ -131,7 +132,7 @@ public abstract class Warp implements Listener
 		
 		if(b != null && CommonsUtil.isInteractable(b.getType()))
 		{
-			
+			e.setCancelled(isSpawnProtection(b.getLocation()));
 		}
 		else if(item != null && item.getType() == Material.BOAT && b != null)
 		{
@@ -630,6 +631,19 @@ public abstract class Warp implements Listener
 		}
 		
 		e.setCancelled(isSpawnProtection(b.getLocation()));
+	}
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void cancelEnderpearl(PlayerTeleportEvent e)
+	{
+		if(e.getTo().getWorld() != w)
+		{
+			return;
+		}
+		
+		if(isSafeZone(e.getTo()) && e.getCause() == TeleportCause.ENDER_PEARL)
+		{
+			e.setCancelled(true);
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
