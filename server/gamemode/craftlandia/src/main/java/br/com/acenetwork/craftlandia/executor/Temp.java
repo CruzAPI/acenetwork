@@ -32,12 +32,12 @@ import net.md_5.bungee.api.ChatColor;
 
 public class Temp implements TabExecutor
 {
-	private static final double HIGHEST = 200.0D;
-	private static final double HIGH = 100.0D;
-	private static final double NORMAL = 50.0D;
-	private static final double LOW = 25.0D;
-	private static final double LOWEST = 10.0D;
-	private static final double MEME = 5.0D;
+	private static final double HIGHEST = 200.0D * 20.0D;
+	private static final double HIGH = 100.0D * 20.0D;
+	private static final double NORMAL = 50.0D * 20.0D;
+	private static final double LOW = 25.0D * 20.0D;
+	private static final double LOWEST = 10.0D * 20.0D;
+	private static final double MEME = 5.0D * 20.0D;
 	
 	public Temp()
 	{
@@ -235,33 +235,22 @@ public class Temp implements TabExecutor
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
-		Bukkit.broadcastMessage("temp");
 		if(sender instanceof Player)
 		{
 			Player p = (Player) sender;
 			CommonPlayer cp = CraftCommonPlayer.get(p);
 			
-			if(args.length == 1)
+			if(!cp.hasPermission("cmd.temp"))
 			{
-				if(args[0].equalsIgnoreCase("land"))
-				{
-					NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "" 
-							+ ChatColor.YELLOW + ChatColor.BOLD + "SKIP PARKOUR");
-					npc.spawn(new Location(p.getWorld(), -1.5D, 69.0D, 2.5D, -135.0F, 0.0F));
-					return true;
-				}
-				
-				NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, "" + ChatColor.BOLD + "CLICK TO PLAY");
-				npc.spawn(new Location(p.getWorld(), 0.5D, 83.0D, 34.0D, 180.0F, 0.0F));
 				return true;
 			}
-			
-			ItemStack item = p.getItemInHand();
-			
-			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
-			
-			Jackpot.getInstance().setJackpotTotal(1000000.0d);
-			p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null, args));
+//			
+//			ItemStack item = p.getItemInHand();
+//			
+//			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+//			
+//			Jackpot.getInstance().setJackpotTotal(1000000.0d);
+			p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null));
 //			p.sendMessage(aliases);
 			
 //			p.sendMessage(CommonsUtil.getEnchants(item).toString());

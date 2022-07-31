@@ -22,7 +22,7 @@ public class NewbieTheEnd extends Warp
 		super(w);
 		
 		spawnLocation = new Location(w, 0.5D, 69.0D, -163.5D, 0.0F, 0.0F);
-		portalLocation = new Location(w, 13.5D, 88.0D, -7.5D, 0.0F, 0.0F);
+		portalLocation = new Location(w, 13.5D, 88.0D, -171.5D, 0.0F, 0.0F);
 	}
 	
 	@EventHandler
@@ -67,5 +67,17 @@ public class NewbieTheEnd extends Warp
 	public Location getPortalLocation()
 	{
 		return portalLocation;
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.GREEN + "Newbie " + ChatColor.LIGHT_PURPLE + "(The End)";
+	}
+	
+	@Override
+	public boolean hasPVP()
+	{
+		return true;
 	}
 }

@@ -12,7 +12,7 @@ public enum Tag
 		@Override
 		public String get(ResourceBundle bundle, Object... args)
 		{
-			return ChatColor.DARK_RED + "(" + bundle.getString("tag.owner") + ") ";
+			return ChatColor.DARK_RED + "[" + bundle.getString("tag.owner") + "] ";
 		}
 	}),
 	
@@ -21,7 +21,7 @@ public enum Tag
 		@Override
 		public String get(ResourceBundle bundle, Object... args)
 		{
-			return ChatColor.RED + "(" + bundle.getString("tag.admin") + ") ";
+			return ChatColor.RED + "[" + bundle.getString("tag.admin") + "] ";
 		}
 	}),
 	
@@ -30,7 +30,7 @@ public enum Tag
 		@Override
 		public String get(ResourceBundle bundle, Object... args)
 		{
-			return ChatColor.DARK_PURPLE + "(" + bundle.getString("tag.mod") + ") ";
+			return ChatColor.DARK_PURPLE + "[" + bundle.getString("tag.mod") + "] ";
 		}
 	}),
 	
@@ -39,7 +39,7 @@ public enum Tag
 		@Override
 		public String get(ResourceBundle bundle, Object... args)
 		{
-			return ChatColor.LIGHT_PURPLE + "(" + bundle.getString("tag.trial-mod") + ") ";
+			return ChatColor.LIGHT_PURPLE + "[" + bundle.getString("tag.trial-mod") + "] ";
 		}
 	}),
 	
@@ -48,16 +48,7 @@ public enum Tag
 		@Override
 		public String get(ResourceBundle bundle, Object... args)
 		{
-			return ChatColor.GOLD + "(" + bundle.getString("tag.vip") + ") ";
-		}
-	}),
-	
-	DEFAULT(ChatColor.GRAY.toString(), new BundleSupplier<String>()
-	{
-		@Override
-		public String get(ResourceBundle bundle, Object... args)
-		{
-			return "";
+			return ChatColor.GOLD + "[" + bundle.getString("tag.vip") + "] ";
 		}
 	}),
 	
@@ -66,7 +57,25 @@ public enum Tag
 		@Override
 		public String get(ResourceBundle bundle, Object... args)
 		{
-			return ChatColor.DARK_PURPLE  + "(" + bundle.getString("tag.beta") + ") ";
+			return ChatColor.DARK_PURPLE  + "[" + bundle.getString("tag.beta") + "] ";
+		}
+	}),
+	
+	MAGNATA(ChatColor.DARK_GREEN.toString(), new BundleSupplier<String>()
+	{
+		@Override
+		public String get(ResourceBundle bundle, Object... args)
+		{
+			return ChatColor.DARK_GREEN + "[" + bundle.getString("tag.magnata") + "] ";
+		}
+	}),
+	
+	DEFAULT(ChatColor.GRAY.toString(), new BundleSupplier<String>()
+	{
+		@Override
+		public String get(ResourceBundle bundle, Object... args)
+		{
+			return ChatColor.GRAY.toString();
 		}
 	}),
 	

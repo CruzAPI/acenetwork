@@ -1,5 +1,7 @@
 package br.com.acenetwork.commons.manager;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -9,17 +11,25 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 
 import com.google.common.io.ByteStreams;
 
+import br.com.acenetwork.commons.event.MagnataChangeEvent;
 import br.com.acenetwork.commons.executor.Withdraw;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 
@@ -54,6 +64,41 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 	public Object clone() throws CloneNotSupportedException
 	{
 		return super.clone();
+	}
+	
+	public static Map<UUID, CommonPlayerData> getBalTopMap()
+	{
+		return getBalTopMap(MAP);
+	}
+	
+	public static UUID getMagnata()
+	{
+		return getBalTopMap().keySet().stream().findFirst().orElse(null);
+	}
+	
+	private static Map<UUID, CommonPlayerData> getBalTopMap(Map<UUID, CommonPlayerData> map)
+	{
+		Set<Entry<UUID, CommonPlayerData>> treeSet = new TreeSet<>(new Comparator<Entry<UUID, CommonPlayerData>>()
+		{
+			@Override
+			public int compare(Entry<UUID, CommonPlayerData> arg0, Entry<UUID, CommonPlayerData> arg1)
+			{
+				return Double.compare(arg1.getValue().getBalance(), arg0.getValue().getBalance());
+			}
+		});
+		
+		treeSet.addAll(map.entrySet());
+		
+		Map<UUID, CommonPlayerData> linkedMap = new LinkedHashMap<>();
+		Iterator<Entry<UUID, CommonPlayerData>> iterator = treeSet.iterator();
+		
+		for(int i = 0; iterator.hasNext() && i < 10; i++)
+		{
+			Entry<UUID, CommonPlayerData> entry = iterator.next();
+			linkedMap.put(entry.getKey(), entry.getValue());
+		}
+		
+		return linkedMap;
 	}
 	
 	public CommonPlayerData(CommonPlayerData pd)
@@ -136,7 +181,14 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 			throw new InsufficientBalanceException();
 		}
 		
+		UUID oldMagnata = getMagnata();
 		this.balance = balance;
+		UUID newMagnata = getMagnata();
+		
+		if(oldMagnata != newMagnata)
+		{
+			Bukkit.getPluginManager().callEvent(new MagnataChangeEvent(Bukkit.getOfflinePlayer(oldMagnata), Bukkit.getOfflinePlayer(newMagnata)));
+		}
 	}
 	
 	public double getDiskBTA()
@@ -225,6 +277,8 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 		
 		Iterator<Entry<UUID, CommonPlayerData>> iterator = toSave.entrySet().iterator();
 		
+		Map<UUID, CommonPlayerData> balTopMap = getBalTopMap();
+		
 		while(iterator.hasNext())
 		{
 			Entry<UUID, CommonPlayerData> entry = iterator.next();
@@ -241,7 +295,7 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 				pd.setDiskBTA(pd.getBTA());
 				fileOut.write(streamOut.toByteArray());
 				
-				if(!Bukkit.getOfflinePlayer(uuid).isOnline())
+				if(!Bukkit.getOfflinePlayer(uuid).isOnline() && !balTopMap.containsKey(uuid))
 				{
 					iterator.remove();
 				}
@@ -251,6 +305,39 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 				ex.printStackTrace();
 			}
 		}
+	}
+	
+	public static void load()
+	{
+		File folder = CommonsConfig.getFile(Type.PLAYER_DATA_FOLDER, false);
+		
+		if(!folder.exists())
+		{
+			return;
+		}
+		
+		Map<UUID, CommonPlayerData> tempMap = new HashMap<>();
+		
+		for(File file : folder.listFiles())
+		{
+			UUID uuid = UUID.fromString(file.getName());
+			
+			file = new File(file, "user.dat");
+			
+			try(FileInputStream fileIn = new FileInputStream(file);
+					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
+					ObjectInputStream in = new ObjectInputStream(streamIn);)
+			{
+				tempMap.put(uuid, (CommonPlayerData) in.readObject());
+			}
+			catch(ClassNotFoundException | IOException ex)
+			{
+				ex.printStackTrace();
+				return;
+			}
+		}
+		
+		getBalTopMap(tempMap).keySet().forEach(x -> load(x));
 	}
 	
 	public static CommonPlayerData load(UUID uuid) throws RuntimeException

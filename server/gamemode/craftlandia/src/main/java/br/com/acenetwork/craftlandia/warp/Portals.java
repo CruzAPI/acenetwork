@@ -3,6 +3,8 @@ package br.com.acenetwork.craftlandia.warp;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class Portals extends Warp
 {
 	private final Location spawnLocation;
@@ -18,5 +20,11 @@ public class Portals extends Warp
 	public Location getSpawnLocation()
 	{
 		return spawnLocation;
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.LIGHT_PURPLE + "Portal Center";
 	}
 }

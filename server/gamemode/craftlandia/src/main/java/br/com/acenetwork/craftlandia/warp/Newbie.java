@@ -114,7 +114,7 @@ public class Newbie extends Warp
 		npc.spawn(new Location(w, -1.5D, 69.0D, 2.5D, -135.0F, 0.0F));
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void entityDamage(EntityDamageEvent e)
 	{
 		Entity entity = e.getEntity();
@@ -300,5 +300,17 @@ public class Newbie extends Warp
 	public Location getPortalLocation()
 	{
 		return portalLocation;
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.GREEN + "Newbie";
+	}
+	
+	@Override
+	public boolean hasPVP()
+	{
+		return pvp;
 	}
 }

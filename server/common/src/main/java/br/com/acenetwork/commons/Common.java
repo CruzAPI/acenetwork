@@ -25,6 +25,7 @@ import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.executor.AdminCMD;
 import br.com.acenetwork.commons.executor.BTA;
 import br.com.acenetwork.commons.executor.Balance;
+import br.com.acenetwork.commons.executor.Baltop;
 import br.com.acenetwork.commons.executor.BanCMD;
 import br.com.acenetwork.commons.executor.BroadcastCMD;
 import br.com.acenetwork.commons.executor.Build;
@@ -66,6 +67,7 @@ import br.com.acenetwork.commons.listener.PlayerQuit;
 import br.com.acenetwork.commons.listener.SocketListener;
 import br.com.acenetwork.commons.listener.SoupListener;
 import br.com.acenetwork.commons.listener.WorldSave;
+import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 
@@ -103,6 +105,7 @@ public class Common extends JavaPlugin
 		
 		registerCommand(new AdminCMD(), "admin");
 		registerCommand(new Balance(), "balance", "bal", "points", "coins");
+		registerCommand(new Baltop(), "baltop");
 		registerCommand(new BanCMD(), "ban");
 		registerCommand(new BroadcastCMD(), "broadcast", "bc", "shout");
 		registerCommand(new Build(), "build");
@@ -135,6 +138,8 @@ public class Common extends JavaPlugin
 		registerCommand(new Withdraw(), "withdraw");
 		registerCommand(new Login(), "login");
 		registerCommand(new Register(), "register");
+		
+		CommonPlayerData.load();
 		
 		for(Player all : Bukkit.getOnlinePlayers())
 		{

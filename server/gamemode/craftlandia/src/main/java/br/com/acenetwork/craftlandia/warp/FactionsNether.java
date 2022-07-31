@@ -5,6 +5,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import net.md_5.bungee.api.ChatColor;
 
 public class FactionsNether extends Warp
 {
@@ -76,6 +77,24 @@ public class FactionsNether extends Warp
 	
 	@Override
 	public boolean canSetHome()
+	{
+		return true;
+	}
+	
+	@Override
+	public Location getRespawnLocation()
+	{
+		return Warp.getInstance(Factions.class).getRespawnLocation();
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.DARK_PURPLE + "Raid " + ChatColor.RED + "(Nether)";
+	}
+	
+	@Override
+	public boolean hasPVP()
 	{
 		return true;
 	}

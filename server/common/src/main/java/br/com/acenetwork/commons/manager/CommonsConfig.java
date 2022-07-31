@@ -27,6 +27,7 @@ public class CommonsConfig
 		WHITELISTED_IP,
 		CLANS_JSON, MESSAGE, 
 		PLAYER, 
+		PLAYER_DATA_FOLDER,
 		BANNED_PLAYERS, BANNED_IPS, MUTED_PLAYERS, DATABASE, CHEST_VIP, ACTIVATED_VIPS, CONFIG, ITEM_VIP_UUID,
 		;
 	}
@@ -46,6 +47,9 @@ public class CommonsConfig
 			break;
 		case PLAYER_DATA:
 			file = new File(Common.getInstance().getConfigFolder() + "/player_data/users/" + args[0], "user.dat");
+			break;
+		case PLAYER_DATA_FOLDER:
+			file = new File(Common.getInstance().getConfigFolder() + "/player_data/users");
 			break;
 		case PLAYERS_DATA:
 			file = new File(Common.getInstance().getConfigFolder() + "/player_data/", "users.dat");

@@ -19,6 +19,7 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.craftlandia.Main;
+import net.md_5.bungee.api.ChatColor;
 
 public class Farm extends Warp
 {
@@ -46,11 +47,11 @@ public class Farm extends Warp
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void b(CreatureSpawnEvent e)
+	public void on(CreatureSpawnEvent e)
 	{
 		Location l = e.getLocation();
 		
-		if(!l.getWorld().getName().equals(worldName))
+		if(l.getWorld() != w)
 		{
 			return;
 		}
@@ -64,7 +65,6 @@ public class Farm extends Warp
 		else
 		{
 			e.setCancelled(false);
-			
 			startTask(entity);
 		}
 	}
@@ -115,7 +115,7 @@ public class Farm extends Warp
 	@EventHandler
 	public void a(ChunkLoadEvent e)
 	{
-		if(!e.getWorld().getName().equals(worldName))
+		if(e.getWorld() != w)
 		{
 			return;
 		}
@@ -161,5 +161,23 @@ public class Farm extends Warp
 		
 		e.getEntity().setMetadata("spawner", new FixedMetadataValue(Main.getInstance(), e.getSpawner().getLocation()));
 		e.getEntity().setMetadata("spawn", new FixedMetadataValue(Main.getInstance(), e.getLocation()));
+	}
+	
+	@Override
+	public Location getRespawnLocation()
+	{
+		return Warp.getInstance(Portals.class).getRespawnLocation();
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.DARK_GRAY + "Farm " + ChatColor.GREEN + "(Common)";
+	}
+	
+	@Override
+	public boolean hasPVP()
+	{
+		return true;
 	}
 }

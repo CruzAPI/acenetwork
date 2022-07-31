@@ -315,7 +315,7 @@ public class Login implements TabExecutor, Listener
 		{
 			taskMap.put(p.getUniqueId(), new BukkitRunnable()
 			{
-				private int secondsToKick = 30 / 5;
+				private int secondsToKick = 180 / 5;
 				@Override
 				public void run()
 				{					

@@ -2,12 +2,14 @@ package br.com.acenetwork.craftlandia;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -37,7 +39,7 @@ public class BlockUtil
 		int amount;
 		double major;
 		double minor;
-		Material drop;
+		Material drop = null;
 		List<String> lore = Util.getLore(b);
 		
 		List<ItemStack> items = new ArrayList<>();
@@ -269,19 +271,31 @@ public class BlockUtil
 			}
 			break;
 		case POTATO:
-			drop = Material.POTATO_ITEM;
 			if(r.nextInt(50) == 0)
 			{
 				items.add(new ItemStack(Material.POISONOUS_POTATO, 1));
 			}
 		case CROPS:
-			drop = Material.SEEDS;
 			if(b.getData() == 7)
 			{
 				items.add(new ItemStack(Material.WHEAT));
 			}
 		case CARROT:
-			drop = Material.CARROT_ITEM;
+			switch(b.getType())
+			{
+			case POTATO:
+				drop = Material.POTATO_ITEM;
+				break;
+			case CROPS:
+				drop = Material.SEEDS;
+				break;
+			case CARROT:
+				drop = Material.CARROT_ITEM;
+				break;
+			default:
+				drop = Material.AIR;
+				break;
+			}
 			
 			if(b.getData() < 7)
 			{
@@ -425,6 +439,12 @@ public class BlockUtil
 			items.add(new ItemStack(Material.MELON, array[r.nextInt(array.length)]));
 			break;
 		case NETHER_WARTS:
+			if(b.getData() != 3)
+			{
+				items.add(new ItemStack(Material.NETHER_STALK, 1));
+				break;
+			}
+			
 			array = new int[3 + fortune];
 			
 			amount = 2;
@@ -492,7 +512,9 @@ public class BlockUtil
 				
 				if(next <= chance)
 				{
+					CreatureSpawner spawner = (CreatureSpawner) b.getState();
 					items.add(new ItemStack(Material.MOB_SPAWNER));
+					items.add(new ItemStack(Material.MONSTER_EGG, 1, spawner.getSpawnedType().getTypeId()));
 				}
 			}
 			break;
@@ -524,7 +546,7 @@ public class BlockUtil
 			
 			Bukkit.getScheduler().runTask(Main.getInstance(), () ->
 			{
-				b.getWorld().dropItem(b.getLocation(), item);
+				b.getWorld().dropItemNaturally(b.getLocation(), item);
 			});
 		}
 	}

@@ -33,4 +33,10 @@ public class WarpJackpot extends Warp
 	{
 		return spawnLocation;
 	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.AQUA + "Jackpot";
+	}
 }

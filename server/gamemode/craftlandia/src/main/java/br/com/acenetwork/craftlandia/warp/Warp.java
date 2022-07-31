@@ -29,7 +29,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -56,10 +55,10 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCreatePortalEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.SheepRegrowWoolEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -659,7 +658,7 @@ public abstract class Warp implements Listener
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(cp.getLocale()));
 		
-		double cost = cp.hasPermission("skip.parkour") ? 0.0D : Math.min(100.0D, cp.getBalance());
+		double cost = cp.hasPermission("skip.parkour") ? 0.0D : Math.min(25.0D, cp.getBalance());
 		
 		if(cost > 0.0D)
 		{
@@ -924,5 +923,17 @@ public abstract class Warp implements Listener
 		}
 		
 		return null;
+	}
+	
+	public Location getRespawnLocation()
+	{
+		return getSpawnLocation();
+	}
+	
+	public abstract String getColoredName();
+	
+	public boolean hasPVP()
+	{
+		return false;
 	}
 }

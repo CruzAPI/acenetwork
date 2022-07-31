@@ -233,4 +233,16 @@ public class Factions extends Warp
 	{
 		return 512;
 	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.DARK_PURPLE + "Raid";
+	}
+	
+	@Override
+	public boolean hasPVP()
+	{
+		return true;
+	}
 }

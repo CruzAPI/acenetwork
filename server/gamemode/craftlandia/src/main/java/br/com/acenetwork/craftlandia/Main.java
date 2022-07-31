@@ -9,19 +9,23 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -124,6 +128,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.constants.Tag;
+import br.com.acenetwork.commons.event.MagnataChangeEvent;
 import br.com.acenetwork.commons.event.PlayerSuccessLoginEvent;
 import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.VipChest;
@@ -150,6 +155,7 @@ import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Spawn;
 import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
+import br.com.acenetwork.craftlandia.executor.WorldCMD;
 import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
 import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
@@ -252,9 +258,9 @@ public class Main extends Common implements Listener
 			
 			registerCommand(new Temp(), "temp");
 			
-			registerCommand(new ItemInfo(), "iteminfo");
+//			registerCommand(new ItemInfo(), "iteminfo");
 			registerCommand(new Jackpot(), "jackpot");
-			registerCommand(new Playtime(), "playtime");
+//			registerCommand(new Playtime(), "playtime");
 			registerCommand(new Portal(), "portal");
 			registerCommand(new Price(), "price");
 			registerCommand(new Spawn(), "spawn");
@@ -262,6 +268,7 @@ public class Main extends Common implements Listener
 			registerCommand(new Sellall(), "sellall");
 			registerCommand(new Shop(), "shop");
 			registerCommand(new ShopSearch(), "shopsearch");
+			registerCommand(new WorldCMD(), "world", "wrld");
 			
 			registerCommand(new LandCMD(), "land");
 			
@@ -269,6 +276,7 @@ public class Main extends Common implements Listener
 			registerCommand(new Sethome(), "sethome");
 			registerCommand(new Delhome(), "delhome");
 			registerCommand(new Visit(), "visit");
+			
 		}
 		catch(Exception e)
 		{
@@ -396,6 +404,73 @@ public class Main extends Common implements Listener
 	}
 	
 	@EventHandler
+	public void a(MagnataChangeEvent e)
+	{
+		OfflinePlayer oldMagnata = e.getOldMagnata();
+		OfflinePlayer newMagnata = e.getNewMagnata();
+		
+		if(oldMagnata != null)
+		{
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "perm user " + oldMagnata.getName() + " remove " + Tag.MAGNATA.getPermission());
+			
+			if(oldMagnata.isOnline())
+			{
+				Player p = oldMagnata.getPlayer();
+				CommonPlayer cp = CraftCommonPlayer.get(p);
+				
+				if(cp.getTag() == Tag.MAGNATA)
+				{
+					cp.setTag(cp.getBestTag());
+				}
+			}
+		}
+		
+		if(newMagnata != null)
+		{
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "perm user " + newMagnata.getName() + " add " + Tag.MAGNATA.getPermission());
+			
+			if(newMagnata.isOnline())
+			{
+				Player p = newMagnata.getPlayer();
+				CommonPlayer cp = CraftCommonPlayer.get(p);
+				
+				cp.setTag(Tag.MAGNATA);
+			}
+		}
+		
+		String displayName = newMagnata.isOnline() ? newMagnata.getPlayer().getDisplayName() : ChatColor.GRAY + newMagnata.getName();
+		
+		ResourceBundle bundle;
+		
+		TextComponent[] extra = new TextComponent[2];
+		extra[0] = new TextComponent(displayName);
+		
+		for(CommonPlayer cp : CraftCommonPlayer.SET)
+		{
+			Player p = cp.getPlayer();
+			bundle = ResourceBundle.getBundle("message", cp.getLocale());
+			
+			extra[1] = new TextComponent(StringUtils.capitalize(bundle.getString("noun.magnata")));
+			extra[1].setColor(ChatColor.DARK_GREEN);
+			
+			TextComponent text = Message.getTextComponent(bundle.getString("broadcast.magnata-change"), extra);
+			text.setColor(ChatColor.GREEN);
+			
+			p.sendMessage("");
+			p.spigot().sendMessage(text);;
+			p.sendMessage("");
+		}
+		
+		bundle = ResourceBundle.getBundle("message");
+		extra[1] = new TextComponent(StringUtils.capitalize(bundle.getString("noun.magnata")));
+		extra[1].setColor(ChatColor.DARK_GREEN);
+		
+		TextComponent text = Message.getTextComponent(bundle.getString("broadcast.magnata-change"), extra);
+		text.setColor(ChatColor.GREEN);
+		Bukkit.getConsoleSender().sendMessage(text.toLegacyText());
+	}
+	
+	@EventHandler
 	public void a(WorldSaveEvent e)
 	{
 		if(!e.getWorld().getName().equals("world"))
@@ -416,7 +491,7 @@ public class Main extends Common implements Listener
 		VipChest.getInstance().save();
 		Home.getInstance().save();
 		Portal.getInstance().save();
-		Playtime.getInstance().save();
+//		Playtime.getInstance().save();
 		Price.getInstance().save();
 		Jackpot.getInstance().save();
 	}
@@ -532,6 +607,23 @@ public class Main extends Common implements Listener
 		
 		switch0:switch(b.getType())
 		{
+		case DIRT:
+		case SAND:
+		case GRASS:
+			if(up.getType() == Material.SUGAR_CANE_BLOCK)
+			{
+				Bukkit.getPluginManager().callEvent(new BlockPhysicsEvent(up, b.getTypeId()));
+			}
+			break;
+		case NETHER_WARTS:
+			if(down.getType() == Material.SOUL_SAND)
+			{
+				break;
+			}
+			
+			e.setCancelled(true);
+			BlockUtil.breakNaturally(b, BreakReason.PHYSIC);
+			break;
 		case SUGAR_CANE_BLOCK:
 			if(down.getType() == Material.SUGAR_CANE_BLOCK)
 			{
@@ -1207,6 +1299,58 @@ public class Main extends Common implements Listener
 				? Util.getRarity(entity.getWorld()) : data.getRarity()).toString());
 	}
 	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void cancelEnderChest(PlayerInteractEvent e)
+	{
+		Block clicked = e.getClickedBlock();
+		
+		if(clicked == null || clicked.getType() != Material.ENDER_CHEST)
+		{
+			return;
+		}
+		
+		BlockData data = Util.readBlock(clicked);
+		
+		Rarity rarity = data == null ? null : data.getRarity();
+		
+		if(rarity == Rarity.LEGENDARY)
+		{
+			return;
+		}
+		
+		e.setCancelled(true);
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void cancelEnderChest(PrepareItemCraftEvent e)
+	{
+		CraftingInventory inv = e.getInventory();
+		
+		if(inv.getResult().getType() != Material.ENDER_CHEST)
+		{
+			return;
+		}
+		
+		List<Rarity> rarities = new ArrayList<>();
+		
+		for(ItemStack content : inv.getMatrix())
+		{
+			if(content == null || content.getType() == Material.AIR)
+			{
+				continue;
+			}
+			
+			rarities.add(Optional.ofNullable(Util.getRarity(content)).orElse(Rarity.COMMON));
+		}
+		
+		Rarity worst = Util.getWorstRarity(rarities.toArray(new Rarity[rarities.size()]));
+		
+		if(worst != Rarity.LEGENDARY)
+		{
+			e.getInventory().setResult(null);
+		}
+	}
+	
 	@EventHandler
 	public void a(PrepareItemCraftEvent e)
 	{
@@ -1427,7 +1571,7 @@ public class Main extends Common implements Listener
 		ItemStack smelting = inv.getSmelting();
 		ItemStack result = inv.getResult();
 		
-		if(Optional.ofNullable(Util.getRarity(smelting)).orElse(Rarity.COMMON) != Util.getRarity(result))
+		if(result != null && result.getType() != Material.AIR && Optional.ofNullable(Util.getRarity(smelting)).orElse(Rarity.COMMON) != Util.getRarity(result))
 		{
 			e.setCancelled(true);
 		}
@@ -1537,6 +1681,7 @@ public class Main extends Common implements Listener
 		
 		if(type != Material.AIR && type != Material.WATER && type != Material.STATIONARY_WATER)
 		{
+			e.setCancelled(true);
 			BlockUtil.breakNaturally(e.getToBlock(), BreakReason.LIQUID);
 		}
 	}
@@ -1800,7 +1945,7 @@ public class Main extends Common implements Listener
 			sender.sendMessage("");
 		}
 		
-		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex group vip user add +" + (30L * 24L * 60L * 60L));
+		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex group vip user add " + p.getName() +  " +" + (30L * 24L * 60L * 60L));
 		
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		cp.setTag(Tag.VIP);
@@ -1943,6 +2088,17 @@ public class Main extends Common implements Listener
 		f.setFireworkMeta(fireworkMeta);
 		
 		return true;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void asdasa(PlayerJoinEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		if(!p.hasPlayedBefore())
+		{
+			p.teleport(Warp.getInstance(WarpTutorial.class).getSpawnLocation());
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

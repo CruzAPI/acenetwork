@@ -3,6 +3,8 @@ package br.com.acenetwork.craftlandia.warp;
 import org.bukkit.Location;
 import org.bukkit.World;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class WarpTutorial extends Warp
 {
 	private final Location spawnLocation;
@@ -24,5 +26,11 @@ public class WarpTutorial extends Warp
 	public boolean isSpawnProtection(Location l)
 	{
 		return true;
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.GREEN + "Tutorial";
 	}
 }

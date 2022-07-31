@@ -23,7 +23,7 @@ public class NewbieNether extends Warp
 		super(w);
 		
 		spawnLocation = new Location(w, 0.5D, 69.0D, 0.5D, 0.0F, 0.0F);
-		portalLocation = new Location(w, 13.5D, 88.0D, -7.5D, 0.0F, 0.0F);
+		portalLocation = new Location(w, -13.5D, 88.0D, 12.5D, 180.0F, 0.0F);
 	}
 	
 	@EventHandler
@@ -68,5 +68,17 @@ public class NewbieNether extends Warp
 	public Location getPortalLocation()
 	{
 		return portalLocation;
+	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.GREEN + "Newbie " + ChatColor.RED + "(Nether)";
+	}
+	
+	@Override
+	public boolean hasPVP()
+	{
+		return true;
 	}
 }

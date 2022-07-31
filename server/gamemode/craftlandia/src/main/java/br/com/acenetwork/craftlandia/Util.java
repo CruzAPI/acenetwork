@@ -12,7 +12,6 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -385,13 +384,11 @@ public class Util
 	{
 		if(shop.getType() != toCompare.getType())
 		{
-			Bukkit.broadcastMessage("A");
 			return false;
 		}
 		
 		if(shop.getDurability() != toCompare.getDurability())
 		{
-			Bukkit.broadcastMessage("B");
 			return false;
 		}
 		
@@ -400,23 +397,16 @@ public class Util
 		
 		if(shopMeta == null || !shopMeta.hasLore() || toCompareMeta == null || !toCompareMeta.hasLore())
 		{
-			Bukkit.broadcastMessage("C1");
 			return false;
 		}
 		
-		Bukkit.broadcastMessage(shopMeta.getLore().toString());
-		Bukkit.broadcastMessage("-----");
-		Bukkit.broadcastMessage(toCompareMeta.getLore().toString());
-		
 		if(!shopMeta.getLore().equals(toCompareMeta.getLore()))
 		{
-			Bukkit.broadcastMessage("C2");
 			return false;
 		}
 		
 		if(!shop.getEnchantments().equals(toCompare.getEnchantments()))
 		{
-			Bukkit.broadcastMessage("D");
 			return false;
 		}
 		
@@ -426,18 +416,15 @@ public class Util
 			
 			if(isSold && repairable.getRepairCost() != 0)
 			{
-				Bukkit.broadcastMessage("E");
 				return false;
 			}
 			
 			if(shop.getDurability() != 0)
 			{
-				Bukkit.broadcastMessage("F");
 				return false;
 			}
 		}
 		
-		Bukkit.broadcastMessage("G");
 		return true;
 	}
 	

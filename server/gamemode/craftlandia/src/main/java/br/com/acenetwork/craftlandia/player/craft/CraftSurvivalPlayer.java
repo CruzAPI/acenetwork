@@ -276,12 +276,12 @@ public class CraftSurvivalPlayer extends CraftCommonPlayer implements SurvivalPl
 		
 		if(p.getBedSpawnLocation() == null)
 		{
-			p.setBedSpawnLocation(warp.getSpawnLocation(), true);
+			p.setBedSpawnLocation(warp.getRespawnLocation(), true);
 		}
 		
 		if(CommonsUtil.isBedObstructed(b))
 		{
-			e.setRespawnLocation(warp.getSpawnLocation());
+			e.setRespawnLocation(warp.getRespawnLocation());
 			setInvincibility(true);
 			setPVPInvincibility(true);
 			return;

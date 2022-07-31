@@ -308,4 +308,10 @@ public class WarpLand extends Warp
 	{
 		return portalLocation;
 	}
+	
+	@Override
+	public String getColoredName()
+	{
+		return ChatColor.GOLD + "Lands";
+	}
 }
