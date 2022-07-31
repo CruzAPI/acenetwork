@@ -62,14 +62,16 @@ public class JackpotGUI extends GUI
 	private final Map<Byte, ItemStack> items = new HashMap<>();
 	private boolean finished;
 	private final Jackpot jackpot;
+	private final double bet;
 	
-	public JackpotGUI(CommonPlayer cp, Map<Byte, Integer> map)
+	public JackpotGUI(CommonPlayer cp, double bet, Map<Byte, Integer> map)
 	{
 		super(cp, () ->
 		{
 			return Bukkit.createInventory(cp.getPlayer(), 9 * 3, "              " + ChatColor.BLACK + ChatColor.BOLD + "JACKPOT");
 		});
 		
+		this.bet = bet;
 		this.jackpot = Jackpot.getInstance();
 		this.bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
@@ -92,8 +94,6 @@ public class JackpotGUI extends GUI
 				array[j] = entry.getKey();
 			}
 		}
-		
-		double bet = 1000.0D;
 		
 		Player p = cp.getPlayer();
 		version = ProtocolLibrary.getProtocolManager().getProtocolVersion(p);
@@ -127,7 +127,7 @@ public class JackpotGUI extends GUI
 		inv.setItem(4, middleGlass);
 		inv.setItem(22, middleGlass);
 		
-		targetTimes = 50 + r.nextInt(50);
+		targetTimes = 25 + r.nextInt(25);
 		
 		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
@@ -208,8 +208,6 @@ public class JackpotGUI extends GUI
 			byte b = array[(pos + i >= array.length ? (pos + i) - array.length : pos + i)];
 			inv.setItem(i, getItemStack(b));
 		}
-		
-		double bet = 1000.0D;
 		
 		if(finish)
 		{
@@ -306,7 +304,7 @@ public class JackpotGUI extends GUI
 			}
 			else if(CommonsUtil.containsUUID(item, Jackpot.$BTA_UUID))
 			{
-				double bta = bet * 0.001D * item.getAmount();
+				double bta = bet * 0.002D * item.getAmount();
 				
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - Jackpot.$BTA_TO_SHARDS * bta);
 				cp.setBTA(cp.getBTA() + bta);
@@ -351,19 +349,27 @@ public class JackpotGUI extends GUI
 			else
 			{
 				p.sendMessage(tag.toLegacyText() + " " + ChatColor.RED + bundle.getString("cmd.jackpot.none"));
-				p.playSound(p.getLocation(), Sound.NOTE_BASS_GUITAR, 5.0F, 1.0F);
+				p.getWorld().playSound(p.getLocation(), Sound.NOTE_BASS_GUITAR, 5.0F, 1.0F);
 				return;
 			}
 			
-			TextComponent[] extra = new TextComponent[1];
+			TextComponent[] extra = new TextComponent[2];
 			
-			extra[0] = new TextComponent(item.getItemMeta().getDisplayName());
+			extra[0] = new TextComponent(p.getDisplayName());
+			extra[1] = new TextComponent(item.getItemMeta().getDisplayName());
 			
-			TextComponent text = Message.getTextComponent(bundle.getString("cmd.jackpot.won"), extra);
-			text.setColor(ChatColor.GREEN);
+			for(CommonPlayer cpall : CraftCommonPlayer.SET)
+			{
+				Player all = cpall.getPlayer();
+				
+				ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+				
+				TextComponent text = Message.getTextComponent(bundle.getString("cmd.jackpot.other-won"), extra);
+				text.setColor(ChatColor.GREEN);
+				all.sendMessage(tag.toLegacyText() + " " + text.toLegacyText());
+			}
 			
-			p.sendMessage(tag.toLegacyText() + " " + text.toLegacyText());
-			p.playSound(p.getLocation(), Sound.NOTE_PLING, 1.0F, 1.5F);
+			p.getWorld().playSound(p.getLocation(), Sound.NOTE_PLING, 1.0F, 1.5F);
 		}
 		else
 		{

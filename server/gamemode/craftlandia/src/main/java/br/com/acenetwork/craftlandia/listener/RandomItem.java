@@ -207,7 +207,7 @@ public class RandomItem implements Listener
 			
 			boolean setCommodity = true;
 			
-			if(nextDouble < (d += 0.2D))
+			if(nextDouble < (d += 0.6D))
 			{
 				ItemStack[] array = new ItemStack[] 
 				{
@@ -218,14 +218,14 @@ public class RandomItem implements Listener
 				
 				nextItem = array[r.nextInt(array.length)];
 			}
-			else if(nextDouble < (d += 3.0D))
+			else if(nextDouble < (d += 5.0D))
 			{
 				short[] array = new short[] {50, 51, 52, 54, 55, 56, 57, 58, 59, 60, 61, 62, 65,
 						66, 67, 68, 90, 91, 92, 93, 94, 95, 96, 98, 100, 101, 120};
 				
 				nextItem = new ItemStack(Material.MONSTER_EGG, 1, array[r.nextInt(array.length)]);
 			}
-			else if(nextDouble < (d += 3.0D))
+			else if(nextDouble < (d += 6.0D))
 			{
 				ItemStack[] array = new ItemStack[] 
 				{
@@ -240,7 +240,7 @@ public class RandomItem implements Listener
 				
 				nextItem = array[r.nextInt(array.length)];
 			}
-			else if(nextDouble < (d += 6.0D))
+			else if(nextDouble < (d += 15.0D))
 			{
 				nextItem = SpecialItems.getInstance().getContainmentPickaxeSupplier().get(null, r.nextInt(25) + r.nextDouble());
 				setCommodity = false;

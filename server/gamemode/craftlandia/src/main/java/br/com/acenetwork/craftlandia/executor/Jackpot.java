@@ -51,6 +51,7 @@ public class Jackpot implements TabExecutor, Listener
 	public static final String VIP_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String NONE_UUID = CommonsUtil.getRandomItemUUID();
+	public static final double COAL_BET = 500.0D;
 	
 	public static final double PERCENT = 0.25D; 
 	private double jackpot;
@@ -88,29 +89,29 @@ public class Jackpot implements TabExecutor, Listener
 		}
 		
 		int size = 0;
-		final int maxSize = 30000;
+		final int maxSize = 32000;
 		
 		COAL_MAP.put(JACKPOT.getId(), -size + (size += 1));
-		COAL_MAP.put(VIP.getId(), -size + (size += 30));
-		COAL_MAP.put(RANDOM_ITEM.getId(), -size + (size += 3000));
-		COAL_MAP.put(NUGGET_1.getId(), -size + (size += 1800));
-		COAL_MAP.put(NUGGET_2.getId(), -size + (size += 1800));
-		COAL_MAP.put(NUGGET_3.getId(), -size + (size += 1800));
-		COAL_MAP.put(NUGGET_4.getId(), -size + (size += 1800));
-		COAL_MAP.put(NUGGET_5.getId(), -size + (size += 1800));
-		COAL_MAP.put(INGOT_1.getId(), -size + (size += 1500));
-		COAL_MAP.put(INGOT_2.getId(), -size + (size += 1200));
-		COAL_MAP.put(INGOT_3.getId(), -size + (size += 900));
-		COAL_MAP.put(INGOT_4.getId(), -size + (size += 600));
-		COAL_MAP.put(INGOT_5.getId(), -size + (size += 300));
-		COAL_MAP.put(BLOCK_1.getId(), -size + (size += 225));
-		COAL_MAP.put(BLOCK_2.getId(), -size + (size += 30));
-		COAL_MAP.put(BLOCK_3.getId(), -size + (size += 20));
-		COAL_MAP.put(BLOCK_4.getId(), -size + (size += 15));
-		COAL_MAP.put(BLOCK_5.getId(), -size + (size += 10));
-		COAL_MAP.put($BTA_1.getId(), -size + (size += 900));
-		COAL_MAP.put($BTA_3.getId(), -size + (size += 400));
-		COAL_MAP.put($BTA_5.getId(), -size + (size += 200));
+		COAL_MAP.put(VIP.getId(), -size + (size += 32));
+		COAL_MAP.put(RANDOM_ITEM.getId(), -size + (size += 6400));
+		COAL_MAP.put(NUGGET_1.getId(), -size + (size += 1536));
+		COAL_MAP.put(NUGGET_2.getId(), -size + (size += 1792));
+		COAL_MAP.put(NUGGET_3.getId(), -size + (size += 2048));
+		COAL_MAP.put(NUGGET_4.getId(), -size + (size += 2304));
+		COAL_MAP.put(NUGGET_5.getId(), -size + (size += 2560));
+		COAL_MAP.put(INGOT_1.getId(), -size + (size += 1280));
+		COAL_MAP.put(INGOT_2.getId(), -size + (size += 1024));
+		COAL_MAP.put(INGOT_3.getId(), -size + (size += 768));
+		COAL_MAP.put(INGOT_4.getId(), -size + (size += 512));
+		COAL_MAP.put(INGOT_5.getId(), -size + (size += 256));
+		COAL_MAP.put(BLOCK_1.getId(), -size + (size += 64));
+		COAL_MAP.put(BLOCK_2.getId(), -size + (size += 32));
+		COAL_MAP.put(BLOCK_3.getId(), -size + (size += 16));
+		COAL_MAP.put(BLOCK_4.getId(), -size + (size += 8));
+		COAL_MAP.put(BLOCK_5.getId(), -size + (size += 4));
+		COAL_MAP.put($BTA_1.getId(), -size + (size += 3200));
+		COAL_MAP.put($BTA_3.getId(), -size + (size += 1600));
+		COAL_MAP.put($BTA_5.getId(), -size + (size += 800));
 		COAL_MAP.put(NONE.getId(), -size + (size += Math.max(0, maxSize - size)));
 		
 		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
@@ -135,15 +136,7 @@ public class Jackpot implements TabExecutor, Listener
 		
 		Player p = (Player) sender;
 		CommonPlayer cp = CraftCommonPlayer.get(p);
-		new JackpotPercentage(cp, COAL_MAP);
-		
-//		TextComponent[] extra = new TextComponent[1];
-//		
-//		extra[0] = new TextComponent("\n/" + aliases + "\n" + "/" + aliases + " %");
-//		
-//		TextComponent text = Message.getTextComponent(bundle.getString("commons.cmds.wrong-syntax-try"), extra);
-//		text.setColor(ChatColor.RED);
-//		p.spigot().sendMessage(text);
+		new JackpotPercentage(cp, COAL_BET, COAL_MAP);
 		
 		return false;
 	}
@@ -178,14 +171,12 @@ public class Jackpot implements TabExecutor, Listener
 			return false;
 		}
 		
-		final double bet = 1000.0D;
-		
 		try
 		{
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(cp.getLocale()));
 			
-			cp.setBalance(cp.getBalance() - bet);
-			p.sendMessage(ChatColor.DARK_RED + "(-" + df.format(bet) + " SHARDS)");
+			cp.setBalance(cp.getBalance() - COAL_BET);
+			p.sendMessage(ChatColor.DARK_RED + "(-" + df.format(COAL_BET) + " SHARDS)");
 		}
 		catch(InsufficientBalanceException e)
 		{
@@ -193,11 +184,11 @@ public class Jackpot implements TabExecutor, Listener
 			return false;
 		}
 		
-		setJackpotTotal(getJackpotTotal() + bet);
+		setJackpotTotal(getJackpotTotal() + COAL_BET);
 		
 		cp.setJackpoting(true);
 		inUse = true;
-		new JackpotGUI(cp, COAL_MAP);
+		new JackpotGUI(cp, COAL_BET, COAL_MAP);
 		return true;
 	}
 	

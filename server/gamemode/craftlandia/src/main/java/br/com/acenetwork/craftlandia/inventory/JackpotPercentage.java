@@ -26,7 +26,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class JackpotPercentage extends GUI
 {
-	public JackpotPercentage(CommonPlayer cp, Map<Byte, Integer> map)
+	public JackpotPercentage(CommonPlayer cp, double bet, Map<Byte, Integer> map)
 	{
 		super(cp, () ->
 		{
@@ -49,7 +49,6 @@ public class JackpotPercentage extends GUI
 		
 		Player p = cp.getPlayer();
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
-		double bet = 1000.0D;
 		int version = ProtocolLibrary.getProtocolManager().getProtocolVersion(p);
 		
 		for(Entry<Byte, Integer> entry : map.entrySet())
