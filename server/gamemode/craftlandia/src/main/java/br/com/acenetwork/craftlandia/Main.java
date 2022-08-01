@@ -132,6 +132,7 @@ import br.com.acenetwork.commons.event.MagnataChangeEvent;
 import br.com.acenetwork.commons.event.PlayerSuccessLoginEvent;
 import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.VipChest;
+import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
@@ -157,7 +158,6 @@ import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.executor.WorldCMD;
 import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
-import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
@@ -166,6 +166,7 @@ import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
 import br.com.acenetwork.craftlandia.manager.LandData;
 import br.com.acenetwork.craftlandia.manager.PlayerData;
+import br.com.acenetwork.craftlandia.manager.SpecialItems;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.FactionsNether;
 import br.com.acenetwork.craftlandia.warp.FactionsTheEnd;
@@ -1001,6 +1002,24 @@ public class Main extends Common implements Listener
 		switch(newState.getType())
 		{
 		case CACTUS:
+			e.setCancelled(true);
+			
+			Bukkit.getScheduler().runTask(this, () ->
+			{
+				b.setType(Material.CACTUS, false);
+				BlockPhysicsEvent event = new BlockPhysicsEvent(b, 0);
+						
+				Bukkit.getPluginManager().callEvent(new BlockPhysicsEvent(b, 0));
+				
+				if(event.getBlock().getType() == Material.AIR)
+				{
+					for(Player p : b.getWorld().getPlayers())
+					{
+						((CraftPlayer) p).getHandle().playerConnection.sendPacket(new PacketPlayOutWorldParticles(
+								EnumParticle.BLOCK_CRACK, true, b.getX() + 0.5F, b.getY() + 0.5F, b.getZ() + 0.5F, 0.25F, 0.25F, 0.25F, 0.0F, 40, 81));
+					}
+				}
+			});
 		case SUGAR_CANE_BLOCK:
 			source = newState.getBlock().getRelative(BlockFace.DOWN);
 			break;
@@ -1010,7 +1029,6 @@ public class Main extends Common implements Listener
 		}
 		
 		BlockData data = Util.readBlock(source);
-		
 		Util.writeBlock(newState.getBlock(), data);
 	}
 	

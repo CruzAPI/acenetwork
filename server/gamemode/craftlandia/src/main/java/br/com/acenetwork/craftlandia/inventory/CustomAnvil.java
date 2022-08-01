@@ -37,6 +37,7 @@ import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.craftlandia.manager.SpecialItems;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

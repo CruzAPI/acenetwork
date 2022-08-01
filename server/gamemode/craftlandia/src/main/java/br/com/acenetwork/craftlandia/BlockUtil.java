@@ -11,13 +11,15 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Tree;
 
 import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
-import br.com.acenetwork.craftlandia.inventory.SpecialItems;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
+import br.com.acenetwork.craftlandia.manager.SpecialItems;
 
 public class BlockUtil
 {
@@ -179,6 +181,9 @@ public class BlockUtil
 				}
 				else
 				{
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(r.nextInt(3));
+					
 					items.add(new ItemStack(Material.COAL, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
@@ -214,6 +219,9 @@ public class BlockUtil
 						array[i] = amount++;
 					}
 					
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(1 + r.nextInt(5));
+					
 					items.add(new ItemStack(Material.REDSTONE, array[r.nextInt(array.length)]));
 				}
 			}
@@ -227,6 +235,9 @@ public class BlockUtil
 				}
 				else
 				{
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(2 + r.nextInt(4));
+					
 					items.add(new ItemStack(Material.INK_SACK, getOreMultiplier(fortune, r) * (4 + r.nextInt(4 + 1)), (short) 4));
 				}
 			}
@@ -240,6 +251,9 @@ public class BlockUtil
 				}
 				else
 				{
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(3 + r.nextInt(5));
+
 					items.add(new ItemStack(Material.EMERALD, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
@@ -253,6 +267,9 @@ public class BlockUtil
 				}
 				else
 				{
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(3 + r.nextInt(5));
+					
 					items.add(new ItemStack(Material.DIAMOND, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
@@ -266,6 +283,9 @@ public class BlockUtil
 				}
 				else
 				{
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(2 + r.nextInt(4));
+
 					items.add(new ItemStack(Material.QUARTZ, 1 * getOreMultiplier(fortune, r)));
 				}
 			}
@@ -501,20 +521,17 @@ public class BlockUtil
 		case MOB_SPAWNER:
 			if(tool != null)
 			{
-				if(!SpecialItems.getInstance().isContainmentPickaxe(tool))
-				{
-					break;
-				}
-				
-				float chance = SpecialItems.getInstance().getContainmentPickaxeChance(tool);
-				
-				next = r.nextInt(100) + r.nextDouble();
-				
-				if(next <= chance)
+				if(SpecialItems.getInstance().isContainmentPickaxe(tool) 
+						&& r.nextInt(100) + r.nextDouble() <= SpecialItems.getInstance().getContainmentPickaxeChance(tool))
 				{
 					CreatureSpawner spawner = (CreatureSpawner) b.getState();
 					items.add(new ItemStack(Material.MOB_SPAWNER));
 					items.add(new ItemStack(Material.MONSTER_EGG, 1, spawner.getSpawnedType().getTypeId()));
+				}
+				else
+				{
+					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
+					orb.setExperience(15 + r.nextInt(29));
 				}
 			}
 			break;
@@ -544,10 +561,7 @@ public class BlockUtil
 			meta.setLore(lore);
 			item.setItemMeta(meta);
 			
-			Bukkit.getScheduler().runTask(Main.getInstance(), () ->
-			{
-				b.getWorld().dropItemNaturally(b.getLocation(), item);
-			});
+			b.getWorld().dropItem(b.getLocation().add(0.5D, 0.5D, 0.5D), item);
 		}
 	}
 	

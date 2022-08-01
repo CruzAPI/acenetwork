@@ -250,7 +250,20 @@ public class Temp implements TabExecutor
 //			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 //			
 //			Jackpot.getInstance().setJackpotTotal(1000000.0d);
-			p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null));
+			if(args.length == 1)
+			{
+				Player t = Bukkit.getPlayer(args[0]);
+				
+				if(t != null)
+				{
+					t.spigot().respawn();
+					p.sendMessage(t.getName() + " respawned!");
+				}
+			}
+			else
+			{
+				p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null));
+			}
 //			p.sendMessage(aliases);
 			
 //			p.sendMessage(CommonsUtil.getEnchants(item).toString());

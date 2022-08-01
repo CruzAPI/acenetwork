@@ -44,6 +44,7 @@ import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.Ping;
 import br.com.acenetwork.commons.executor.Register;
 import br.com.acenetwork.commons.executor.Reply;
+import br.com.acenetwork.commons.executor.Setbalance;
 import br.com.acenetwork.commons.executor.Setip;
 import br.com.acenetwork.commons.executor.Specs;
 import br.com.acenetwork.commons.executor.Stop;
@@ -105,6 +106,7 @@ public class Common extends JavaPlugin
 		
 		registerCommand(new AdminCMD(), "admin");
 		registerCommand(new Balance(), "balance", "bal", "points", "coins");
+		registerCommand(new Setbalance(), "setbalance", "setbal");
 		registerCommand(new Baltop(), "baltop");
 		registerCommand(new BanCMD(), "ban");
 		registerCommand(new BroadcastCMD(), "broadcast", "bc", "shout");

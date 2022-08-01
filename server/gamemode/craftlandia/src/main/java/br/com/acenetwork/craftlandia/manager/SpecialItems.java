@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.craftlandia.manager;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.BundleSupplier;
-import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 import net.md_5.bungee.api.ChatColor;
 
@@ -50,7 +49,7 @@ public class SpecialItems
 				
 				DecimalFormat df = new DecimalFormat("#.##");
 				lore.add(ChatColor.GRAY + df.format(nextDouble) + "% chance to get spawners");
-				
+				lore.add(ChatColor.GRAY + "(single use)");
 				meta.setLore(lore);
 				
 				item.setItemMeta(meta);
