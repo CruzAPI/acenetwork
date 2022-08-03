@@ -51,7 +51,7 @@ public class Jackpot implements TabExecutor, Listener
 	public static final String VIP_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String NONE_UUID = CommonsUtil.getRandomItemUUID();
-	public static final double COAL_BET = 500.0D;
+	public static final double COAL_BET = 1000.0D;
 	
 	public static final double PERCENT = 0.25D; 
 	private double jackpot;
@@ -63,7 +63,7 @@ public class Jackpot implements TabExecutor, Listener
 	public static final int $BTA_TO_SHARDS = 200;
 	
 	public static final Map<Byte, Integer> COAL_MAP = new LinkedHashMap<>();
-	public static final double BTA_BET_MULTIPLIER = 0.002D;
+	public static final double BTA_BET_MULTIPLIER = 0.001D;
 	
 	public Jackpot()
 	{

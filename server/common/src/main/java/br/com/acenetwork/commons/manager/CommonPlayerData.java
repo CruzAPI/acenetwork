@@ -30,6 +30,7 @@ import org.bukkit.event.Listener;
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.event.MagnataChangeEvent;
+import br.com.acenetwork.commons.executor.Baltop;
 import br.com.acenetwork.commons.executor.Withdraw;
 import br.com.acenetwork.commons.manager.CommonsConfig.Type;
 
@@ -92,7 +93,7 @@ public class CommonPlayerData implements Listener, Serializable, Cloneable
 		Map<UUID, CommonPlayerData> linkedMap = new LinkedHashMap<>();
 		Iterator<Entry<UUID, CommonPlayerData>> iterator = treeSet.iterator();
 		
-		for(int i = 0; iterator.hasNext() && i < 10; i++)
+		for(int i = 0; iterator.hasNext() && i < Baltop.SIZE; i++)
 		{
 			Entry<UUID, CommonPlayerData> entry = iterator.next();
 			linkedMap.put(entry.getKey(), entry.getValue());

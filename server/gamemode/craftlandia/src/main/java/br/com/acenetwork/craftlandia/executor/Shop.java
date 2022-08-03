@@ -346,7 +346,7 @@ public class Shop implements TabExecutor, Listener
 		return false;
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void asad(PlayerInteractEvent e)
 	{
 		Block clickedBlock = e.getClickedBlock();

@@ -32,12 +32,14 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.WorldSaveEvent;
 
 import com.google.common.io.ByteStreams;
 
+import br.com.acenetwork.commons.event.CustomEntityDeathEvent;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
@@ -164,6 +166,20 @@ public class WarpLand extends Warp
 	public Location getSpawnLocation()
 	{
 		return spawnLocation;
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void b(CustomEntityDeathEvent ce)
+	{
+		EntityDeathEvent e = ce.getEntityDeathEventEvent();
+		
+		if(e.getEntity().getWorld() != w)
+		{
+			return;
+		}
+		
+		ce.setKeepInventory(true);
+		ce.setKeepExp(true);
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

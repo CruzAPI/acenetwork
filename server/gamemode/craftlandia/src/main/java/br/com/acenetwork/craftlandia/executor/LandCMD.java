@@ -166,7 +166,75 @@ public class LandCMD implements TabExecutor, Listener
 //			return true;
 //		}
 		
-		if(args.length == 2 && args[1].equalsIgnoreCase("trust"))
+		if(args.length == 1 && (args[0].equalsIgnoreCase("identify") || args[0].equalsIgnoreCase("id")))
+		{
+			Location l  = p.getLocation();
+			
+			for(Land land : Land.SET)
+			{
+				if(land.isLand(l))
+				{
+					p.sendMessage("");
+					p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.land")) + ": " + ChatColor.YELLOW + land.getBeautyId());
+					
+					if(land.getName() != null)
+					{
+						p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.name")) + ": " + ChatColor.YELLOW + land.getName());
+					}
+					
+					if(land.hasOwner())
+					{
+						OfflinePlayer op = Bukkit.getOfflinePlayer(land.getOwner());
+						String displayName = op.isOnline() ? op.getPlayer().getDisplayName() : ChatColor.GRAY + op.getName();
+						p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.owner")) + ": " + displayName);
+					}
+					
+					p.sendMessage("");
+					
+					return true;
+				}
+			}
+			
+			p.sendMessage(ChatColor.RED + bundle.getString("cmd.land.land-not-found"));
+			return true;
+		}
+		else if(args.length == 2 && args[1].equalsIgnoreCase("setspawnlocation"))
+		{
+			Land land = Land.getLandByUserInput(args[0]);
+			
+			if(land == null)
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("cmd.land.land-not-found"));
+				return true;
+			}
+			
+			if(!land.isOwner(p.getUniqueId()))
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
+				return true;
+			}
+			
+			Location l = p.getLocation();
+			
+			if(!land.isLand(l))
+			{
+				TextComponent[] extra = new TextComponent[1];
+				extra[0] = new TextComponent(land.getBeautyName());
+				TextComponent text = Message.getTextComponent(bundle.getString("cmd.land.you-need-to-be-in-land"), extra);
+				text.setColor(ChatColor.RED);
+				p.spigot().sendMessage(text);
+				return true;
+			}
+			
+			TextComponent[] extra = new TextComponent[1];
+			extra[0] = new TextComponent(land.getBeautyName());
+			extra[0].setColor(ChatColor.YELLOW);
+			TextComponent text = Message.getTextComponent(bundle.getString("cmd.land.spawn-location-reset"), extra);
+			text.setColor(ChatColor.GREEN);
+			p.spigot().sendMessage(text);
+			land.setLocation(l);
+		}
+		else if(args.length == 2 && args[1].equalsIgnoreCase("trust"))
 		{
 			Land land = Land.getLandByUserInput(args[0]);
 			
@@ -629,7 +697,7 @@ public class LandCMD implements TabExecutor, Listener
 					
 					TextComponent text = new TextComponent(land.getBeautyName());
 					
-					if(land.getWorld() == p.getWorld())
+					if(land.getWorld() == p.getWorld() || cp.hasPermission("portals.bypass"))
 					{
 						text.setColor(ChatColor.YELLOW);
 						text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/land " + land.getBeautyId()));
@@ -660,7 +728,7 @@ public class LandCMD implements TabExecutor, Listener
 				
 				TextComponent text = new TextComponent(land.getBeautyName());
 				
-				if(land.getWorld() == p.getWorld())
+				if(land.getWorld() == p.getWorld() || cp.hasPermission("portals.bypass"))
 				{
 					text.setColor(ChatColor.YELLOW);
 					text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/land " + land.getBeautyId()));
@@ -756,7 +824,7 @@ public class LandCMD implements TabExecutor, Listener
 				return true;
 			}
 			
-			if(!land.isPublic() && !land.isTrusted(p)) // && !cp.hasPermission("land.bypass"))
+			if(!land.isPublic() && !land.isTrusted(p) && cp.hasPermission("land.bypass"))
 			{
 				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
 				return true;
@@ -764,7 +832,7 @@ public class LandCMD implements TabExecutor, Listener
 			
 			final World w = land.getWorld();
 			
-			if(p.getWorld() != w)
+			if(p.getWorld() != w && !cp.hasPermission("portals.bypass"))
 			{
 				p.sendMessage(ChatColor.RED + bundle.getString("cmds.can-not-teleport-between-dimensions"));
 				return true;

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -252,12 +253,22 @@ public class Temp implements TabExecutor
 //			Jackpot.getInstance().setJackpotTotal(1000000.0d);
 			if(args.length == 1)
 			{
-				Player t = Bukkit.getPlayer(args[0]);
-				
-				if(t != null)
+				try
 				{
-					t.spigot().respawn();
-					p.sendMessage(t.getName() + " respawned!");
+					Difficulty diff = Difficulty.getByValue(Integer.valueOf(args[0]));
+					
+					p.getWorld().setDifficulty(diff);
+					p.sendMessage(p.getWorld().getName() + " difficulty set to " + diff.name());
+				}
+				catch(Exception e)
+				{
+					Player t = Bukkit.getPlayer(args[0]);
+					
+					if(t != null)
+					{
+						t.spigot().respawn();
+						p.sendMessage(t.getName() + " respawned!");
+					}
 				}
 			}
 			else

@@ -67,7 +67,7 @@ public class JackpotPercentage extends GUI
 			List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 			
 			lore.add("" + ChatColor.GRAY + value + "/" + size + " (" + df.format(div * 100.0D) + "%)");
-//			lore.add("(" + df.format(avg) + " shards)");
+			lore.add("(" + df.format(avg) + " shards)"); //
 			
 			meta.setLore(lore);
 			
@@ -92,7 +92,7 @@ public class JackpotPercentage extends GUI
 				ChatColor.GRAY + df.format(Jackpot.PERCENT * 100.0D) + "% jackpot prize ≃ " + df.format(avgJackpot * Jackpot.PERCENT)));
 		info.setItemMeta(meta);
 		
-//		inv.setItem(inv.getSize() - 1, info);
+		inv.setItem(inv.getSize() - 1, info);
 	}
 	
 	@EventHandler

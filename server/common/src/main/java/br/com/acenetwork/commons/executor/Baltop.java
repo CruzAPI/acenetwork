@@ -26,6 +26,8 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class Baltop implements TabExecutor
 {
+	public static final int SIZE = 8;
+	
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
@@ -52,7 +54,7 @@ public class Baltop implements TabExecutor
 			
 			sender.sendMessage(ChatColor.DARK_GRAY + "============" + ChatColor.DARK_GREEN + ChatColor.BOLD + " BALTOP " + ChatColor.DARK_GRAY + "============");
 			
-			for(int i = 0; balTop.hasNext() && i < 10; i++)
+			for(int i = 0; balTop.hasNext() && i < SIZE; i++)
 			{
 				Entry<UUID, CommonPlayerData> entry = balTop.next();
 				UUID uuid = entry.getKey();

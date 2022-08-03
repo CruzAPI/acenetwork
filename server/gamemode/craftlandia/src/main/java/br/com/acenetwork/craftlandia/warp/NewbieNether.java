@@ -2,11 +2,8 @@ package br.com.acenetwork.craftlandia.warp;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageEvent;
 
 import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
 import net.citizensnpcs.api.CitizensAPI;

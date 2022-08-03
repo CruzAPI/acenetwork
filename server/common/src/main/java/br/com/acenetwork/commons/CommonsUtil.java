@@ -2277,6 +2277,7 @@ public class CommonsUtil
 		case JUNGLE_FENCE:
 		case NETHER_FENCE:
 		case SPRUCE_FENCE:
+			return true;
 		default:
 			return false;
 		}

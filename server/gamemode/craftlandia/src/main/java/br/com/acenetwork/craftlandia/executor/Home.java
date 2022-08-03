@@ -307,7 +307,7 @@ public class Home implements TabExecutor, ChannelCommand
 				
 				TextComponent text = new TextComponent(key);
 				
-				if(value.getWorld() == p.getWorld())
+				if(value.getWorld() == p.getWorld() || cp.hasPermission("portals.bypass"))
 				{
 					text.setColor(ChatColor.YELLOW);
 					text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/home " + key));
@@ -375,7 +375,7 @@ public class Home implements TabExecutor, ChannelCommand
 				return true;
 			}
 			
-			if(destiny.getWorld() != p.getWorld())
+			if(destiny.getWorld() != p.getWorld() && !cp.hasPermission("portals.bypass"))
 			{
 				TextComponent[] extra = new TextComponent[1];
 				

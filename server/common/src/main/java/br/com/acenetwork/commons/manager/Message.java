@@ -2,11 +2,17 @@ package br.com.acenetwork.commons.manager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class Message
 {
+	public static TextComponent getTextComponent(String pattern, Supplier<TextComponent[]> extra)
+	{
+		return getTextComponent(pattern, extra.get());
+	}
+	
 	public static TextComponent getTextComponent(String pattern, TextComponent[] extra)
 	{
 		List<Integer> indexes = new ArrayList<>();

@@ -4,19 +4,16 @@ import static org.bukkit.block.BlockFace.EAST;
 import static org.bukkit.block.BlockFace.NORTH;
 import static org.bukkit.block.BlockFace.SOUTH;
 import static org.bukkit.block.BlockFace.WEST;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -30,6 +27,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -60,13 +58,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
@@ -114,7 +110,6 @@ import org.bukkit.material.Attachable;
 import org.bukkit.material.Bed;
 import org.bukkit.material.Directional;
 import org.bukkit.material.Door;
-import org.bukkit.material.MonsterEggs;
 import org.bukkit.material.Rails;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
@@ -132,7 +127,6 @@ import br.com.acenetwork.commons.event.MagnataChangeEvent;
 import br.com.acenetwork.commons.event.PlayerSuccessLoginEvent;
 import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.VipChest;
-import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
@@ -142,10 +136,8 @@ import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
 import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.Home;
-import br.com.acenetwork.craftlandia.executor.ItemInfo;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
 import br.com.acenetwork.craftlandia.executor.LandCMD;
-import br.com.acenetwork.craftlandia.executor.Playtime;
 import br.com.acenetwork.craftlandia.executor.Portal;
 import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
@@ -1058,6 +1050,31 @@ public class Main extends Common implements Listener
 		e.setItemStack(item);
 	}
 	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void b(PlayerBucketEmptyEvent e)
+	{
+		if(e.getBucket() != Material.WATER_BUCKET)
+		{
+			return;
+		}
+		
+		Block b = e.getBlockClicked();
+		Block relative = b.getRelative(e.getBlockFace());
+		
+		if(relative.getBiome() != Biome.HELL)
+		{
+			return;
+		}
+		
+		e.setCancelled(true);
+		Player p = e.getPlayer();
+		
+		p.getItemInHand().setType(Material.BUCKET);
+		
+		((CraftPlayer) e.getPlayer()).getHandle().playerConnection.sendPacket(new PacketPlayOutWorldParticles(
+				EnumParticle.SMOKE_NORMAL, true, relative.getX() + 0.5F, relative.getY() + 0.5F, relative.getZ() + 0.5F, 0.25F, 0.25F, 0.25F, 0.0F, 20, 174));
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(PlayerBucketEmptyEvent e)
 	{
@@ -1219,6 +1236,8 @@ public class Main extends Common implements Listener
 		
 		if(spawner.update())
 		{
+			Rarity itemRarity = Optional.ofNullable(Util.getRarity(item)).orElse(Rarity.COMMON);
+			
 			if(p.getGameMode() != GameMode.CREATIVE)
 			{
 				item.setAmount(item.getAmount() - 1);
@@ -1229,7 +1248,6 @@ public class Main extends Common implements Listener
 				}
 			}
 			
-			Rarity itemRarity = Optional.ofNullable(Util.getRarity(item)).orElse(Rarity.COMMON);
 			BlockData data = Optional.ofNullable(Util.readBlock(b)).orElse(new BlockData());
 			Rarity blockRarity = Optional.ofNullable(data.getRarity()).orElse(Util.getRarity(b.getWorld()));
 			

@@ -67,6 +67,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.StructureGrowEvent;
@@ -257,7 +258,7 @@ public abstract class Warp implements Listener
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void b(PlayerBucketEmptyEvent e)
 	{
 		Block b = e.getBlockClicked();
@@ -551,6 +552,34 @@ public abstract class Warp implements Listener
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
 	
+	@EventHandler(priority = EventPriority.HIGH)
+	public void a(PlayerPortalEvent e)
+	{
+		if(e.getFrom().getWorld() != w)
+		{
+			return;
+		}
+		
+		if(e.getCause() == TeleportCause.END_PORTAL)
+		{
+			return;
+		}
+		
+		if(isSpawnProtection(e.getFrom()))
+		{
+			e.setCancelled(true);
+			return;
+		}
+		
+		Warp warp = Warp.getByWorld(e.getTo().getWorld());
+		
+		if(warp.isSpawnProtection(e.getTo()))
+		{
+			e.setCancelled(true);
+			return;
+		}
+	}
+	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void a(BlockFromToEvent e)
 	{
@@ -562,7 +591,6 @@ public abstract class Warp implements Listener
 		}
 		
 		e.setCancelled(isSpawnProtection(b.getLocation()));
-		
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

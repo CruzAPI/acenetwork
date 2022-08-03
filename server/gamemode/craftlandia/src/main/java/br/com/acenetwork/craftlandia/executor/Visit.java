@@ -1,27 +1,13 @@
 package br.com.acenetwork.craftlandia.executor;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -30,15 +16,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import com.google.common.io.ByteStreams;
-
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.manager.ChannelCommand;
-import br.com.acenetwork.craftlandia.manager.Config;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
 import br.com.acenetwork.craftlandia.manager.HomeObj;
 import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
 import br.com.acenetwork.craftlandia.warp.Warp;
@@ -169,7 +151,7 @@ public class Visit implements TabExecutor, ChannelCommand
 				
 				TextComponent text = new TextComponent(key);
 				
-				if(value.getWorld() == p.getWorld())
+				if(value.getWorld() == p.getWorld() || cp.hasPermission("portals.bypass"))
 				{
 					text.setColor(ChatColor.YELLOW);
 					text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/visit " + op.getName() + " " + key));
@@ -231,7 +213,7 @@ public class Visit implements TabExecutor, ChannelCommand
 			
 			Location destiny = homeObj.getLocation();
 			
-			if(destiny.getWorld() != p.getWorld())
+			if(destiny.getWorld() != p.getWorld() && !cp.hasPermission("portals.bypass"))
 			{
 				TextComponent[] extra = new TextComponent[1];
 				

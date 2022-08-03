@@ -33,8 +33,11 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -43,6 +46,7 @@ import org.bukkit.material.Dispenser;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.event.CustomEntityDeathEvent;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.listener.EntitySpawn;
@@ -246,8 +250,7 @@ public class Land implements Listener
 		Material type = isPublic ? Material.AIR : Material.STAINED_GLASS_PANE;
 		byte data;
 		Block b = w.getBlockAt(getX(), 63, getZ());
-		Bukkit.broadcastMessage(b.getBiome() + "");
-		
+	
 		switch(b.getBiome())
 		{
 		case ICE_PLAINS_SPIKES:
@@ -300,10 +303,10 @@ public class Land implements Listener
 					
 					for(Player all : w.getPlayers())
 					{
-//						if(isTrusted(all))
-//						{
-//							continue;
-//						}
+						if(isTrusted(all))
+						{
+							continue;
+						}
 						
 						if(isLand(all.getLocation()))
 						{
@@ -414,24 +417,27 @@ public class Land implements Listener
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	public void on(PlayerInteractEvent e)
 	{
-		Action a = e.getAction();
+		Player p = e.getPlayer();
+		Block b = e.getClickedBlock();
 		
-		if(a == Action.RIGHT_CLICK_BLOCK)
+		if(b != null && isLand(b))
 		{
-			Player p = e.getPlayer();
-			
-			Block b = e.getClickedBlock();
-			BlockFace bf = e.getBlockFace();
-			
-			Block iteract = CommonsUtil.isInteractable(b.getType(), b.getData()) && !p.isSneaking() ? b : b.getRelative(bf);
-			
-			if(isLand(iteract))
+			if(isTrusted(p))
 			{
-				if(isTrusted(p))
-				{
-					e.setCancelled(false);
-				}
+				e.setCancelled(false);
 			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(HangingPlaceEvent e)
+	{
+		Player p = e.getPlayer();
+		Entity entity = e.getEntity();
+		
+		if(isLand(entity.getLocation()) && isTrusted(p))
+		{
+			e.setCancelled(false);
 		}
 	}
 	
@@ -492,7 +498,7 @@ public class Land implements Listener
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGH)
 	public void a(PlayerBucketEmptyEvent e)
 	{
 		Block b = e.getBlockClicked();
@@ -537,6 +543,20 @@ public class Land implements Listener
 		{
 			e.setCancelled(false);
 		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void b(CustomEntityDeathEvent ce)
+	{
+		EntityDeathEvent e = ce.getEntityDeathEventEvent();
+		
+		if(!isLand(e.getEntity().getLocation()) || !hasOwner())
+		{
+			return;
+		}
+		
+		ce.setKeepExp(false);
+		ce.setKeepInventory(false);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
