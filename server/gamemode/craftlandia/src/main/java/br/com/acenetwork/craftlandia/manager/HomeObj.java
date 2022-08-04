@@ -24,9 +24,9 @@ public class HomeObj implements Serializable
 	{
 		mostSigBits = l.getWorld().getUID().getMostSignificantBits();
 		leastSigBits = l.getWorld().getUID().getLeastSignificantBits();
-		x = l.getBlockX();
-		y = l.getBlockY();
-		z = l.getBlockZ();
+		x = l.getX();
+		y = l.getY();
+		z = l.getZ();
 		yaw = l.getYaw();
 		pitch = l.getPitch();
 		this.isPublic = isPublic;

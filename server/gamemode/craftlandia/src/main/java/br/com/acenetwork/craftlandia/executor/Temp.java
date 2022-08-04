@@ -2,6 +2,7 @@ package br.com.acenetwork.craftlandia.executor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
@@ -13,6 +14,9 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.Repairable;
@@ -24,6 +28,7 @@ import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.manager.LandEntityData;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
@@ -31,7 +36,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 
-public class Temp implements TabExecutor
+public class Temp implements TabExecutor, Listener
 {
 	private static final double HIGHEST = 200.0D * 20.0D;
 	private static final double HIGH = 100.0D * 20.0D;
@@ -225,6 +230,8 @@ public class Temp implements TabExecutor
 		new PRICE(394, (short)0, 0.2D, 640, NORMAL);
 		new PRICE(363, (short)0, 0.25D, 640, HIGHEST);
 		new PRICE(365, (short)0, 0.25D, 640, HIGHEST);
+		
+		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
 	
 	@Override
@@ -233,6 +240,26 @@ public class Temp implements TabExecutor
 		return new ArrayList<>();
 	}
 
+	@EventHandler
+	public void a(PlayerInteractEntityEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		if(!cp.hasPermission("cmd.temp") || temp != p)
+		{
+			return;
+		}
+		
+		WarpLand warpLand = Warp.getInstance(WarpLand.class);
+		
+		LandEntityData data = warpLand.map.get(e.getRightClicked().getUniqueId());
+		p.sendMessage("" + data);
+	}
+	
+	Player temp;
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String aliases, String[] args)
 	{
@@ -245,6 +272,9 @@ public class Temp implements TabExecutor
 			{
 				return true;
 			}
+			
+			temp = temp == null ? p : null;
+			
 //			
 //			ItemStack item = p.getItemInHand();
 //			

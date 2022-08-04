@@ -697,7 +697,7 @@ public class Land implements Listener
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void a(EntitySpawnEvent e)
 	{
 		if(!isLand(e.getLocation()))

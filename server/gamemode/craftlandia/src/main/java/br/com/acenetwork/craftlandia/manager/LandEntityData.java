@@ -38,4 +38,10 @@ public class LandEntityData implements Serializable
 	{
 		this.lastLocation = lastLocation;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "LandEntityData [landId=" + landId + ", lastLocation=" + lastLocation + "]";
+	}
 }

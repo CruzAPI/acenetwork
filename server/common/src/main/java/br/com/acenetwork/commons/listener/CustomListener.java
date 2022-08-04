@@ -34,15 +34,15 @@ public class CustomListener implements Listener
 		}
 		else
 		{
-			if(ce.getKeepExp())
-			{
-				e.setDroppedExp(0);
-			}
-			
 			if(ce.getKeepInventory())
 			{
 				e.getDrops().clear();
 			}
+		}
+		
+		if(ce.getKeepExp())
+		{
+			e.setDroppedExp(0);
 		}
 	}
 }
