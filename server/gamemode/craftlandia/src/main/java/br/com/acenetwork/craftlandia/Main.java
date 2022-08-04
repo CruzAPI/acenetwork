@@ -8,8 +8,11 @@ import static org.bukkit.block.BlockFace.WEST;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -36,7 +39,9 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
@@ -104,6 +109,7 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Attachable;
@@ -111,6 +117,7 @@ import org.bukkit.material.Bed;
 import org.bukkit.material.Directional;
 import org.bukkit.material.Door;
 import org.bukkit.material.Rails;
+import org.bukkit.material.Sign;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
 import org.bukkit.material.TrapDoor;
@@ -119,6 +126,10 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.PacketContainer;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
@@ -173,9 +184,15 @@ import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.citizensnpcs.api.CitizensAPI;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.EntityHuman;
 import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import net.minecraft.server.v1_8_R3.NBTTagList;
+import net.minecraft.server.v1_8_R3.NBTTagString;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_8_R3.StatisticList;
 
 public class Main extends Common implements Listener
 {
@@ -282,6 +299,123 @@ public class Main extends Common implements Listener
 	public void onDisable()
 	{
 		super.onDisable();
+	}
+	
+	public static void open(Player p, net.minecraft.server.v1_8_R3.ItemStack book, boolean addStats)
+	{
+		EntityHuman player = ((CraftHumanEntity) p).getHandle();
+		ItemStack hand = p.getItemInHand();
+		
+		try
+		{
+			p.setItemInHand(CraftItemStack.asBukkitCopy(book));
+			player.openBook(book);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			p.setItemInHand(hand);
+		}
+		
+		if(addStats)
+		{
+			player.b(StatisticList.USE_ITEM_COUNT[387]);
+		}
+    }
+	
+	public static net.minecraft.server.v1_8_R3.ItemStack createBook(String author, String name, List<String> list)
+	{
+		net.minecraft.server.v1_8_R3.ItemStack book = new net.minecraft.server.v1_8_R3.ItemStack(net.minecraft.server.v1_8_R3.Item.getById(387));
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.setString("author", author);
+		tag.setString("title", name);
+		NBTTagList pages = new NBTTagList();
+		
+		for(String page : list)
+		{
+			pages.add(new NBTTagString(page));
+		}
+		
+		tag.set("pages", pages);
+		book.setTag(tag);
+		return book;
+	}
+	
+	@EventHandler
+	public void a(PlayerInteractEvent e)
+	{
+		Player p = e.getPlayer();
+		
+		Block b = e.getClickedBlock();
+		
+		if(b != null && b.getState() instanceof org.bukkit.block.Sign && !p.isSneaking())
+		{
+			org.bukkit.block.Sign sign = (org.bukkit.block.Sign) b.getState();
+			
+			String regex = "(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})";
+			Pattern pattern = Pattern.compile(regex);
+			
+			List<String> links = new ArrayList<>();
+			
+			for(String line : sign.getLines())
+			{
+				Matcher matcher = pattern.matcher(line);
+				
+				while(matcher.find())
+				{
+					String group = matcher.group();
+					
+					if(!group.startsWith("http://") && !group.startsWith("https://"))
+					{
+						group = "http://" + group;
+					}
+					
+					TextComponent text = new TextComponent(group);
+					text.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, group));
+					text.setColor(ChatColor.DARK_BLUE);
+					text.setUnderlined(true);
+					links.add(text.toLegacyText());
+				}
+			}
+			
+			open(p, createBook(p.getName(), "test", links), true);
+		}
+	}
+	
+	@EventHandler
+	public void b(SignChangeEvent e)
+	{
+		String[] lines = e.getLines();
+		
+		String regex = "(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})";
+		Pattern pattern = Pattern.compile(regex);
+		String colorCode = "" + ChatColor.DARK_BLUE + ChatColor.UNDERLINE;
+		String resetCode = "" + ChatColor.RESET;
+		
+		for(int i = 0; i < lines.length; i++)
+		{
+			String oldLine = lines[i];
+			Matcher matcher = pattern.matcher(oldLine);
+			
+			String newLine = "";
+			
+			int end = 0;
+			
+			while(matcher.find())
+			{
+				int start = matcher.start();
+				newLine += oldLine.substring(end, start) + colorCode;
+				end = matcher.end();
+				newLine += oldLine.substring(start, end) + resetCode;
+			}
+			
+			newLine += oldLine.substring(end, oldLine.length());
+			
+			e.setLine(i, newLine);
+		}
 	}
 	
 	@EventHandler

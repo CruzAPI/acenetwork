@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
@@ -83,6 +84,7 @@ import br.com.acenetwork.commons.manager.Pitch;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.craftlandia.Property;
 import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
 import br.com.acenetwork.craftlandia.manager.BlockData;
@@ -307,14 +309,51 @@ public abstract class Warp implements Listener
 			return;
 		}
 		
+		Block against = e.getBlockAgainst();
+		
 		BlockData data = new BlockData();
+		BlockData againstData = Util.readBlock(against);
+
+		ItemStack inHand = e.getItemInHand();
 		
-		data.setRarity(Optional.ofNullable(Util.getRarity(e.getItemInHand())).orElse(Rarity.COMMON));
-		data.setProperties(Util.getProperties(e.getItemInHand()));
+		Rarity itemRarity = Optional.ofNullable(Util.getRarity(inHand)).orElse(Rarity.COMMON);
+		Rarity againstRarity = Optional.ofNullable(againstData == null ? null : againstData.getRarity()).orElse(Rarity.COMMON);
+		Rarity worldRarity = Util.getRarity(b.getWorld());
 		
-		if(b.getType() == Material.WALL_SIGN)
+		Set<Property> itemProperties = Util.getProperties(inHand);
+		
+		Rarity worstRarity = itemRarity;
+		
+		switch(inHand.getType())
 		{
-			data.setPlayer(e.getPlayer().getUniqueId());
+		case SEEDS:
+		case MELON_SEEDS:
+		case PUMPKIN_SEEDS:
+		case NETHER_STALK:
+		case SAPLING:
+		case RED_MUSHROOM:
+		case BROWN_MUSHROOM:
+		case CACTUS:
+		case SUGAR_CANE:
+		case DOUBLE_PLANT:
+		case LONG_GRASS:
+		case YELLOW_FLOWER:
+		case RED_ROSE:
+		case INK_SACK:
+			worstRarity = Util.getWorstRarity(itemRarity, againstRarity, worldRarity);
+			break;
+		default:
+			break;
+		}
+		
+		data.setRarity(worstRarity);
+		data.setProperties(itemProperties);
+		
+		Player p = e.getPlayer();
+		
+		if(b.getType() == Material.WALL_SIGN && CommonsUtil.hasPermission(p, "cmd.shop"))
+		{
+			data.setPlayer(p.getUniqueId());
 		}
 		
 		writeBlock(b, data);
