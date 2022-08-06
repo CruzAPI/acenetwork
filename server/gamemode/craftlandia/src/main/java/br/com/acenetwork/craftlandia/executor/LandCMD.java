@@ -21,6 +21,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -166,36 +167,64 @@ public class LandCMD implements TabExecutor, Listener
 //			return true;
 //		}
 		
-		if(args.length == 1 && (args[0].equalsIgnoreCase("identify") || args[0].equalsIgnoreCase("id")))
+		if((args.length == 1 && (args[0].equalsIgnoreCase("identify") || args[0].equalsIgnoreCase("id") || args[0].equalsIgnoreCase("info")))
+				|| args.length == 2 && (args[1].equalsIgnoreCase("identify") || args[1].equalsIgnoreCase("id") || args[1].equalsIgnoreCase("info")))
 		{
 			Location l  = p.getLocation();
 			
-			for(Land land : Land.SET)
+			Land land = null;
+			
+			if(args.length == 2)
 			{
-				if(land.isLand(l))
+				land = Land.getLandByUserInput(args[0]);
+			}
+			else
+			{
+				for(Land lands : Land.SET)
 				{
-					p.sendMessage("");
-					p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.land")) + ": " + ChatColor.YELLOW + land.getBeautyId());
-					
-					if(land.getName() != null)
+					if(lands.isLand(l))
 					{
-						p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.name")) + ": " + ChatColor.YELLOW + land.getName());
+						land = lands;
+						break;
 					}
-					
-					if(land.hasOwner())
-					{
-						OfflinePlayer op = Bukkit.getOfflinePlayer(land.getOwner());
-						String displayName = op.isOnline() ? op.getPlayer().getDisplayName() : ChatColor.GRAY + op.getName();
-						p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.owner")) + ": " + displayName);
-					}
-					
-					p.sendMessage("");
-					
-					return true;
 				}
 			}
 			
-			p.sendMessage(ChatColor.RED + bundle.getString("cmd.land.land-not-found"));
+			if(land == null)
+			{
+				p.sendMessage(ChatColor.RED + bundle.getString("cmd.land.land-not-found"));
+				return true;
+			}
+			
+			p.sendMessage("");
+			p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.land")) + ": " + ChatColor.YELLOW + land.getBeautyId());
+			
+			p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.size")) + ": " + ChatColor.YELLOW
+					+ bundle.getString("size." + land.getType().name().toLowerCase()).toUpperCase() + ChatColor.GRAY 
+					+ " (" + land.getSize() + "x" + land.getSize() + ")");
+			
+			p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.biome")) + ": " + Land.getColor(land.getBiome()) 
+			+ WordUtils.capitalize(land.getBiome().name().replace('_', ' ').toLowerCase()));
+			
+			if(land.getName() != null || land.hasOwner())
+			{
+				p.sendMessage("");
+			}
+			
+			if(land.getName() != null)
+			{
+				p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.name")) + ": " + ChatColor.YELLOW + land.getName());
+			}
+			
+			if(land.hasOwner())
+			{
+				OfflinePlayer op = Bukkit.getOfflinePlayer(land.getOwner());
+				String displayName = op.isOnline() ? op.getPlayer().getDisplayName() : ChatColor.GRAY + op.getName();
+				p.sendMessage(ChatColor.GREEN + StringUtils.capitalize(bundle.getString("noun.owner")) + ": " + displayName);
+			}
+			
+			p.sendMessage("");
+			
 			return true;
 		}
 		else if(args.length == 2 && args[1].equalsIgnoreCase("setspawnlocation"))
@@ -824,7 +853,7 @@ public class LandCMD implements TabExecutor, Listener
 				return true;
 			}
 			
-			if(!land.isPublic() && !land.isTrusted(p) && cp.hasPermission("land.bypass"))
+			if(!land.isPublic() && !land.isTrusted(p) && !cp.hasPermission("land.bypass"))
 			{
 				p.sendMessage(ChatColor.RED + bundle.getString("commons.cmds.permission"));
 				return true;

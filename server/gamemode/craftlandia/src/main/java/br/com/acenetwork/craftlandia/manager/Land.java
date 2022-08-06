@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -53,6 +54,7 @@ import br.com.acenetwork.commons.listener.EntitySpawn;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
+import net.md_5.bungee.api.ChatColor;
 
 public class Land implements Listener
 {
@@ -69,6 +71,7 @@ public class Land implements Listener
 	private final int x, z;
 	private final int id;
 	private final Type type;
+	private final Biome biome;
 	
 	private LandData landData;
 	
@@ -133,7 +136,7 @@ public class Land implements Listener
 	
 	public enum Type
 	{
-		BIG(63),
+		LARGE(63),
 		MEDIUM(29), 
 		SMALL(12), 
 		;
@@ -174,6 +177,7 @@ public class Land implements Listener
 		this.x = x;
 		this.z = z;
 		this.type = type;
+		this.biome = Bukkit.getWorld(worldUID).getBiome(x, z);
 		
 		this.landData = LandData.load(id);
 		
@@ -780,7 +784,42 @@ public class Land implements Listener
 			return SET.stream().filter(x -> input.equals(x.getName())).findAny().orElse(null);
 		}
 	}
-
+	
+	public static ChatColor getColor(Biome biome)
+	{
+		switch(biome)
+		{
+		case DESERT:
+			return ChatColor.YELLOW;
+		case MESA:
+			return ChatColor.GOLD;
+		case HELL:
+			return ChatColor.RED;
+		case SKY:
+			return ChatColor.DARK_PURPLE;
+		case MUSHROOM_ISLAND:
+			return ChatColor.LIGHT_PURPLE;
+		case ICE_PLAINS_SPIKES:
+			return ChatColor.WHITE;
+		case JUNGLE:
+			return ChatColor.GREEN;
+		case SWAMPLAND:
+			return ChatColor.DARK_GREEN;
+		default:
+			return ChatColor.GRAY;
+		}
+	}
+	
+	public Biome getBiome()
+	{
+		return biome;
+	}
+	
+	public Type getType()
+	{
+		return type;
+	}
+	
 	public int getTrustedPlayerLimit()
 	{
 		return getSize() / 4;
