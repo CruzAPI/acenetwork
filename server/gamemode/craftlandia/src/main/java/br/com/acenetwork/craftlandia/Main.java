@@ -466,8 +466,6 @@ public class Main extends Common
 		Player p = e.getPlayer();
 		CommonPlayer cp = CraftCommonPlayer.get(p);
 		
-		p.setOp(false);
-		
 		if(cp.isLogged())
 		{
 			return;

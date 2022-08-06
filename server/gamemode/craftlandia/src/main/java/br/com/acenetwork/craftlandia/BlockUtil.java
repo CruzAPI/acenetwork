@@ -162,7 +162,7 @@ public class BlockUtil
 		case STONE:
 			if(tool == null || tool.getType().name().contains("PICKAXE"))
 			{
-				if(silkTouch > 0)
+				if(b.getData() != 0 || silkTouch > 0)
 				{
 					items.add(new ItemStack(b.getType(), 1, b.getData()));
 				}
