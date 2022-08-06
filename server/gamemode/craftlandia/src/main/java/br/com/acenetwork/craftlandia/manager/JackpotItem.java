@@ -4,24 +4,26 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 
-import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.manager.BundleSupplier;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
-import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.item.CommonRandomItem;
+import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
+import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
+import br.com.acenetwork.craftlandia.item.NormalRandomItem;
+import br.com.acenetwork.craftlandia.item.RareRandomItem;
+import br.com.acenetwork.craftlandia.item.VipItem;
 import net.md_5.bungee.api.ChatColor;
 
 public enum JackpotItem
 {
-	
-	JACKPOT((byte) -1, new BundleSupplier<ItemStack>()
+	JACKPOT(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
@@ -48,7 +50,7 @@ public enum JackpotItem
 		}
 	}),
 	
-	NONE((byte) 0, new BundleSupplier<ItemStack>()
+	NONE(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
@@ -61,17 +63,19 @@ public enum JackpotItem
 		}
 	}),
 	
-	NUGGET_1((byte) 1, new BundleSupplier<ItemStack>()
+	NUGGET(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
 			double bet = (double) args[0];
+			int amount = (int) args[1];
+			
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
 			df.setGroupingSize(3);
 			df.setGroupingUsed(true);
 			
-			ItemStack item = new ItemStack(Material.GOLD_NUGGET, 1);
+			ItemStack item = new ItemStack(Material.GOLD_NUGGET, amount);
 			double prize = bet * Jackpot.getMultiplier(item);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
@@ -80,18 +84,19 @@ public enum JackpotItem
 		}
 	}),
 	
-	NUGGET_2((byte) 2, new BundleSupplier<ItemStack>()
+	INGOT(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
 			double bet = (double) args[0];
+			int amount = (int) args[1];
 			
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
 			df.setGroupingSize(3);
 			df.setGroupingUsed(true);
 			
-			ItemStack item = new ItemStack(Material.GOLD_NUGGET, 2);
+			ItemStack item = new ItemStack(Material.GOLD_INGOT, amount);
 			double prize = bet * Jackpot.getMultiplier(item);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
@@ -100,18 +105,19 @@ public enum JackpotItem
 		}
 	}),
 	
-	NUGGET_3((byte) 3, new BundleSupplier<ItemStack>()
+	BLOCK(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
 			double bet = (double) args[0];
+			int amount = (int) args[1];
 			
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
 			df.setGroupingSize(3);
 			df.setGroupingUsed(true);
 			
-			ItemStack item = new ItemStack(Material.GOLD_NUGGET, 3);
+			ItemStack item = new ItemStack(Material.GOLD_BLOCK, amount);
 			double prize = bet * Jackpot.getMultiplier(item);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
@@ -120,259 +126,19 @@ public enum JackpotItem
 		}
 	}),
 	
-	
-	NUGGET_4((byte) 4, new BundleSupplier<ItemStack>()
+	$BTA(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
 			double bet = (double) args[0];
+			int amount = (int) args[1];
 			
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
 			df.setGroupingSize(3);
 			df.setGroupingUsed(true);
 			
-			ItemStack item = new ItemStack(Material.GOLD_NUGGET, 4);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	NUGGET_5((byte) 5, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_NUGGET, 5);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	INGOT_1((byte) 6, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	INGOT_2((byte) 7, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_INGOT, 2);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	INGOT_3((byte) 8, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_INGOT, 3);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	INGOT_4((byte) 9, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_INGOT, 4);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	INGOT_5((byte) 10, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_INGOT, 5);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	BLOCK_1((byte) 11, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_BLOCK, 1);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	BLOCK_2((byte) 12, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_BLOCK, 2);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	BLOCK_3((byte) 13, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_BLOCK, 3);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	BLOCK_4((byte) 14, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_BLOCK, 4);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	BLOCK_5((byte) 15, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.GOLD_BLOCK, 5);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.SHARDS_UUID + ChatColor.GOLD + ChatColor.BOLD + df.format(prize) + " " + bundle.getString("shards").toUpperCase());
-			item.setItemMeta(meta);
-			return item;
-		}
-	}),
-	
-	$BTA_1((byte) 16, new BundleSupplier<ItemStack>()
-	{
-		@Override
-		public ItemStack get(ResourceBundle bundle, Object... args)
-		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.NETHER_STAR, 1);
+			ItemStack item = new ItemStack(Material.NETHER_STAR, amount);
 			double prize = bet * Jackpot.getMultiplier(item);
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Jackpot.$BTA_UUID + ChatColor.DARK_PURPLE + ChatColor.BOLD + df.format(prize) + " $BTA");
@@ -381,133 +147,93 @@ public enum JackpotItem
 		}
 	}),
 	
-	$BTA_3((byte) 17, new BundleSupplier<ItemStack>()
+	VIP(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.NETHER_STAR, 3);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.$BTA_UUID + ChatColor.DARK_PURPLE + ChatColor.BOLD + df.format(prize) + " $BTA");
-			item.setItemMeta(meta);
+			int amount = (int) args[1];
+			int version = (int) args[2];
+			ItemStack item = ItemSpecial.getInstance(VipItem.class).getItemStack(bundle, UUID.randomUUID(), version);
+			item.setAmount(amount);
 			return item;
 		}
 	}),
 	
-	$BTA_5((byte) 18, new BundleSupplier<ItemStack>()
+	RANDOM_ITEM(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
-			double bet = (double) args[0];
-			
-			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
-			df.setGroupingSize(3);
-			df.setGroupingUsed(true);
-			
-			ItemStack item = new ItemStack(Material.NETHER_STAR, 5);
-			double prize = bet * Jackpot.getMultiplier(item);
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Jackpot.$BTA_UUID + ChatColor.DARK_PURPLE + ChatColor.BOLD + df.format(prize) + " $BTA");
-			item.setItemMeta(meta);
+			int amount = (int) args[1];
+			int version = (int) args[2];
+			ItemStack item = ItemSpecial.getInstance(NormalRandomItem.class).getItemStack(bundle, UUID.randomUUID(), version);
+			item.setAmount(amount);
 			return item;
 		}
 	}),
 	
-	RANDOM_ITEM((byte) 19, new BundleSupplier<ItemStack>()
+	COMMON_RANDOM_ITEM(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
-			int version = (int) args[1];
-			
-			ItemStack item;
-			ItemMeta meta;
-			
-			if(version > 5)
-			{
-				item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-				meta = item.getItemMeta();
-				CommonsUtil.setCustomSkull((SkullMeta) meta, RandomItem.SKIN_VALUE);
-			}
-			else
-			{
-				item = new ItemStack(Material.CHEST);
-				meta = item.getItemMeta();
-			}
-			
-			meta.setDisplayName(Jackpot.RANDOM_ITEM_UUID + ChatColor.WHITE + ChatColor.BOLD + bundle.getString("inv.jackpot.random-item.item"));
-			item.setItemMeta(meta);
+			int amount = (int) args[1];
+			int version = (int) args[2];
+			ItemStack item = ItemSpecial.getInstance(CommonRandomItem.class).getItemStack(bundle, UUID.randomUUID(), version);
+			item.setAmount(amount);
 			return item;
 		}
 	}),
 	
-	VIP((byte) 20, new BundleSupplier<ItemStack>()
+	RARE_RANDOM_ITEM(new BundleSupplier<ItemStack>()
 	{
 		@Override
 		public ItemStack get(ResourceBundle bundle, Object... args)
 		{
-			int version = (int) args[1];
-			
-			ItemStack item;
-			ItemMeta meta;
-			
-			if(version > 5)
-			{
-				item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-				meta = item.getItemMeta();
-				CommonsUtil.setCustomSkull((SkullMeta) meta, VipChest.SKIN_VALUE);
-			}
-			else
-			{
-				item = new ItemStack(Material.WOOL, 1, (short) 5);
-				meta = item.getItemMeta();
-			}
-			
-			meta.setDisplayName(Jackpot.VIP_UUID + ChatColor.GREEN + ChatColor.BOLD + bundle.getString("abbreviation.vip"));
-			item.setItemMeta(meta);
+			int amount = (int) args[1];
+			int version = (int) args[2];
+			ItemStack item = ItemSpecial.getInstance(RareRandomItem.class).getItemStack(bundle, UUID.randomUUID(), version);
+			item.setAmount(amount);
+			return item;
+		}
+	}),
+	
+	LEGENDARY_RANDOM_ITEM(new BundleSupplier<ItemStack>()
+	{
+		@Override
+		public ItemStack get(ResourceBundle bundle, Object... args)
+		{
+			int amount = (int) args[1];
+			int version = (int) args[2];
+			ItemStack item = ItemSpecial.getInstance(LegendaryRandomItem.class).getItemStack(bundle, UUID.randomUUID(), version);
+			item.setAmount(amount);
+			return item;
+		}
+	}),
+	
+	CONTAINMENT_PICKAXE(new BundleSupplier<ItemStack>()
+	{
+		@Override
+		public ItemStack get(ResourceBundle bundle, Object... args)
+		{
+			float chance = (float) args[1];
+			ItemStack item = ItemSpecial.getInstance(ContainmentPickaxe.class).getItemStack(bundle, chance);
 			return item;
 		}
 	}),
 	
 	;
 	
-	private final byte id;
 	private final BundleSupplier<ItemStack> itemSupplier;
 	
-	private JackpotItem(byte id, BundleSupplier<ItemStack> itemSupplier)
+	private JackpotItem(BundleSupplier<ItemStack> itemSupplier)
 	{
-		this.id = id;
 		this.itemSupplier = itemSupplier;
-	}
-	
-	public byte getId()
-	{
-		return id;
 	}
 	
 	public BundleSupplier<ItemStack> getItemSupplier()
 	{
 		return itemSupplier;
-	}
-
-	public static JackpotItem getById(Byte id)
-	{
-		for(JackpotItem value : values())
-		{
-			if(value.id == id)
-			{
-				return value;
-			}
-		}
-		
-		return null;
 	}
 }

@@ -2,7 +2,6 @@ package br.com.acenetwork.craftlandia.inventory;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,18 +21,22 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.comphenix.protocol.ProtocolLibrary;
-
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.inventory.GUI;
-import br.com.acenetwork.commons.inventory.VipChestGUI;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
-import br.com.acenetwork.craftlandia.listener.RandomItem;
-import br.com.acenetwork.craftlandia.manager.JackpotItem;
+import br.com.acenetwork.craftlandia.item.CommonRandomItem;
+import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
+import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
+import br.com.acenetwork.craftlandia.item.NormalRandomItem;
+import br.com.acenetwork.craftlandia.item.RareRandomItem;
+import br.com.acenetwork.craftlandia.item.VipItem;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
+import br.com.acenetwork.craftlandia.manager.JackpotType;
+import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -44,7 +47,7 @@ public class JackpotGUI extends GUI
 	private ItemStack glass2;
 	
 	private final Random r;
-	private final byte[] array;
+	private final ItemStack[] array;
 	
 	private int tickSpeed = 2;
 	private long tick;
@@ -57,23 +60,27 @@ public class JackpotGUI extends GUI
 	private int task;
 	private int taskB;
 	private final ResourceBundle bundle;
+	private final Player p;
 	
 	private final int version;
-	private final Map<Byte, ItemStack> items = new HashMap<>();
 	private boolean finished;
-	private final Jackpot jackpot;
 	private final double bet;
+	private final JackpotType type;
 	
-	public JackpotGUI(CommonPlayer cp, double bet, Map<Byte, Integer> map)
+	public JackpotGUI(CommonPlayer cp, NPC machine, JackpotType type)
 	{
 		super(cp, () ->
 		{
-			return Bukkit.createInventory(cp.getPlayer(), 9 * 3, "              " + ChatColor.BLACK + ChatColor.BOLD + "JACKPOT");
+			return Bukkit.createInventory(cp.getPlayer(), 9 * 3, "              " + type.getColor() + ChatColor.BOLD + "JACKPOT");
 		});
 		
-		this.bet = bet;
-		this.jackpot = Jackpot.getInstance();
+		this.type = type;
+		this.bet = type.getBet();
 		this.bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		this.p = cp.getPlayer();
+		this.version = cp.getVersion();
+		
+		Map<ItemStack, Integer> map = type.getMapSupplier().get(bundle, version);
 		
 		r = new Random();
 		int size = 0;
@@ -83,24 +90,16 @@ public class JackpotGUI extends GUI
 			size += i;
 		}
 		
-		array = new byte[size];
+		array = new ItemStack[size];
 		
 		int j = 0;
 		
-		for(Entry<Byte, Integer> entry : map.entrySet())
+		for(Entry<ItemStack, Integer> entry : map.entrySet())
 		{
 			for(int i = 0; i < entry.getValue() && j < array.length; i++, j++)
 			{
 				array[j] = entry.getKey();
 			}
-		}
-		
-		Player p = cp.getPlayer();
-		version = ProtocolLibrary.getProtocolManager().getProtocolVersion(p);
-
-		for(JackpotItem item : JackpotItem.values())
-		{
-			items.put(item.getId(), item.getItemSupplier().get(bundle, bet, version));
 		}
 		
 		CommonsUtil.shuffle(array, r);
@@ -109,17 +108,17 @@ public class JackpotGUI extends GUI
 		
 		ItemMeta meta;
 		
-		middleGlass = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15);
+		middleGlass = new ItemStack(Material.STAINED_GLASS_PANE, 1, type.getMiddleGlass());
 		meta = middleGlass.getItemMeta();
 		meta.setDisplayName(" ");
 		middleGlass.setItemMeta(meta);
 		
-		glass1 = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 3);
+		glass1 = new ItemStack(Material.STAINED_GLASS_PANE, 1, type.getGlass1());
 		meta = glass1.getItemMeta();
 		meta.setDisplayName(" ");
 		glass1.setItemMeta(meta);
 		
-		glass2 = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5);
+		glass2 = new ItemStack(Material.STAINED_GLASS_PANE, 1, type.getGlass2());
 		meta = glass2.getItemMeta();
 		meta.setDisplayName(" ");
 		glass2.setItemMeta(meta);
@@ -127,7 +126,7 @@ public class JackpotGUI extends GUI
 		inv.setItem(4, middleGlass);
 		inv.setItem(22, middleGlass);
 		
-		targetTimes = 25 + r.nextInt(25);
+		targetTimes = type.getTime() + r.nextInt(type.getTime());
 		
 		task = Bukkit.getScheduler().scheduleSyncRepeatingTask(Main.getInstance(), () ->
 		{
@@ -147,7 +146,7 @@ public class JackpotGUI extends GUI
 					{
 						Bukkit.getScheduler().cancelTask(task);
 						finished = true;
-						jackpot.setInUse(false);
+						machine.data().set("inUse", false);
 						refresh(true);
 						return;
 					}
@@ -205,8 +204,7 @@ public class JackpotGUI extends GUI
 		
 		for(int i = 9; i < 9 + 9; i++)
 		{
-			byte b = array[(pos + i >= array.length ? (pos + i) - array.length : pos + i)];
-			inv.setItem(i, getItemStack(b));
+			inv.setItem(i, array[(pos + i >= array.length ? (pos + i) - array.length : pos + i)]);
 		}
 		
 		if(finish)
@@ -219,6 +217,8 @@ public class JackpotGUI extends GUI
 			
 			TextComponent tag = new TextComponent("[" + bundle.getString("noun.jackpot").toUpperCase() + "]");
 			tag.setColor(ChatColor.AQUA);
+			
+			int amount = 0;
 			
 			if(CommonsUtil.containsUUID(item, Jackpot.JACKPOT_UUID) && jackpotPrize > 0.0D)
 			{
@@ -309,12 +309,6 @@ public class JackpotGUI extends GUI
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - Jackpot.$BTA_TO_SHARDS * bta);
 				cp.setBTA(cp.getBTA() + bta);
 			}
-			else if(CommonsUtil.containsUUID(item, Jackpot.VIP_UUID))
-			{
-				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - 10.000D);
-				p.getInventory().addItem(VipChestGUI.getVipItem()).values()
-						.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
-			}
 			else if(CommonsUtil.containsUUID(item, Jackpot.SHARDS_UUID))
 			{
 				p.playSound(p.getLocation(), Sound.NOTE_PLING, 1.0F, 1.5F);
@@ -341,9 +335,62 @@ public class JackpotGUI extends GUI
 				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - prize); 
 				cp.setBalance(cp.getBalance() + prize);
 			}
-			else if(CommonsUtil.containsUUID(item, Jackpot.RANDOM_ITEM_UUID))
+			else if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(VipItem.class).getUUID()))
 			{
-				p.getInventory().addItem(RandomItem.getInstance().getItemSupplier().get(bundle, version)).values()
+				jackpot.setJackpotTotal(jackpot.getJackpotTotal() - Jackpot.getValueInShards(bet, item));
+				amount = item.getAmount();
+				
+				for(int i = 0; i < item.getAmount(); i++)
+				{
+					p.getInventory().addItem(ItemSpecial.getInstance(VipItem.class).getItemStack(bundle, null, version)).values()
+							.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
+				}
+			}
+			else if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(NormalRandomItem.class).getUUID()))
+			{
+				amount = item.getAmount();
+				
+				for(int i = 0; i < item.getAmount(); i++)
+				{
+					p.getInventory().addItem(ItemSpecial.getInstance(NormalRandomItem.class).getItemStack(bundle, null, version)).values()
+							.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
+				}
+			}
+			else if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(CommonRandomItem.class).getUUID()))
+			{
+				amount = item.getAmount();
+				
+				for(int i = 0; i < item.getAmount(); i++)
+				{
+					p.getInventory().addItem(ItemSpecial.getInstance(CommonRandomItem.class).getItemStack(bundle, null, version)).values()
+							.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
+				}
+			}
+			else if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(RareRandomItem.class).getUUID()))
+			{
+				amount = item.getAmount();
+				
+				for(int i = 0; i < item.getAmount(); i++)
+				{
+					p.getInventory().addItem(ItemSpecial.getInstance(RareRandomItem.class).getItemStack(bundle, null, version)).values()
+							.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
+				}
+			}
+			else if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(LegendaryRandomItem.class).getUUID()))
+			{
+				amount = item.getAmount();
+				
+				for(int i = 0; i < item.getAmount(); i++)
+				{
+					p.getInventory().addItem(ItemSpecial.getInstance(LegendaryRandomItem.class).getItemStack(bundle, null, version)).values()
+							.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
+				}
+			}
+			else if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(ContainmentPickaxe.class).getUUID()))
+			{
+				amount = item.getAmount();
+				
+				p.getInventory().addItem(item).values()
 						.forEach(x -> p.getWorld().dropItemNaturally(p.getLocation(), x));
 			}
 			else
@@ -356,7 +403,7 @@ public class JackpotGUI extends GUI
 			TextComponent[] extra = new TextComponent[2];
 			
 			extra[0] = new TextComponent(p.getDisplayName());
-			extra[1] = new TextComponent(item.getItemMeta().getDisplayName());
+			extra[1] = new TextComponent(item.getItemMeta().getDisplayName() + (amount > 1 ? " x" + amount : ""));
 			
 			for(CommonPlayer cpall : CraftCommonPlayer.SET)
 			{
@@ -375,23 +422,6 @@ public class JackpotGUI extends GUI
 		{
 			p.playSound(p.getLocation(), Sound.NOTE_PLING, 1.0F, 0.75F);
 		}
-	}
-	
-	private ItemStack getItemStack(byte b)
-	{
-		ItemStack item = items.get(b);
-		
-		if(item != null)
-		{
-			if(JackpotItem.JACKPOT.getId() == b)
-			{
-				return JackpotItem.JACKPOT.getItemSupplier().get(bundle);
-			}
-			
-			return item;
-		}
-		
-		return null;
 	}
 	
 	@EventHandler

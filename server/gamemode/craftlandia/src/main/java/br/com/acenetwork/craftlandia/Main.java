@@ -161,15 +161,16 @@ import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.executor.WorldCMD;
 import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
+import br.com.acenetwork.craftlandia.item.CommonRandomItem;
+import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
-import br.com.acenetwork.craftlandia.listener.RandomItem;
 import br.com.acenetwork.craftlandia.listener.TestListener;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
 import br.com.acenetwork.craftlandia.manager.LandData;
 import br.com.acenetwork.craftlandia.manager.PlayerData;
-import br.com.acenetwork.craftlandia.manager.SpecialItems;
 import br.com.acenetwork.craftlandia.warp.Factions;
 import br.com.acenetwork.craftlandia.warp.FactionsNether;
 import br.com.acenetwork.craftlandia.warp.FactionsTheEnd;
@@ -262,9 +263,10 @@ public class Main extends Common implements Listener
 			
 			getServer().getPluginManager().registerEvents(this, this);
 			getServer().getPluginManager().registerEvents(new PlayerMode(), this);
-			getServer().getPluginManager().registerEvents(new RandomItem(), this);
 			getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
 			getServer().getPluginManager().registerEvents(new TestListener(), this);
+			
+			ItemSpecial.load();
 			
 			registerCommand(new Temp(), "temp");
 			
@@ -1892,7 +1894,7 @@ public class Main extends Common implements Listener
 		
 		BlockUtil.breakNaturally(b, tool);
 		
-		if(SpecialItems.getInstance().isContainmentPickaxe(tool))
+		if(ItemSpecial.getInstance(ContainmentPickaxe.class).isInstanceOf(tool))
 		{
 			p.playSound(p.getLocation(), Sound.ITEM_BREAK, 1.0F, 1.0F);
 			p.setItemInHand(null);
@@ -2037,31 +2039,6 @@ public class Main extends Common implements Listener
 		Block b = e.getBlock();
 		
 		Util.writeBlock(b, Util.readBlock(source));
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void a(EntityDamageEvent e)
-	{
-		if(!(e.getEntity() instanceof Player))
-		{
-			return;
-		}
-		
-		Player p = (Player) e.getEntity();
-		
-		if(p.getHealth() - e.getFinalDamage() <= 0.0D)
-		{
-			for(int i = 0; i < p.getInventory().getSize(); i++)
-			{
-				if(activateVIP(p, i))
-				{
-					e.setCancelled(true);
-					p.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 20 * 5, 2));
-					p.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20 * 5, 2));
-					break;
-				}
-			}
-		}
 	}
 	
 	public boolean activateVIP(Player p, int slot)

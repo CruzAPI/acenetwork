@@ -5,22 +5,21 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.commons.executor.VipChest;
-import br.com.acenetwork.commons.inventory.AnvilCommand;
-import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.inventory.Scroller;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.item.CommonRandomItem;
+import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
+import br.com.acenetwork.craftlandia.item.NormalRandomItem;
+import br.com.acenetwork.craftlandia.item.RareRandomItem;
+import br.com.acenetwork.craftlandia.item.VipItem;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
 import net.md_5.bungee.api.ChatColor;
 
 public class SpecialItemSelector extends Scroller
@@ -42,8 +41,11 @@ public class SpecialItemSelector extends Scroller
 	{
 		super(cp, "inv.item-selector");
 		
-		itemList.add(new ItemKey(VipChest.getInstance().getVipSupplier().get(null, UUID.randomUUID()), "vip"));
-		itemList.add(new ItemKey(RandomItem.getInstance().getItemSupplier().get(null, 47, UUID.randomUUID()), "random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(VipItem.class).getItemStack(null, UUID.randomUUID()), "vip"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(NormalRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(CommonRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "common_random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(RareRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "rare_random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(LegendaryRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "legendary_random_item"));
 		
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		

@@ -37,7 +37,8 @@ import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.Rarity;
 import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.manager.SpecialItems;
+import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 
@@ -55,6 +56,8 @@ public class CustomAnvil extends GUI
 	private final Rarity rarity;
 	private final Block b;
 	private final ResourceBundle bundle;
+	
+	private final ContainmentPickaxe containmentPickaxe = ItemSpecial.getInstance(ContainmentPickaxe.class);
 	
 	private int cost;
 	private int materials;
@@ -295,7 +298,7 @@ public class CustomAnvil extends GUI
 			rename = null;
 		}
 		
-		inv.setItem(32, left.getType() == Material.AIR || SpecialItems.getInstance().isSpecial(left) ? blackGlass : rename == null ? renameItem : clearRename);
+		inv.setItem(32, left.getType() == Material.AIR || ItemSpecial.isSpecial(left) ? blackGlass : rename == null ? renameItem : clearRename);
 		
 		ItemStack result = left.clone();
 		
@@ -321,7 +324,7 @@ public class CustomAnvil extends GUI
 			
 			cost = leftCost + rightCost + repairCost + enchantmentCost + renameCost;
 			
-			if(!SpecialItems.getInstance().isSpecial(result))
+			if(!ItemSpecial.isSpecial(result))
 			{
 				Util.setCommodity(result, worstRarity);
 			}
@@ -387,20 +390,20 @@ public class CustomAnvil extends GUI
 			return 0;
 		}
 		
-		if(SpecialItems.getInstance().isSpecial(target))
+		if(ItemSpecial.isSpecial(target))
 		{
-			if(!SpecialItems.getInstance().isContainmentPickaxe(target)
+			if(!containmentPickaxe.isInstanceOf(target)
 					|| !CommonsUtil.containsUUID(sacrifice, CommonsUtil.getHiddenUUIDs(target).get(0)))
 			{
 				return 0;
 			}
 			
-			float targetChance = SpecialItems.getInstance().getContainmentPickaxeChance(target);
-			float sacrificeChance = SpecialItems.getInstance().getContainmentPickaxeChance(sacrifice);
+			float targetChance = containmentPickaxe.getContainmentPickaxeChance(target);
+			float sacrificeChance = containmentPickaxe.getContainmentPickaxeChance(sacrifice);
 			
 			float f = (1.0F - (1.0F - targetChance / 100.0F) * (1.0F - sacrificeChance / 100.0F)) * 100.0F;
 			
-			CommonsUtil.setItemCopyOf(result, SpecialItems.getInstance().getContainmentPickaxeSupplier().get(null, f));
+			CommonsUtil.setItemCopyOf(result, containmentPickaxe.getItemStack(null, f));
 			
 			materials = 1;
 			return 2;
@@ -439,8 +442,8 @@ public class CustomAnvil extends GUI
 		if(target.getType() == Material.AIR || sacrificeEnchants.isEmpty() 
 				|| sacrifice.getType().getMaxDurability() == 0 && sacrifice.getType() != Material.ENCHANTED_BOOK
 				|| target.getType() != sacrifice.getType() && sacrifice.getType() != Material.ENCHANTED_BOOK
-				|| SpecialItems.getInstance().isSpecial(target)
-				|| SpecialItems.getInstance().isSpecial(sacrifice))
+				|| ItemSpecial.isSpecial(target)
+				|| ItemSpecial.isSpecial(sacrifice))
 		{
 			return 0;
 		}

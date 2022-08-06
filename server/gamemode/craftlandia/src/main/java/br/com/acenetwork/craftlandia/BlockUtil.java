@@ -2,7 +2,6 @@ package br.com.acenetwork.craftlandia;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -18,8 +17,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Tree;
 
 import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
+import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
-import br.com.acenetwork.craftlandia.manager.SpecialItems;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
 
 public class BlockUtil
 {
@@ -521,8 +521,10 @@ public class BlockUtil
 		case MOB_SPAWNER:
 			if(tool != null)
 			{
-				if(SpecialItems.getInstance().isContainmentPickaxe(tool) 
-						&& r.nextInt(100) + r.nextDouble() <= SpecialItems.getInstance().getContainmentPickaxeChance(tool))
+				ContainmentPickaxe containmentPickaxe = ItemSpecial.getInstance(ContainmentPickaxe.class);
+				
+				if(containmentPickaxe.isInstanceOf(tool) 
+						&& r.nextInt(100) + r.nextDouble() <= containmentPickaxe.getContainmentPickaxeChance(tool))
 				{
 					CreatureSpawner spawner = (CreatureSpawner) b.getState();
 					items.add(new ItemStack(Material.MOB_SPAWNER));

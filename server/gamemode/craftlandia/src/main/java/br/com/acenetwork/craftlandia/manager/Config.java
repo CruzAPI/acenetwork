@@ -21,7 +21,9 @@ public class Config
 		COMBATLOG, 
 		PRICE, 
 		PLAYER_INFO, WRAPPED_BTA_MAP, PORTALS, LANDS, LINKS, LAND_SCHEM, LAND_ENTITY_DATA, 
-		CONTAINMENT_PICKAXE_UUID, RANDOM_ITEM_SET, PLAYER_DATA
+		CONTAINMENT_PICKAXE_UUID, RANDOM_ITEM_SET, PLAYER_DATA,
+		SPECIAL_ITEM_UUID,
+		SPECIAL_ITEM_SET,
 		;
 	}
 	
@@ -61,6 +63,12 @@ public class Config
 			break;
 		case RANDOM_ITEM_SET:
 			file = new File(Main.getInstance().getDataFolder() + "/special_items", "random_item_set.dat");
+			break;
+		case SPECIAL_ITEM_UUID:
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", args[0] + ".dat");
+			break;
+		case SPECIAL_ITEM_SET:
+			file = new File(Main.getInstance().getDataFolder() + "/special_items", args[0] + ".dat");
 			break;
 		case CONTAINMENT_PICKAXE_UUID:
 			file = new File(Main.getInstance().getDataFolder() + "/special_items", "containment_pickaxe_uuid.dat");

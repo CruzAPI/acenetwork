@@ -362,12 +362,12 @@ public class CommonsUtil
 		}
 	}
 	
-	public static void shuffle(int[] array, Random r)
+	public static <T> void shuffle(T[] array, Random r)
 	{
 		for(int i = 0; i < array.length; i++)
 		{
 			int j = r.nextInt(array.length - i) + i;
-			int temp = array[j];
+			T temp = array[j];
 			array[j] = array[i];
 			array[i] = temp;
 		}
@@ -1609,6 +1609,7 @@ public class CommonsUtil
             case 8259:
                 return bundle.getString("potion.fireResistance.postfix");        
             case 16387:
+            case 16451:
             case 16419:
                 return bundle.getString("potion.fireResistance.postfix");
             case 8196:

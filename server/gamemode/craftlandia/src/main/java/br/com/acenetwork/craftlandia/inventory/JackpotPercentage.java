@@ -16,24 +16,34 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.comphenix.protocol.ProtocolLibrary;
-
+import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.executor.Jackpot;
-import br.com.acenetwork.craftlandia.manager.JackpotItem;
+import br.com.acenetwork.craftlandia.manager.JackpotType;
 import net.md_5.bungee.api.ChatColor;
 
 public class JackpotPercentage extends GUI
 {
-	public JackpotPercentage(CommonPlayer cp, double bet, Map<Byte, Integer> map)
+	private ItemStack next;
+	private ItemStack previous;
+	
+	private final JackpotType type;
+	
+	public JackpotPercentage(CommonPlayer cp, JackpotType type)
 	{
 		super(cp, () ->
 		{
-			return Bukkit.createInventory(cp.getPlayer(), 9 * 3, "      " + ChatColor.BOLD + "  " + ChatColor.BLACK + ChatColor.BOLD + "   JACKPOT %");
+			return Bukkit.createInventory(cp.getPlayer(), 9 * 5, "      " + ChatColor.BOLD + "  " + type.getColor() + ChatColor.BOLD + "   JACKPOT %");
 		});
 		
+		this.type = type;
+		
 		int size = 0;
+		
+		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
+		
+		Map<ItemStack, Integer> map = type.getMapSupplier().get(bundle, cp.getVersion());
 		
 		for(int i : map.values())
 		{
@@ -47,16 +57,14 @@ public class JackpotPercentage extends GUI
 		df.setGroupingSize(3);
 		df.setGroupingUsed(true);
 		
-		Player p = cp.getPlayer();
-		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
-		int version = ProtocolLibrary.getProtocolManager().getProtocolVersion(p);
+		boolean analytics = cp.hasPermission("jackpot.analytics");
 		
-		for(Entry<Byte, Integer> entry : map.entrySet())
+		for(Entry<ItemStack, Integer> entry : map.entrySet())
 		{
-			ItemStack key = JackpotItem.getById(entry.getKey()).getItemSupplier().get(bundle, bet, version).clone();
+			ItemStack key = entry.getKey();
 			int value = entry.getValue();
 			
-			double shards = Jackpot.getValueInShardsTheoretically(bet, key);
+			double shards = Jackpot.getValueInShardsTheoretically(type.getBet(), key);
 			
 			ItemMeta meta = key.getItemMeta();
 			
@@ -67,7 +75,11 @@ public class JackpotPercentage extends GUI
 			List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 			
 			lore.add("" + ChatColor.GRAY + value + "/" + size + " (" + df.format(div * 100.0D) + "%)");
-			lore.add("(" + df.format(avg) + " shards)"); //
+			
+			if(analytics)
+			{
+				lore.add("(" + df.format(avg) + " shards)");
+			}
 			
 			meta.setLore(lore);
 			
@@ -79,9 +91,11 @@ public class JackpotPercentage extends GUI
 		ItemMeta meta = info.getItemMeta();
 		meta.setDisplayName(ChatColor.WHITE + "Total AVG without jackpot = " + df.format(totalAvg));
 		
-		int value = map.get(JackpotItem.JACKPOT.getId());
+		int value = map.entrySet().stream().filter(x -> CommonsUtil.containsUUID(x.getKey(), Jackpot.JACKPOT_UUID) 
+				|| CommonsUtil.containsUUID(x.getKey(), Jackpot.NONE_UUID))
+				.findFirst().get().getValue().intValue();
 		
-		double avgJackpot = (bet - totalAvg) * ((double) size / value);
+		double avgJackpot = (type.getBet() - totalAvg) * ((double) size / value);
 		
 		double div = ((double) value / size);
 		double avg = div * avgJackpot * Jackpot.PERCENT;
@@ -92,17 +106,50 @@ public class JackpotPercentage extends GUI
 				ChatColor.GRAY + df.format(Jackpot.PERCENT * 100.0D) + "% jackpot prize ≃ " + df.format(avgJackpot * Jackpot.PERCENT)));
 		info.setItemMeta(meta);
 		
-		inv.setItem(inv.getSize() - 1, info);
+		if(analytics)
+		{
+			inv.setItem(inv.getSize() - 2, info);
+		}
+		
+		JackpotType nextType = type.getNext();
+		JackpotType previousType = type.getPrevious();
+		
+		if(nextType != null)
+		{
+			next = new ItemStack(nextType.getMaterial());
+			meta = next.getItemMeta();
+			meta.setDisplayName("" + nextType.getColor() + ChatColor.BOLD + nextType.name() + " %");
+			next.setItemMeta(meta);
+			inv.setItem(inv.getSize() - 1, next);
+		}
+		
+		if(previousType != null)
+		{
+			previous = new ItemStack(previousType.getMaterial());
+			meta = previous.getItemMeta();
+			meta.setDisplayName("" + previousType.getColor() + ChatColor.BOLD + previousType.name() + " %");
+			previous.setItemMeta(meta);
+			inv.setItem(inv.getSize() - 9, previous);
+		}
 	}
 	
 	@EventHandler
 	public void asdasdfas(InventoryClickEvent e)
 	{
-		Player p = cp.getPlayer();
-		
 		if(e.getWhoClicked() != p)
 		{
 			return;
+		}
+		
+		ItemStack current = e.getCurrentItem();
+		
+		if(previous != null && previous.equals(current))
+		{
+			Bukkit.dispatchCommand(p, "jackpot " + type.getPrevious().name());
+		}
+		else if(next != null && next.equals(current))
+		{
+			Bukkit.dispatchCommand(p, "jackpot " + type.getNext().name());
 		}
 		
 		e.setCancelled(true);

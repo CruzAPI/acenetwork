@@ -2,39 +2,30 @@ package br.com.acenetwork.craftlandia.executor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
-import org.bukkit.inventory.meta.Repairable;
 
-import com.comphenix.protocol.ProtocolLibrary;
-
-import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.listener.RandomItem;
+import br.com.acenetwork.craftlandia.item.CommonRandomItem;
+import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
+import br.com.acenetwork.craftlandia.item.NormalRandomItem;
+import br.com.acenetwork.craftlandia.item.RareRandomItem;
+import br.com.acenetwork.craftlandia.item.VipItem;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
 import br.com.acenetwork.craftlandia.manager.LandEntityData;
 import br.com.acenetwork.craftlandia.manager.PRICE;
 import br.com.acenetwork.craftlandia.warp.Warp;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.md_5.bungee.api.ChatColor;
 
 public class Temp implements TabExecutor, Listener
 {
@@ -281,7 +272,11 @@ public class Temp implements TabExecutor, Listener
 //			ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 //			
 //			Jackpot.getInstance().setJackpotTotal(1000000.0d);
-			if(args.length == 1)
+			if(args.length == 1 && args[0].equalsIgnoreCase("vip"))
+			{
+				p.setItemInHand(ItemSpecial.getInstance(VipItem.class).getItemStack(null));
+			}
+			else if(args.length == 1)
 			{
 				try
 				{
@@ -301,9 +296,23 @@ public class Temp implements TabExecutor, Listener
 					}
 				}
 			}
-			else
+			else if(args.length == 2 && args[0].equalsIgnoreCase("random"))
 			{
-				p.setItemInHand(RandomItem.getInstance().getItemSupplier().get(null));
+				switch(args[1])
+				{
+				case "1":
+					p.setItemInHand(ItemSpecial.getInstance(CommonRandomItem.class).getItemStack(null));
+					break;
+				case "2":
+					p.setItemInHand(ItemSpecial.getInstance(RareRandomItem.class).getItemStack(null));
+					break;
+				case "3":
+					p.setItemInHand(ItemSpecial.getInstance(LegendaryRandomItem.class).getItemStack(null));
+					break;
+				default:
+					p.setItemInHand(ItemSpecial.getInstance(NormalRandomItem.class).getItemStack(null));
+					break;
+				}
 			}
 //			p.sendMessage(aliases);
 			

@@ -66,4 +66,5 @@ public interface CommonPlayer extends Listener
 	int getPing();
 	void setCommonPlayerData(CommonPlayerData cloneMemoryPD);
 	void sendActionBarMessage(String msg);
+	int getVersion();
 }

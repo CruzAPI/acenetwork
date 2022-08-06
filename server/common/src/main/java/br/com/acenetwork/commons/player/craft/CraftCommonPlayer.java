@@ -638,4 +638,11 @@ public abstract class CraftCommonPlayer implements CommonPlayer
 			Bukkit.getPluginManager().callEvent(new PlayerSuccessLoginEvent(p));
 		}
 	}
+	
+	@Override
+	public int getVersion()
+	{
+		return 47;
+//				ProtocolLibrary.getProtocolManager().getProtocolVersion(p);
+	}
 }

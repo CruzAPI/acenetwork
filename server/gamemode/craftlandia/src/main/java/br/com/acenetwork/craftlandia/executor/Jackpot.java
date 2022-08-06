@@ -1,7 +1,5 @@
 package br.com.acenetwork.craftlandia.executor;
 
-import static br.com.acenetwork.craftlandia.manager.JackpotItem.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -13,20 +11,15 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.google.common.io.ByteStreams;
@@ -38,31 +31,30 @@ import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.inventory.JackpotGUI;
 import br.com.acenetwork.craftlandia.inventory.JackpotPercentage;
+import br.com.acenetwork.craftlandia.item.VipItem;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
-import net.citizensnpcs.api.CitizensAPI;
+import br.com.acenetwork.craftlandia.manager.ItemSpecial;
+import br.com.acenetwork.craftlandia.manager.JackpotType;
+import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 
 public class Jackpot implements TabExecutor, Listener
-{
+{	
 	public static final String JACKPOT_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String RANDOM_ITEM_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String SHARDS_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String VIP_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String $BTA_UUID = CommonsUtil.getRandomItemUUID();
 	public static final String NONE_UUID = CommonsUtil.getRandomItemUUID();
-	public static final double COAL_BET = 1000.0D;
 	
-	public static final double PERCENT = 0.25D; 
+	public static final double PERCENT = 0.2D; 
 	private double jackpot;
 	
 	private static Jackpot instance;
 	
-	private boolean inUse;
-	
 	public static final int $BTA_TO_SHARDS = 200;
 	
-	public static final Map<Byte, Integer> COAL_MAP = new LinkedHashMap<>();
 	public static final double BTA_BET_MULTIPLIER = 0.001D;
 	
 	public Jackpot()
@@ -89,32 +81,6 @@ public class Jackpot implements TabExecutor, Listener
 			setJackpotTotal(0.0D);
 		}
 		
-		int size = 0;
-		final int maxSize = 32000;
-		
-		COAL_MAP.put(JACKPOT.getId(), -size + (size += 1));
-		COAL_MAP.put(VIP.getId(), -size + (size += 32));
-		COAL_MAP.put(RANDOM_ITEM.getId(), -size + (size += 6400));
-		COAL_MAP.put(NUGGET_1.getId(), -size + (size += 1536));
-		COAL_MAP.put(NUGGET_2.getId(), -size + (size += 1792));
-		COAL_MAP.put(NUGGET_3.getId(), -size + (size += 2048));
-		COAL_MAP.put(NUGGET_4.getId(), -size + (size += 2304));
-		COAL_MAP.put(NUGGET_5.getId(), -size + (size += 2560));
-		COAL_MAP.put(INGOT_1.getId(), -size + (size += 1280));
-		COAL_MAP.put(INGOT_2.getId(), -size + (size += 1024));
-		COAL_MAP.put(INGOT_3.getId(), -size + (size += 768));
-		COAL_MAP.put(INGOT_4.getId(), -size + (size += 512));
-		COAL_MAP.put(INGOT_5.getId(), -size + (size += 256));
-		COAL_MAP.put(BLOCK_1.getId(), -size + (size += 64));
-		COAL_MAP.put(BLOCK_2.getId(), -size + (size += 32));
-		COAL_MAP.put(BLOCK_3.getId(), -size + (size += 16));
-		COAL_MAP.put(BLOCK_4.getId(), -size + (size += 8));
-		COAL_MAP.put(BLOCK_5.getId(), -size + (size += 4));
-		COAL_MAP.put($BTA_1.getId(), -size + (size += 3200));
-		COAL_MAP.put($BTA_3.getId(), -size + (size += 1600));
-		COAL_MAP.put($BTA_5.getId(), -size + (size += 800));
-		COAL_MAP.put(NONE.getId(), -size + (size += Math.max(0, maxSize - size)));
-		
 		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
 	
@@ -137,28 +103,31 @@ public class Jackpot implements TabExecutor, Listener
 		
 		Player p = (Player) sender;
 		CommonPlayer cp = CraftCommonPlayer.get(p);
-		new JackpotPercentage(cp, COAL_BET, COAL_MAP);
+		
+		JackpotType type = JackpotType.COAL;
+		
+		if(args.length == 1)
+		{
+			try
+			{
+				type = JackpotType.valueOf(args[0].toUpperCase());
+			}
+			catch(IllegalArgumentException e)
+			{
+				
+			}
+		}
+		
+		new JackpotPercentage(cp, type);
 		
 		return false;
 	}
 	
-	@EventHandler
-	public void a(PlayerInteractEntityEvent e)
-	{
-		Player p = e.getPlayer();
-		
-		Entity clicked = e.getRightClicked();
-		
-		if(CitizensAPI.getNPCRegistry().isNPC(clicked) && clicked.getName().contains("CLICK TO PLAY"))
-		{
-			run(CraftCommonPlayer.get(p));
-		}
-	}
-	
-	private boolean run(CommonPlayer cp)
+	public boolean run(CommonPlayer cp, NPC machine, JackpotType type)
 	{
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		Player p = cp.getPlayer();
+		boolean inUse = machine.data().get("inUse");
 		
 		if(inUse)
 		{
@@ -175,9 +144,11 @@ public class Jackpot implements TabExecutor, Listener
 		try
 		{
 			DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(cp.getLocale()));
+			df.setGroupingSize(3);
+			df.setGroupingUsed(true);
 			
-			cp.setBalance(cp.getBalance() - COAL_BET);
-			p.sendMessage(ChatColor.DARK_RED + "(-" + df.format(COAL_BET) + " SHARDS)");
+			cp.setBalance(cp.getBalance() - type.getBet());
+			p.sendMessage(ChatColor.DARK_RED + "(-" + df.format(type.getBet()) + " SHARDS)");
 		}
 		catch(InsufficientBalanceException e)
 		{
@@ -185,11 +156,11 @@ public class Jackpot implements TabExecutor, Listener
 			return false;
 		}
 		
-		setJackpotTotal(getJackpotTotal() + COAL_BET);
+		setJackpotTotal(getJackpotTotal() + type.getBet());
 		
 		cp.setJackpoting(true);
-		inUse = true;
-		new JackpotGUI(cp, COAL_BET, COAL_MAP);
+		machine.data().set("inUse", true);
+		new JackpotGUI(cp, machine, type);
 		return true;
 	}
 	
@@ -248,12 +219,12 @@ public class Jackpot implements TabExecutor, Listener
 			return bet * getMultiplier(item) * $BTA_TO_SHARDS;
 		}
 		
-		if(CommonsUtil.containsUUID(item, Jackpot.VIP_UUID))
+		if(CommonsUtil.containsUUID(item, ItemSpecial.getInstance(VipItem.class).getUUID()))
 		{
-			return 10000;
+			return 10000.0D * item.getAmount();
 		}
 		
-		return 0;
+		return 0.0D;
 	}
 	
 	public static double getValueInShardsTheoretically(double bet, ItemStack item)
@@ -289,16 +260,6 @@ public class Jackpot implements TabExecutor, Listener
 		}
 		
 		return multiplier * item.getAmount();
-	}
-	
-	public void setInUse(boolean inUse)
-	{
-		this.inUse = inUse;
-	}
-	
-	public boolean isInUse()
-	{
-		return inUse;
 	}
 }
 
