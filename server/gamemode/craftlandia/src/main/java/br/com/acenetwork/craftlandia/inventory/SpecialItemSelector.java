@@ -42,10 +42,10 @@ public class SpecialItemSelector extends Scroller
 		super(cp, "inv.item-selector");
 		
 		itemList.add(new ItemKey(ItemSpecial.getInstance(VipItem.class).getItemStack(null, UUID.randomUUID()), "vip"));
-		itemList.add(new ItemKey(ItemSpecial.getInstance(NormalRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "random_item"));
-		itemList.add(new ItemKey(ItemSpecial.getInstance(CommonRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "common_random_item"));
-		itemList.add(new ItemKey(ItemSpecial.getInstance(RareRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "rare_random_item"));
-		itemList.add(new ItemKey(ItemSpecial.getInstance(LegendaryRandomItem.class).getItemStack(null, 47, UUID.randomUUID()), "legendary_random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(NormalRandomItem.class).getItemStack(null, UUID.randomUUID()), "random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(CommonRandomItem.class).getItemStack(null, UUID.randomUUID()), "common_random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(RareRandomItem.class).getItemStack(null, UUID.randomUUID()), "rare_random_item"));
+		itemList.add(new ItemKey(ItemSpecial.getInstance(LegendaryRandomItem.class).getItemStack(null, UUID.randomUUID()), "legendary_random_item"));
 		
 		ResourceBundle bundle = ResourceBundle.getBundle("message", cp.getLocale());
 		
