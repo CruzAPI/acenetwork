@@ -43,6 +43,24 @@ public enum Tag
 		}
 	}),
 	
+	MAGNATA(ChatColor.DARK_GREEN.toString(), new BundleSupplier<String>()
+	{
+		@Override
+		public String get(ResourceBundle bundle, Object... args)
+		{
+			return ChatColor.DARK_GREEN + "[" + bundle.getString("tag.magnata") + "] ";
+		}
+	}),
+	
+	LEGENDARY(ChatColor.GOLD.toString(), new BundleSupplier<String>()
+	{
+		@Override
+		public String get(ResourceBundle bundle, Object... args)
+		{
+			return ChatColor.GOLD + "[" + bundle.getString("tag.legendary") + "] ";
+		}
+	}),
+	
 	VIP(ChatColor.GOLD.toString(), new BundleSupplier<String>()
 	{
 		@Override
@@ -58,15 +76,6 @@ public enum Tag
 		public String get(ResourceBundle bundle, Object... args)
 		{
 			return ChatColor.DARK_PURPLE  + "[" + bundle.getString("tag.beta") + "] ";
-		}
-	}),
-	
-	MAGNATA(ChatColor.DARK_GREEN.toString(), new BundleSupplier<String>()
-	{
-		@Override
-		public String get(ResourceBundle bundle, Object... args)
-		{
-			return ChatColor.DARK_GREEN + "[" + bundle.getString("tag.magnata") + "] ";
 		}
 	}),
 	

@@ -15,12 +15,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import com.google.common.base.Objects;
 import com.google.common.io.ByteStreams;
 
+import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.manager.LocationSerializable;
+import br.com.acenetwork.commons.player.CommonPlayer;
+import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.manager.Config.Type;
 
 public class LandData implements Serializable
@@ -49,9 +55,41 @@ public class LandData implements Serializable
 	
 	public void setOwner(UUID ownerUUID)
 	{
+		OfflinePlayer oldPlayer = this.ownerUUID == null ? null : Bukkit.getOfflinePlayer(this.ownerUUID);
+		OfflinePlayer newPlayer = ownerUUID == null ? null : Bukkit.getOfflinePlayer(ownerUUID);
+		
 		if(!Objects.equal(ownerUUID, (this.ownerUUID = ownerUUID)))
-		{
+		{			
 			trustedPlayers = new HashSet<>();
+		}
+		
+		if(oldPlayer != null && Land.getLandsOf(oldPlayer).isEmpty())
+		{
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + oldPlayer.getName() + " remove tag.legendary");
+			
+			if(oldPlayer.isOnline())
+			{
+				Player p = oldPlayer.getPlayer();
+				CommonPlayer cp = CraftCommonPlayer.get(p);
+				
+				if(cp.getTag() == Tag.LEGENDARY)
+				{
+					cp.setTag(cp.getBestTag());
+				}
+			}
+		}
+		
+		if(newPlayer != null)
+		{
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + newPlayer.getName() + " add tag.legendary");
+			
+			if(newPlayer.isOnline())
+			{
+				Player p = newPlayer.getPlayer();
+				CommonPlayer cp = CraftCommonPlayer.get(p);
+				
+				cp.setTag(Tag.LEGENDARY);
+			}
 		}
 	}
 	
