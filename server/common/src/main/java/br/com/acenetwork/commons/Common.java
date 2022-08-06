@@ -17,6 +17,9 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -73,7 +76,7 @@ import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 
-public class Common extends JavaPlugin
+public class Common extends JavaPlugin implements Listener
 {
 	private static Common instance;
 	private static JavaPlugin plugin;
@@ -92,6 +95,7 @@ public class Common extends JavaPlugin
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, "commons:commons", new PluginMessage());
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "commons:commons");
 		
+		Bukkit.getPluginManager().registerEvents(this, this);
 		Bukkit.getPluginManager().registerEvents(new CustomListener(), this);
 		Bukkit.getPluginManager().registerEvents(new EntitySpawn(), this);
 		Bukkit.getPluginManager().registerEvents(new InventoryClose(), this);
@@ -140,6 +144,8 @@ public class Common extends JavaPlugin
 		registerCommand(new Withdraw(), "withdraw");
 		registerCommand(new Login(), "login");
 		registerCommand(new Register(), "register");
+		
+		getCommand("admin").setPermission("cmd.admin");
 		
 		CommonPlayerData.load();
 		
@@ -227,6 +233,15 @@ public class Common extends JavaPlugin
 		catch(Exception ex)
 		{
 			ex.printStackTrace();
+		}
+	}
+	
+	@EventHandler
+	public void a(PlayerKickEvent e)
+	{
+		if(e.getReason().equalsIgnoreCase("disconnect.spam"))
+		{
+			e.setCancelled(true);
 		}
 	}
 	

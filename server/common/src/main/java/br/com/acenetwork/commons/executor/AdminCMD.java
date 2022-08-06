@@ -27,7 +27,7 @@ public class AdminCMD implements TabExecutor
 	{
 		return new ArrayList<>();
 	}
-
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String aliases, String[] args)
 	{

