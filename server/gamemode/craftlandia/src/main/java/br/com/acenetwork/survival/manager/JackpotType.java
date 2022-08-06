@@ -1,6 +1,6 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
-import static br.com.acenetwork.craftlandia.manager.JackpotItem.*;
+import static br.com.acenetwork.survival.manager.JackpotItem.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

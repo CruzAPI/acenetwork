@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,10 +29,10 @@ import br.com.acenetwork.commons.executor.Balance;
 import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.manager.Config;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
-import br.com.acenetwork.craftlandia.manager.CryptoInfo;
-import br.com.acenetwork.craftlandia.manager.PRICE;
+import br.com.acenetwork.survival.manager.Config;
+import br.com.acenetwork.survival.manager.CryptoInfo;
+import br.com.acenetwork.survival.manager.PRICE;
+import br.com.acenetwork.survival.manager.Config.Type;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

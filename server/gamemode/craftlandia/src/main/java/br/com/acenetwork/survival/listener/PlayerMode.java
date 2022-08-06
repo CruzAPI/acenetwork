@@ -1,11 +1,11 @@
-package br.com.acenetwork.craftlandia.listener;
+package br.com.acenetwork.survival.listener;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import br.com.acenetwork.commons.event.PlayerModeEvent;
-import br.com.acenetwork.craftlandia.player.craft.CraftSurvivalPlayer;
+import br.com.acenetwork.survival.player.craft.CraftSurvivalPlayer;
 
 public class PlayerMode implements Listener
 {

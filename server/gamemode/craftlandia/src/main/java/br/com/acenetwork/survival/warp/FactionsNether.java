@@ -1,10 +1,10 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import br.com.acenetwork.survival.player.SurvivalPlayer;
 import net.md_5.bungee.api.ChatColor;
 
 public class FactionsNether extends Warp

@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.survival.inventory;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -19,8 +19,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.executor.Jackpot;
-import br.com.acenetwork.craftlandia.manager.JackpotType;
+import br.com.acenetwork.survival.executor.Jackpot;
+import br.com.acenetwork.survival.manager.JackpotType;
 import net.md_5.bungee.api.ChatColor;
 
 public class JackpotPercentage extends GUI

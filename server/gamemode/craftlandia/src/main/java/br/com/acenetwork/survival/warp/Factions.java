@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,9 +15,9 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
-import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.event.NPCLoadEvent;
+import br.com.acenetwork.survival.player.SurvivalPlayer;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;

@@ -1,10 +1,10 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 import br.com.acenetwork.commons.manager.IdData;
-import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.survival.Rarity;
 
 public class IdDataRarity implements Serializable
 {

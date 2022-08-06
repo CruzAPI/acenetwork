@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.inventory.ItemSelector;
+import br.com.acenetwork.survival.inventory.ItemSelector;
 import net.md_5.bungee.api.ChatColor;
 
 public class ShopSearch implements TabExecutor

@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.survival.inventory;
 
 import java.util.ResourceBundle;
 import java.util.UUID;
@@ -13,13 +13,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.inventory.Scroller;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.item.CommonRandomItem;
-import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
-import br.com.acenetwork.craftlandia.item.NormalRandomItem;
-import br.com.acenetwork.craftlandia.item.RareRandomItem;
-import br.com.acenetwork.craftlandia.item.VipItem;
-import br.com.acenetwork.craftlandia.manager.ItemSpecial;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.item.CommonRandomItem;
+import br.com.acenetwork.survival.item.LegendaryRandomItem;
+import br.com.acenetwork.survival.item.NormalRandomItem;
+import br.com.acenetwork.survival.item.RareRandomItem;
+import br.com.acenetwork.survival.item.VipItem;
+import br.com.acenetwork.survival.manager.ItemSpecial;
 import net.md_5.bungee.api.ChatColor;
 
 public class SpecialItemSelector extends Scroller

@@ -1,10 +1,10 @@
-package br.com.acenetwork.craftlandia.player;
+package br.com.acenetwork.survival.player;
 
 import org.bukkit.Location;
 
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.manager.ChannelCommand;
-import br.com.acenetwork.craftlandia.manager.PlayerData;
+import br.com.acenetwork.survival.manager.ChannelCommand;
+import br.com.acenetwork.survival.manager.PlayerData;
 
 public interface SurvivalPlayer extends CommonPlayer
 {

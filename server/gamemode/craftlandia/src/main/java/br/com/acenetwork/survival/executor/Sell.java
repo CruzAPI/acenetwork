@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,14 +31,14 @@ import br.com.acenetwork.commons.manager.IdData;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.event.SellItemEvent;
-import br.com.acenetwork.craftlandia.manager.AmountPrice;
-import br.com.acenetwork.craftlandia.manager.Config;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
-import br.com.acenetwork.craftlandia.manager.CryptoInfo;
-import br.com.acenetwork.craftlandia.manager.IdDataRarity;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.event.SellItemEvent;
+import br.com.acenetwork.survival.manager.AmountPrice;
+import br.com.acenetwork.survival.manager.Config;
+import br.com.acenetwork.survival.manager.CryptoInfo;
+import br.com.acenetwork.survival.manager.IdDataRarity;
+import br.com.acenetwork.survival.manager.Config.Type;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.TranslatableComponent;

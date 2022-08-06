@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
@@ -51,9 +51,9 @@ import br.com.acenetwork.commons.event.CustomEntityDeathEvent;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.listener.EntitySpawn;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.warp.Warp;
-import br.com.acenetwork.craftlandia.warp.WarpLand;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.warp.Warp;
+import br.com.acenetwork.survival.warp.WarpLand;
 import net.md_5.bungee.api.ChatColor;
 
 public class Land implements Listener

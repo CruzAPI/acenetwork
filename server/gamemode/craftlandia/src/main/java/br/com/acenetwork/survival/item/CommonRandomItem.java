@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.item;
+package br.com.acenetwork.survival.item;
 
 import java.util.Random;
 import java.util.ResourceBundle;
@@ -15,9 +15,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.Message;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.manager.Activatable;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.manager.Activatable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

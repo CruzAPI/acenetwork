@@ -1,8 +1,8 @@
-package br.com.acenetwork.craftlandia;
+package br.com.acenetwork.survival;
 
-import static br.com.acenetwork.craftlandia.Rarity.COMMON;
-import static br.com.acenetwork.craftlandia.Rarity.LEGENDARY;
-import static br.com.acenetwork.craftlandia.Rarity.RARE;
+import static br.com.acenetwork.survival.Rarity.COMMON;
+import static br.com.acenetwork.survival.Rarity.LEGENDARY;
+import static br.com.acenetwork.survival.Rarity.RARE;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -21,8 +21,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
 
-import br.com.acenetwork.craftlandia.manager.BlockData;
-import br.com.acenetwork.craftlandia.warp.Warp;
+import br.com.acenetwork.survival.manager.BlockData;
+import br.com.acenetwork.survival.warp.Warp;
 
 public class Util
 {

@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,14 +12,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.item.CommonRandomItem;
-import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
-import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
-import br.com.acenetwork.craftlandia.item.NormalRandomItem;
-import br.com.acenetwork.craftlandia.item.RareRandomItem;
-import br.com.acenetwork.craftlandia.item.VipItem;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.item.CommonRandomItem;
+import br.com.acenetwork.survival.item.ContainmentPickaxe;
+import br.com.acenetwork.survival.item.LegendaryRandomItem;
+import br.com.acenetwork.survival.item.NormalRandomItem;
+import br.com.acenetwork.survival.item.RareRandomItem;
+import br.com.acenetwork.survival.item.VipItem;
+import br.com.acenetwork.survival.manager.Config.Type;
 
 public abstract class ItemSpecial implements Listener
 {

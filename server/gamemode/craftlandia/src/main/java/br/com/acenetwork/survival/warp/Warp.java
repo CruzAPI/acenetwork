@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -83,14 +83,14 @@ import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.manager.Pitch;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Property;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.manager.BlockData;
-import br.com.acenetwork.craftlandia.manager.ChunkLocation;
-import br.com.acenetwork.craftlandia.manager.Config;
-import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.Property;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.manager.BlockData;
+import br.com.acenetwork.survival.manager.ChunkLocation;
+import br.com.acenetwork.survival.manager.Config;
+import br.com.acenetwork.survival.player.SurvivalPlayer;
 import net.citizensnpcs.api.CitizensAPI;
 import net.md_5.bungee.api.ChatColor;
 

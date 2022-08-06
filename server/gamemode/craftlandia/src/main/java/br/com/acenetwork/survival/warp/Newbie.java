@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -20,10 +20,10 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
-import br.com.acenetwork.craftlandia.manager.BlockData;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.event.NPCLoadEvent;
+import br.com.acenetwork.survival.manager.BlockData;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;

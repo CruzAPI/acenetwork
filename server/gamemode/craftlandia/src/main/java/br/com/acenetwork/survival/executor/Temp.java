@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +15,17 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.item.CommonRandomItem;
-import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
-import br.com.acenetwork.craftlandia.item.NormalRandomItem;
-import br.com.acenetwork.craftlandia.item.RareRandomItem;
-import br.com.acenetwork.craftlandia.item.VipItem;
-import br.com.acenetwork.craftlandia.manager.ItemSpecial;
-import br.com.acenetwork.craftlandia.manager.LandEntityData;
-import br.com.acenetwork.craftlandia.manager.PRICE;
-import br.com.acenetwork.craftlandia.warp.Warp;
-import br.com.acenetwork.craftlandia.warp.WarpLand;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.item.CommonRandomItem;
+import br.com.acenetwork.survival.item.LegendaryRandomItem;
+import br.com.acenetwork.survival.item.NormalRandomItem;
+import br.com.acenetwork.survival.item.RareRandomItem;
+import br.com.acenetwork.survival.item.VipItem;
+import br.com.acenetwork.survival.manager.ItemSpecial;
+import br.com.acenetwork.survival.manager.LandEntityData;
+import br.com.acenetwork.survival.manager.PRICE;
+import br.com.acenetwork.survival.warp.Warp;
+import br.com.acenetwork.survival.warp.WarpLand;
 
 public class Temp implements TabExecutor, Listener
 {

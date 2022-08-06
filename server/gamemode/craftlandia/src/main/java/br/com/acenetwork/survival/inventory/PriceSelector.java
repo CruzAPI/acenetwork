@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.survival.inventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;

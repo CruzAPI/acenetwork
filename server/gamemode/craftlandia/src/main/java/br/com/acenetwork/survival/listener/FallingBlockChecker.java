@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.listener;
+package br.com.acenetwork.survival.listener;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,8 +12,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.event.FallingBlockObstructEvent;
 
 public class FallingBlockChecker implements Listener
 {

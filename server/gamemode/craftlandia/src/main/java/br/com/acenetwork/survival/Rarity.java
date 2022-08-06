@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia;
+package br.com.acenetwork.survival;
 
 import org.bukkit.World;
 

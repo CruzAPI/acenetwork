@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import java.util.Random;
 
@@ -18,7 +18,7 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.survival.Main;
 import net.md_5.bungee.api.ChatColor;
 
 public class Farm extends Warp

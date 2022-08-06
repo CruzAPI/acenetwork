@@ -1,10 +1,10 @@
-package br.com.acenetwork.craftlandia.event;
+package br.com.acenetwork.survival.event;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 
 import br.com.acenetwork.commons.manager.IdData;
-import br.com.acenetwork.craftlandia.manager.IdDataRarity;
+import br.com.acenetwork.survival.manager.IdDataRarity;
 
 public class SellItemEvent extends ItemEvent 
 {

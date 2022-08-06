@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -28,14 +28,14 @@ import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.manager.InsufficientBalanceException;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.inventory.JackpotGUI;
-import br.com.acenetwork.craftlandia.inventory.JackpotPercentage;
-import br.com.acenetwork.craftlandia.item.VipItem;
-import br.com.acenetwork.craftlandia.manager.Config;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
-import br.com.acenetwork.craftlandia.manager.ItemSpecial;
-import br.com.acenetwork.craftlandia.manager.JackpotType;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.inventory.JackpotGUI;
+import br.com.acenetwork.survival.inventory.JackpotPercentage;
+import br.com.acenetwork.survival.item.VipItem;
+import br.com.acenetwork.survival.manager.Config;
+import br.com.acenetwork.survival.manager.ItemSpecial;
+import br.com.acenetwork.survival.manager.JackpotType;
+import br.com.acenetwork.survival.manager.Config.Type;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;
 

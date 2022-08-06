@@ -1,11 +1,11 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import br.com.acenetwork.craftlandia.Main;
+import br.com.acenetwork.survival.Main;
 
 public class Config
 {

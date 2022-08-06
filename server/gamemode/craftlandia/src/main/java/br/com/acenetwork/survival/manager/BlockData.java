@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import br.com.acenetwork.craftlandia.Property;
-import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.survival.Property;
+import br.com.acenetwork.survival.Rarity;
 import net.md_5.bungee.api.ChatColor;
 
 public class BlockData implements Serializable

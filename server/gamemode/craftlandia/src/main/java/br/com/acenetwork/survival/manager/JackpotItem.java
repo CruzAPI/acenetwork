@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -12,13 +12,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.manager.BundleSupplier;
-import br.com.acenetwork.craftlandia.executor.Jackpot;
-import br.com.acenetwork.craftlandia.item.CommonRandomItem;
-import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
-import br.com.acenetwork.craftlandia.item.LegendaryRandomItem;
-import br.com.acenetwork.craftlandia.item.NormalRandomItem;
-import br.com.acenetwork.craftlandia.item.RareRandomItem;
-import br.com.acenetwork.craftlandia.item.VipItem;
+import br.com.acenetwork.survival.executor.Jackpot;
+import br.com.acenetwork.survival.item.CommonRandomItem;
+import br.com.acenetwork.survival.item.ContainmentPickaxe;
+import br.com.acenetwork.survival.item.LegendaryRandomItem;
+import br.com.acenetwork.survival.item.NormalRandomItem;
+import br.com.acenetwork.survival.item.RareRandomItem;
+import br.com.acenetwork.survival.item.VipItem;
 import net.md_5.bungee.api.ChatColor;
 
 public enum JackpotItem

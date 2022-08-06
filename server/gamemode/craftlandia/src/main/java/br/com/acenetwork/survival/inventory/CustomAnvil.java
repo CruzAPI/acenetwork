@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.survival.inventory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +34,11 @@ import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.manager.Pitch;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
-import br.com.acenetwork.craftlandia.manager.ItemSpecial;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.item.ContainmentPickaxe;
+import br.com.acenetwork.survival.manager.ItemSpecial;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

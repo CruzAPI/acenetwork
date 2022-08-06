@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia;
+package br.com.acenetwork.survival;
 
 import java.util.HashSet;
 import java.util.Set;

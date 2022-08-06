@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.event;
+package br.com.acenetwork.survival.event;
 
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.Event;

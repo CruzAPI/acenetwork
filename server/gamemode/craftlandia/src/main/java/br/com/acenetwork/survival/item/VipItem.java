@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.item;
+package br.com.acenetwork.survival.item;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -33,9 +33,9 @@ import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.manager.Activatable;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.manager.Activatable;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

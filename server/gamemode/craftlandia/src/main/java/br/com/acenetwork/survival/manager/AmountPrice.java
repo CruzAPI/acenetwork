@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 public class AmountPrice
 {

@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.survival.inventory;
 
 import java.util.ResourceBundle;
 
@@ -15,7 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.inventory.GUI;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.manager.InvalidCommandArgumentException;
+import br.com.acenetwork.survival.manager.InvalidCommandArgumentException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

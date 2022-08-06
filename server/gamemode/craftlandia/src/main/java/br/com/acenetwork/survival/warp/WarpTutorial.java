@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import org.bukkit.Location;
 import org.bukkit.World;

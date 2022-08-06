@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,7 +26,7 @@ import org.bukkit.inventory.ItemStack;
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
+import br.com.acenetwork.survival.manager.Config.Type;
 import net.md_5.bungee.api.ChatColor;
 
 public abstract class Activatable extends ItemSpecial

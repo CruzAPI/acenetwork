@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,13 +35,13 @@ import com.google.common.io.ByteStreams;
 import br.com.acenetwork.commons.CommonsUtil;
 import br.com.acenetwork.commons.event.CustomEntityDeathEvent;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
-import br.com.acenetwork.craftlandia.manager.Config;
-import br.com.acenetwork.craftlandia.manager.Config.Type;
-import br.com.acenetwork.craftlandia.manager.Land;
-import br.com.acenetwork.craftlandia.manager.LandEntityData;
-import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.event.NPCLoadEvent;
+import br.com.acenetwork.survival.manager.Config;
+import br.com.acenetwork.survival.manager.Land;
+import br.com.acenetwork.survival.manager.LandEntityData;
+import br.com.acenetwork.survival.manager.Config.Type;
+import br.com.acenetwork.survival.player.SurvivalPlayer;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.md_5.bungee.api.ChatColor;

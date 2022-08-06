@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.item;
+package br.com.acenetwork.survival.item;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import br.com.acenetwork.commons.CommonsUtil;
-import br.com.acenetwork.craftlandia.manager.ItemSpecial;
+import br.com.acenetwork.survival.manager.ItemSpecial;
 import net.md_5.bungee.api.ChatColor;
 
 public class ContainmentPickaxe extends ItemSpecial

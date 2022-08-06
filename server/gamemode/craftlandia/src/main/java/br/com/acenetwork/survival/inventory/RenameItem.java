@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.inventory;
+package br.com.acenetwork.survival.inventory;
 
 import java.util.Arrays;
 
@@ -14,8 +14,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import br.com.acenetwork.commons.inventory.AnvilCommand;
 import br.com.acenetwork.commons.player.CommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Rarity;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.Rarity;
 
 public class RenameItem extends AnvilCommand
 {

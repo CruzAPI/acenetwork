@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.warp;
+package br.com.acenetwork.survival.warp;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,9 +14,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
-import br.com.acenetwork.craftlandia.executor.Jackpot;
-import br.com.acenetwork.craftlandia.manager.JackpotType;
+import br.com.acenetwork.survival.event.NPCLoadEvent;
+import br.com.acenetwork.survival.executor.Jackpot;
+import br.com.acenetwork.survival.manager.JackpotType;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;

@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,17 +38,17 @@ import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.manager.CommonPlayerData;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Property;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
-import br.com.acenetwork.craftlandia.inventory.CurrencySelector;
-import br.com.acenetwork.craftlandia.inventory.EnchantSelector;
-import br.com.acenetwork.craftlandia.inventory.ItemSelector;
-import br.com.acenetwork.craftlandia.inventory.PriceSelector;
-import br.com.acenetwork.craftlandia.inventory.RaritySelector;
-import br.com.acenetwork.craftlandia.manager.BlockData;
-import br.com.acenetwork.craftlandia.manager.InvalidCommandArgumentException;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.Property;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
+import br.com.acenetwork.survival.inventory.CurrencySelector;
+import br.com.acenetwork.survival.inventory.EnchantSelector;
+import br.com.acenetwork.survival.inventory.ItemSelector;
+import br.com.acenetwork.survival.inventory.PriceSelector;
+import br.com.acenetwork.survival.inventory.RaritySelector;
+import br.com.acenetwork.survival.manager.BlockData;
+import br.com.acenetwork.survival.manager.InvalidCommandArgumentException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

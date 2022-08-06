@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia;
+package br.com.acenetwork.survival;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Tree;
 
-import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
-import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
-import br.com.acenetwork.craftlandia.manager.BreakReason;
-import br.com.acenetwork.craftlandia.manager.ItemSpecial;
+import br.com.acenetwork.survival.event.BreakNaturallyEvent;
+import br.com.acenetwork.survival.item.ContainmentPickaxe;
+import br.com.acenetwork.survival.manager.BreakReason;
+import br.com.acenetwork.survival.manager.ItemSpecial;
 
 public class BlockUtil
 {

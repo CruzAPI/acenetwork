@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.listener;
+package br.com.acenetwork.survival.listener;
 
 import java.util.Optional;
 
@@ -11,9 +11,9 @@ import org.bukkit.inventory.ItemStack;
 
 import br.com.acenetwork.commons.event.PlayerConsumeSoupEvent;
 import br.com.acenetwork.commons.inventory.VipChestGUI;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.Rarity;
-import br.com.acenetwork.craftlandia.Util;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.Rarity;
+import br.com.acenetwork.survival.Util;
 
 public class TestListener implements Listener
 {

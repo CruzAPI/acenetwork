@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.executor;
+package br.com.acenetwork.survival.executor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +14,10 @@ import org.bukkit.entity.Player;
 import br.com.acenetwork.commons.manager.Message;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
-import br.com.acenetwork.craftlandia.Main;
-import br.com.acenetwork.craftlandia.manager.ChannelCommand;
-import br.com.acenetwork.craftlandia.player.SurvivalPlayer;
-import br.com.acenetwork.craftlandia.warp.Warp;
+import br.com.acenetwork.survival.Main;
+import br.com.acenetwork.survival.manager.ChannelCommand;
+import br.com.acenetwork.survival.player.SurvivalPlayer;
+import br.com.acenetwork.survival.warp.Warp;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 

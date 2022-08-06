@@ -1,4 +1,4 @@
-package br.com.acenetwork.craftlandia.manager;
+package br.com.acenetwork.survival.manager;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 
-import br.com.acenetwork.craftlandia.executor.Portal;
+import br.com.acenetwork.survival.executor.Portal;
 
 public class PortalObj implements Serializable
 {
