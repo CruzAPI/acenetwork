@@ -1893,25 +1893,37 @@ public class Main extends Common
 			return;
 		}
 		
+		Material type = b.getType();
+		
 		e.setCancelled(true);
 		
 		ItemStack tool = p.getItemInHand();
 		
 		BlockUtil.breakNaturally(b, tool);
 		
+		boolean instaBreak = BlockUtil.breaksInstantly(type);
+		
 		if(ItemSpecial.getInstance(ContainmentPickaxe.class).isInstanceOf(tool))
 		{
-			p.playSound(p.getLocation(), Sound.ITEM_BREAK, 1.0F, 1.0F);
-			p.setItemInHand(null);
+			if(!instaBreak)
+			{
+				p.playSound(p.getLocation(), Sound.ITEM_BREAK, 1.0F, 1.0F);
+				p.setItemInHand(null);
+			}
+			
 			return;
 		}
 		
-		short damage;
-		
-		loop:switch(tool.getType())
+		if(tool.getType().getMaxDurability() == 0)
 		{
-		case SHEARS:
-			switch(b.getType())
+			return;
+		}
+		
+		short damage = 0;
+		
+		if(tool.getType() == Material.SHEARS)
+		{
+			switch(type)
 			{
 			case TRIPWIRE:
 			case LEAVES:
@@ -1922,46 +1934,26 @@ public class Main extends Common
 			case VINE:
 			case WOOL:
 				damage = 1;
-				break loop;
+				break;
 			default:
-				damage = 0;
-				break loop;
+				break;
 			}
-		case DIAMOND_SWORD:
-		case GOLD_SWORD:
-		case IRON_SWORD:
-		case STONE_SWORD:
-		case WOOD_SWORD:
-			damage = 2;
-			break;
-		case DIAMOND_SPADE:
-		case GOLD_SPADE:
-		case IRON_SPADE:
-		case STONE_SPADE:
-		case WOOD_SPADE:
-		case DIAMOND_PICKAXE:
-		case GOLD_PICKAXE:
-		case IRON_PICKAXE:
-		case STONE_PICKAXE:
-		case WOOD_PICKAXE:
-		case DIAMOND_AXE:
-		case GOLD_AXE:
-		case IRON_AXE:
-		case STONE_AXE:
-		case WOOD_AXE:
-			damage = 1;
-			break;
-		default:
-			damage = 0;
-			break;
+		}
+		else if(!instaBreak)
+		{
+			if(tool.getType().name().contains("SWORD"))
+			{
+				damage = 2;
+			}
+			else if(tool.getType().name().contains("PICKAXE")
+					|| tool.getType().name().contains("SPADE")
+					|| tool.getType().name().contains("AXE"))
+			{
+				damage = (short) (tool.getType().name().contains("PICKAXE") && type == Material.MOB_SPAWNER ? 500 : 1);
+			}
 		}
 		
 		Random r = new Random();
-		
-		if(tool.getType().getMaxDurability() == 0)
-		{
-			return;
-		}
 		
 		if(r.nextDouble() <= (1.0D / (tool.getEnchantmentLevel(Enchantment.DURABILITY) + 1.0D)))
 		{

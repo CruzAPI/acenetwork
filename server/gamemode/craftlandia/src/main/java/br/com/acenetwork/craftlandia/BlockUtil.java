@@ -524,13 +524,14 @@ public class BlockUtil
 				ContainmentPickaxe containmentPickaxe = ItemSpecial.getInstance(ContainmentPickaxe.class);
 				
 				if(containmentPickaxe.isInstanceOf(tool) 
-						&& r.nextInt(100) + r.nextDouble() <= containmentPickaxe.getContainmentPickaxeChance(tool))
+						&& r.nextInt(100) + r.nextDouble() <= containmentPickaxe.getContainmentPickaxeChance(tool)
+						|| tool.getType().name().contains("PICKAXE") && r.nextInt(10) < silkTouch)
 				{
 					CreatureSpawner spawner = (CreatureSpawner) b.getState();
 					items.add(new ItemStack(Material.MOB_SPAWNER));
 					items.add(new ItemStack(Material.MONSTER_EGG, 1, spawner.getSpawnedType().getTypeId()));
 				}
-				else
+				else if(tool.getType().name().contains("PICKAXE"))
 				{
 					ExperienceOrb orb = (ExperienceOrb) b.getWorld().spawnEntity(b.getLocation(), EntityType.EXPERIENCE_ORB);
 					orb.setExperience(15 + r.nextInt(29));
@@ -612,5 +613,39 @@ public class BlockUtil
 		}
 		
 		return choose(total - 1, choose - 1) + choose(total - 1, choose);
+	}
+	
+	public static boolean breaksInstantly(Material type)
+	{
+		switch(type)
+		{
+		case SAPLING:
+		case LONG_GRASS:
+		case YELLOW_FLOWER:
+		case RED_ROSE:
+		case WATER_LILY:
+		case DOUBLE_PLANT:
+		case RED_MUSHROOM:
+		case BROWN_MUSHROOM:
+		case CROPS:
+		case POTATO:
+		case CARROT:
+		case NETHER_WARTS:
+		case MELON_STEM:
+		case PUMPKIN_STEM:
+		case REDSTONE_WIRE:
+		case TORCH:
+		case REDSTONE_TORCH_OFF:
+		case REDSTONE_TORCH_ON:
+		case REDSTONE_COMPARATOR_OFF:
+		case REDSTONE_COMPARATOR_ON:
+		case DIODE_BLOCK_OFF:
+		case DIODE_BLOCK_ON:
+		case TRIPWIRE:
+		case STRING:
+			return true;
+		default:
+			return false;
+		}
 	}
 }

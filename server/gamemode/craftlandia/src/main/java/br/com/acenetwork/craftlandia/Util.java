@@ -482,7 +482,6 @@ public class Util
 			
 			if(enchantment.equals(Enchantment.LOOT_BONUS_MOBS)
 					|| enchantment.equals(Enchantment.OXYGEN)
-					|| enchantment.equals(Enchantment.ARROW_DAMAGE)
 					|| enchantment.equals(Enchantment.THORNS)
 					|| enchantment.equals(Enchantment.DURABILITY)
 					|| enchantment.equals(Enchantment.LOOT_BONUS_BLOCKS)
@@ -490,6 +489,11 @@ public class Util
 					|| enchantment.equals(Enchantment.LUCK))
 			{
 				return rarity == LEGENDARY ? 5 : 4;
+			}
+			
+			if(enchantment.equals(Enchantment.SILK_TOUCH))
+			{
+				return rarity == LEGENDARY ? 10 : 1;
 			}
 			
 			default:
