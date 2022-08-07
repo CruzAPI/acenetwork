@@ -8,7 +8,7 @@
   <artifactId>gamemode</artifactId>
   <packaging>pom</packaging>
   <modules>
-  	<module>craftlandia</module>
+  	<module>survival</module>
   </modules>
   <properties>
     <common.version>0.0.1-SNAPSHOT</common.version>
