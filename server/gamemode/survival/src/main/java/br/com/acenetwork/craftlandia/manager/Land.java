@@ -5,10 +5,12 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -182,6 +184,11 @@ public class Land implements Listener
 		this.landData = LandData.load(id);
 		
 		SET.add(this);
+		
+		if(hasOwner())
+		{
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "pex user " + Bukkit.getOfflinePlayer(getOwner()).getName() + " add tag.legendary");
+		}
 		
 		Bukkit.getPluginManager().registerEvents(this, Main.getInstance());
 	}
@@ -828,5 +835,10 @@ public class Land implements Listener
 	public boolean hasOwner()
 	{
 		return getOwner() != null;
+	}
+	
+	public static Set<Land> getLandsOf(OfflinePlayer op)
+	{
+		return SET.stream().filter(x -> x.hasOwner() && x.getOwner().equals(op.getUniqueId())).collect(Collectors.toSet());
 	}
 }
