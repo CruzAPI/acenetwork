@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
@@ -20,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -33,30 +30,24 @@ import br.com.acenetwork.commons.executor.Baltop;
 import br.com.acenetwork.commons.executor.BanCMD;
 import br.com.acenetwork.commons.executor.BroadcastCMD;
 import br.com.acenetwork.commons.executor.Build;
-import br.com.acenetwork.commons.executor.ChatCMD;
 import br.com.acenetwork.commons.executor.ChatClean;
 import br.com.acenetwork.commons.executor.Deposit;
 import br.com.acenetwork.commons.executor.Give;
-import br.com.acenetwork.commons.executor.Ignore;
 import br.com.acenetwork.commons.executor.Invis;
 import br.com.acenetwork.commons.executor.Invsee;
 import br.com.acenetwork.commons.executor.Login;
-import br.com.acenetwork.commons.executor.MuteCMD;
 import br.com.acenetwork.commons.executor.Mutebroadcast;
 import br.com.acenetwork.commons.executor.Pardon;
 import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.executor.Ping;
 import br.com.acenetwork.commons.executor.Register;
-import br.com.acenetwork.commons.executor.Reply;
 import br.com.acenetwork.commons.executor.Setbalance;
 import br.com.acenetwork.commons.executor.Setip;
 import br.com.acenetwork.commons.executor.Specs;
 import br.com.acenetwork.commons.executor.Stop;
 import br.com.acenetwork.commons.executor.TagCMD;
-import br.com.acenetwork.commons.executor.Tell;
 import br.com.acenetwork.commons.executor.Test;
 import br.com.acenetwork.commons.executor.Tp;
-import br.com.acenetwork.commons.executor.Unmute;
 import br.com.acenetwork.commons.executor.VipChest;
 import br.com.acenetwork.commons.executor.Wallet;
 import br.com.acenetwork.commons.executor.WatchCMD;
@@ -64,7 +55,6 @@ import br.com.acenetwork.commons.executor.Withdraw;
 import br.com.acenetwork.commons.listener.CustomListener;
 import br.com.acenetwork.commons.listener.EntitySpawn;
 import br.com.acenetwork.commons.listener.InventoryClose;
-import br.com.acenetwork.commons.listener.PlayerChat;
 import br.com.acenetwork.commons.listener.PlayerDeath;
 import br.com.acenetwork.commons.listener.PlayerJoin;
 import br.com.acenetwork.commons.listener.PlayerLogin;
@@ -79,7 +69,6 @@ import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 public class Common extends JavaPlugin implements Listener
 {
 	private static Common instance;
-	private static JavaPlugin plugin;
 	private static boolean restarting;
 	
 	public void onEnable()
