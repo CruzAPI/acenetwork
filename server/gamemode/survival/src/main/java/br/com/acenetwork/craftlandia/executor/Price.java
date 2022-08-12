@@ -8,10 +8,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 
 import org.bukkit.Bukkit;
@@ -40,6 +43,7 @@ public class Price implements TabExecutor
 {
 	private Map<IdData, CryptoInfo> map = new HashMap<>();
 	private static Price instance;
+	private final Map<IdData, Map<IdData, Double>> elementMap = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	public Price()
@@ -70,6 +74,205 @@ public class Price implements TabExecutor
 				throw new RuntimeException(e);
 			}
 		}
+		
+		//primitives
+		
+//		new IdData(Material.STONE, (short) 0);
+//		new IdData(Material.DIRT, (short) 0);
+//		new IdData(Material.SAND, (short) 0);
+//		new IdData(Material.SAND, (short) 1);
+//		new IdData(Material.GRAVEL, (short) 0);
+//		new IdData(Material.LOG, (short) 0);
+//		new IdData(Material.LOG, (short) 1);
+//		new IdData(Material.LOG, (short) 2);
+//		new IdData(Material.LOG, (short) 3);
+//		new IdData(Material.LOG_2, (short) 0);
+//		new IdData(Material.LOG_2, (short) 1);
+//		new IdData(Material.SPONGE, (short) 0);
+//		new IdData(Material.WOOL, (short) 0);
+//		new IdData(Material.OBSIDIAN, (short) 0);
+//		new IdData(Material.ICE, (short) 0);
+//		new IdData(Material.SNOW_BLOCK, (short) 0);
+//		new IdData(Material.CLAY, (short) 0);
+//		new IdData(Material.PUMPKIN, (short) 0);
+//		new IdData(Material.NETHERRACK, (short) 0);
+//		new IdData(Material.SOUL_SAND, (short) 0);
+//		new IdData(Material.GLOWSTONE, (short) 0);
+//		new IdData(Material.MELON_BLOCK, (short) 0);
+//		new IdData(Material.ENDER_STONE, (short) 0);
+//		
+//		new IdData(Material.COAL_ORE, (short) 0);
+//		new IdData(Material.IRON_ORE, (short) 0);
+//		new IdData(Material.GOLD_ORE, (short) 0);
+//		new IdData(Material.REDSTONE_ORE, (short) 0);
+//		new IdData(Material.LAPIS_ORE, (short) 0);
+//		new IdData(Material.DIAMOND_ORE, (short) 0);
+//		new IdData(Material.EMERALD_ORE, (short) 0);
+//		new IdData(Material.QUARTZ_ORE, (short) 0);
+//		
+//		new IdData(Material.LEAVES, (short) 0);
+//		new IdData(Material.LEAVES, (short) 1);
+//		new IdData(Material.LEAVES, (short) 2);
+//		new IdData(Material.LEAVES, (short) 3);
+//		new IdData(Material.LEAVES_2, (short) 0);
+//		new IdData(Material.LEAVES_2, (short) 1);
+//		
+//		new IdData(Material.LONG_GRASS, (short) 1);
+//		new IdData(Material.LONG_GRASS, (short) 2);
+//		new IdData(Material.DEAD_BUSH, (short) 0);
+//		
+//		new IdData(Material.RED_MUSHROOM, (short) 0);
+//		new IdData(Material.BROWN_MUSHROOM, (short) 0);
+//		
+//		new IdData(Material.CACTUS, (short) 0);
+//		
+//		new IdData(Material.YELLOW_FLOWER, (short) 0);
+//		new IdData(Material.RED_ROSE, (short) 0);
+//		
+//		new IdData(Material.RED_ROSE, (short) 1);
+//		new IdData(Material.RED_ROSE, (short) 2);
+//		new IdData(Material.RED_ROSE, (short) 3);
+//		new IdData(Material.RED_ROSE, (short) 4);
+//		new IdData(Material.RED_ROSE, (short) 5);
+//		new IdData(Material.RED_ROSE, (short) 6);
+//		new IdData(Material.RED_ROSE, (short) 7);
+//		new IdData(Material.RED_ROSE, (short) 8);
+//		
+//		new IdData(Material.DOUBLE_PLANT, (short) 0);
+//		new IdData(Material.DOUBLE_PLANT, (short) 1);
+//		new IdData(Material.DOUBLE_PLANT, (short) 2);
+//		new IdData(Material.DOUBLE_PLANT, (short) 3);
+//		new IdData(Material.DOUBLE_PLANT, (short) 4);
+//		new IdData(Material.DOUBLE_PLANT, (short) 5);
+//		
+//		new IdData(Material.VINE, (short) 0);
+//		new IdData(Material.WATER_LILY, (short) 0);
+//		
+//		new IdData(Material.SKULL_ITEM, (short) 0);
+//		new IdData(Material.SKULL_ITEM, (short) 1);
+//		new IdData(Material.SKULL_ITEM, (short) 2);
+//		new IdData(Material.SKULL_ITEM, (short) 3);
+//		new IdData(Material.SKULL_ITEM, (short) 4);
+//		
+//		new IdData(Material.SADDLE, (short) 0);
+//		new IdData(Material.IRON_BARDING, (short) 0);
+//		new IdData(Material.GOLD_BARDING, (short) 0);
+//		new IdData(Material.DIAMOND_BARDING, (short) 0);
+//		new IdData(Material.NAME_TAG, (short) 0);
+//		new IdData(Material.RECORD_12, (short) 0);
+//		new IdData(Material.RECORD_11, (short) 0);
+//		new IdData(Material.RECORD_10, (short) 0);
+//		new IdData(Material.RECORD_9, (short) 0);
+//		new IdData(Material.RECORD_8, (short) 0);
+//		new IdData(Material.RECORD_7, (short) 0);
+//		new IdData(Material.RECORD_6, (short) 0);
+//		new IdData(Material.RECORD_5, (short) 0);
+//		new IdData(Material.RECORD_4, (short) 0);
+//		new IdData(Material.RECORD_3, (short) 0);
+//		new IdData(Material.GREEN_RECORD, (short) 0);
+//		new IdData(Material.GOLD_RECORD, (short) 0);
+//		
+//		new IdData(Material.SLIME_BALL, (short) 0);
+//		new IdData(Material.BONE, (short) 0);
+//		new IdData(Material.ENDER_PEARL, (short) 0);
+//		
+//		
+//		new IdData(Material.PORK, (short) 0);
+//		new IdData(Material.RAW_FISH, (short) 0);
+//		new IdData(Material.RAW_FISH, (short) 1);
+//		new IdData(Material.RAW_FISH, (short) 2);
+//		new IdData(Material.RAW_FISH, (short) 3);
+//		new IdData(Material.RAW_BEEF, (short) 0);
+//		new IdData(Material.RAW_CHICKEN, (short) 0);
+//		new IdData(Material.ROTTEN_FLESH, (short) 0);
+//		new IdData(Material.SPIDER_EYE, (short) 0);
+//		new IdData(Material.CARROT_ITEM, (short) 0);
+//		new IdData(Material.POTATO_ITEM, (short) 0);
+//		new IdData(Material.RABBIT, (short) 0);
+//		new IdData(Material.MUTTON, (short) 0);
+//		
+//		
+//		new IdData(Material.COAL, (short) 0);
+//		new IdData(Material.IRON_INGOT, (short) 0);
+//		new IdData(Material.GOLD_INGOT, (short) 0);
+//		new IdData(Material.REDSTONE, (short) 0);
+//		new IdData(Material.INK_SACK, (short) 4); //LAPIZ_LAZULI
+//		new IdData(Material.DIAMOND, (short) 0);
+//		new IdData(Material.EMERALD, (short) 0);
+//		new IdData(Material.QUARTZ, (short) 0);
+//		
+//		new IdData(Material.STRING, (short) 0);
+//		new IdData(Material.FEATHER, (short) 0);
+//		new IdData(Material.SULPHUR, (short) 0);
+//		new IdData(Material.SEEDS, (short) 0);
+//		new IdData(Material.WHEAT, (short) 0);
+//		new IdData(Material.LEATHER, (short) 0);
+//		new IdData(Material.SUGAR, (short) 0);
+//		new IdData(Material.EGG, (short) 0);
+//		new IdData(Material.INK_SACK, (short) 0);
+//		new IdData(Material.INK_SACK, (short) 3); //COCOA_BEAN
+//		new IdData(Material.BLAZE_ROD, (short) 0);
+//		new IdData(Material.GHAST_TEAR, (short) 0);
+//		new IdData(Material.NETHER_STALK, (short) 0);
+//		new IdData(Material.NETHER_STAR, (short) 0);
+//		new IdData(Material.PRISMARINE_SHARD, (short) 0);
+//		new IdData(Material.PRISMARINE_CRYSTALS, (short) 0);
+//		new IdData(Material.RABBIT_HIDE, (short) 0);
+//		new IdData(Material.RABBIT_FOOT, (short) 0);
+		
+		//elements
+		
+		Map<IdData, Double> tempMap;
+		
+		elementMap.put(new IdData(Material.STONE, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.STONE, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.STONE, (short) 3), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.STONE, (short) 4), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.STONE, (short) 5), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.STONE, (short) 6), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.GRASS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.DIRT, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.DIRT, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.DIRT, (short) 0), 0.5D);
+		tempMap.put(new IdData(Material.GRAVEL, (short) 0), 0.5D);
+		
+		elementMap.put(new IdData(Material.DIRT, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.DIRT, (short) 0), 16.0D);
+		
+		elementMap.put(new IdData(Material.COBBLESTONE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 0.5D);
+		
+		elementMap.put(new IdData(Material.WOOD, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 0), 0.25D);
+		
+		elementMap.put(new IdData(Material.WOOD, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 1), 0.25D);
+		
+		elementMap.put(new IdData(Material.WOOD, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 2), 0.25D);
+		
+		elementMap.put(new IdData(Material.WOOD, (short) 3), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 3), 0.25D);
+		
+		elementMap.put(new IdData(Material.WOOD, (short) 4), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 0), 0.25D);
+		
+		elementMap.put(new IdData(Material.WOOD, (short) 5), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 0), 0.25D);
+		
 	}
 	
 	public void save()
@@ -196,24 +399,39 @@ public class Price implements TabExecutor
 		}
 
 		IdData key = new IdData(type.getId(), data);
-
-		if(!map.containsKey(key))
+		
+		
+		Map<IdData, Double> tempMap = new HashMap<>();
+		
+		if(elementMap.containsKey(key))
+		{
+			tempMap = elementMap.get(key); //Derivative
+		}
+		else
+		{
+			tempMap.put(key, 1.0D); //Original
+		}
+		
+		if(tempMap.isEmpty() || tempMap.keySet().stream().filter(x -> map.containsKey(x)).count() != tempMap.size())
 		{
 			sender.sendMessage(ChatColor.RED + bundle.getString("raid.cmd.sell.item-not-for-sale"));
 			return true;
 		}
 		
-		CryptoInfo cryptoInfo = map.get(key);
-		double marketCap = cryptoInfo.getMarketCap();
-		double circulatingSupply = cryptoInfo.getCirculatingSupply();
+		double price = 0.0D;
 		
-		String price = Balance.getDecimalFormat().format(marketCap / circulatingSupply);
+		for(Entry<IdData, Double> entry : tempMap.entrySet())
+		{
+			price += entry.getValue() * map.get(entry.getKey()).getPrice();
+		}
+		
+		DecimalFormat df =  new DecimalFormat("#.##", new DecimalFormatSymbols(bundle.getLocale()));
 		
 		TextComponent text = new TextComponent(CommonsUtil.getTranslation(key, minecraftBundle));
 		text.addExtra(": ");
 		text.setColor(ChatColor.GREEN);
 		
-		TextComponent extra = new TextComponent("" + price);
+		TextComponent extra = new TextComponent("" + df.format(price));
 		extra.setColor(ChatColor.YELLOW);
 		text.addExtra(extra);
 		
@@ -225,6 +443,11 @@ public class Price implements TabExecutor
 	public Map<IdData, CryptoInfo> getPriceMap()
 	{
 		return map;
+	}
+	
+	public Map<IdData, Map<IdData, Double>> getElementMap()
+	{
+		return elementMap;
 	}
 	
 	public static Price getInstance()

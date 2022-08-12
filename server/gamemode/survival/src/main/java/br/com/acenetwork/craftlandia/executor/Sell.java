@@ -117,7 +117,7 @@ public class Sell implements TabExecutor
 		
 		double total = 0.0D;
 		
-		List<SellItemEvent> events = new ArrayList<>();
+//		List<SellItemEvent> events = new ArrayList<>();
 		
 		for(int i = 0; i < itemsToSell.size(); i++)
 		{
@@ -142,9 +142,21 @@ public class Sell implements TabExecutor
 			
 			IdDataRarity idDataRarity = new IdDataRarity(id, data, rarity);
 			IdData idData = idDataRarity.getIdData();
-			Map<IdData, CryptoInfo> priceMap = Price.getInstance().getPriceMap();
 			
-			if(!priceMap.containsKey(idData))
+			Map<IdData, CryptoInfo> priceMap = Price.getInstance().getPriceMap();
+			Map<IdData, Map<IdData, Double>> elementMap = Price.getInstance().getElementMap();
+			Map<IdData, Double> tempMap = new HashMap<>();
+			
+			if(elementMap.containsKey(idData))
+			{
+				tempMap = elementMap.get(idData); //Derivative
+			}
+			else
+			{
+				tempMap.put(idData, 1.0D); //Original
+			}
+			
+			if(tempMap.isEmpty() || tempMap.keySet().stream().filter(x -> priceMap.containsKey(x)).count() != tempMap.size())
 			{
 				if(sellType == SellType.HAND)
 				{
@@ -154,13 +166,6 @@ public class Sell implements TabExecutor
 				
 				continue;
 			}
-			
-			CryptoInfo cryptoInfo = priceMap.get(idData);
-			
-			final double oldMarketCap = cryptoInfo.getMarketCap();
-			double marketCap = oldMarketCap;
-			final double oldCirculatingSupply = cryptoInfo.getCirculatingSupply();
-			double circulatingSupply = oldCirculatingSupply;
 			
 			final int amountToSell = item.getAmount() * rarity.getMultiplierAdminShop();
 			
@@ -173,34 +178,45 @@ public class Sell implements TabExecutor
 				p.getInventory().setItem(i, null);
 			}
 			
-			double oldPrice = marketCap / circulatingSupply;
-			double newPrice = (marketCap - oldPrice * amountToSell) / (circulatingSupply + amountToSell);
+			double totalShards = 0.0D;
 			
-			final double price = (oldPrice + newPrice) / 2.0D;
+			for(Entry<IdData, Double> entry : tempMap.entrySet())
+			{
+				CryptoInfo cryptoInfo = priceMap.get(entry.getKey());
+				final double oldMarketCap = cryptoInfo.getMarketCap();
+				double marketCap = oldMarketCap;
+				final double oldCirculatingSupply = cryptoInfo.getCirculatingSupply();
+				double circulatingSupply = oldCirculatingSupply;
+				
+				double oldPrice = marketCap / circulatingSupply;
+				double newPrice = (marketCap - oldPrice * amountToSell * entry.getValue()) / (circulatingSupply + amountToSell * entry.getValue());
+				
+				final double price = (oldPrice + newPrice) / 2.0D;
+				
+				double shards = price * amountToSell * entry.getValue();
+				
+				totalShards += shards;
+				marketCap -= shards;
+				circulatingSupply += amountToSell * entry.getValue();
+				
+				cryptoInfo.setMarketCap(marketCap);
+				cryptoInfo.setCirculatingSupply(circulatingSupply);
+			}
 			
-			double shards = price * amountToSell;
-			
-			marketCap -= shards;
-			circulatingSupply += amountToSell;
-			
-			cryptoInfo.setMarketCap(marketCap);
-			cryptoInfo.setCirculatingSupply(circulatingSupply);
-			
-			cp.setBalance(balance += shards);
-			
-			total += shards;
+			cp.setBalance(balance += totalShards);
+			total += totalShards;
 			
 			AmountPrice ap = map.containsKey(idDataRarity) ? map.get(idDataRarity) : new AmountPrice();
 			
 			ap.amount += item.getAmount();
-			ap.price += shards;
+			ap.price += totalShards;
 			
 			map.put(idDataRarity, ap);
 			
-			events.add(new SellItemEvent(p, idDataRarity, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
+//			events.add(new SellItemEvent(p, idDataRarity, amountToSell, oldMarketCap, marketCap, oldCirculatingSupply, circulatingSupply));
 		}
 		
-		events.forEach(x -> Bukkit.getPluginManager().callEvent(x));
+//		events.forEach(x -> Bukkit.getPluginManager().callEvent(x));
 		
 		if(map.isEmpty())
 		{

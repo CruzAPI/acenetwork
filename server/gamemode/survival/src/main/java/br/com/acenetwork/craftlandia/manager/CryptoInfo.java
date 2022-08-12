@@ -35,6 +35,11 @@ public class CryptoInfo implements Serializable
 		this.circulatingSupply = circulatingSupply;
 	}
 	
+	public double getPrice()
+	{
+		return marketCap / circulatingSupply;
+	}
+	
 	@Override
 	public String toString()
 	{
