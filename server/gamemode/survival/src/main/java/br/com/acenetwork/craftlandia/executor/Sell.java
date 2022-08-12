@@ -142,7 +142,7 @@ public class Sell implements TabExecutor
 			
 			IdDataRarity idDataRarity = new IdDataRarity(id, data, rarity);
 			IdData idData = idDataRarity.getIdData();
-			Map<IdData, CryptoInfo> priceMap = Price.getPriceMap();
+			Map<IdData, CryptoInfo> priceMap = Price.getInstance().getPriceMap();
 			
 			if(!priceMap.containsKey(idData))
 			{

@@ -37,6 +37,7 @@ import br.com.acenetwork.commons.event.CustomEntityDeathEvent;
 import br.com.acenetwork.commons.player.CommonPlayer;
 import br.com.acenetwork.craftlandia.Main;
 import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
+import br.com.acenetwork.craftlandia.event.TNTSpawnEvent;
 import br.com.acenetwork.craftlandia.manager.Config;
 import br.com.acenetwork.craftlandia.manager.Land;
 import br.com.acenetwork.craftlandia.manager.LandEntityData;
@@ -177,16 +178,23 @@ public class WarpLand extends Warp
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void a(TNTSpawnEvent e)
+	{
+		registerEntity(e.getTNTPrimed().getLocation(), e.getTNTPrimed());
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void a(EntitySpawnEvent e)
 	{
-		Location l = e.getLocation();
-		
+		registerEntity(e.getLocation(), e.getEntity());
+	}
+	
+	private void registerEntity(Location l, Entity entity)
+	{
 		if(l.getWorld() != w)
 		{
 			return;
 		}
-		
-		Entity entity = e.getEntity();
 		
 		if(!entity.hasMetadata("land"))
 		{

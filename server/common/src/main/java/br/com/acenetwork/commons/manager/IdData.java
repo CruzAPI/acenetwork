@@ -53,6 +53,10 @@ public class IdData implements Serializable
 		IdData other = (IdData) obj;
 		return data == other.data && id == other.id;
 	}
-	
-	
+
+	@Override
+	public String toString()
+	{
+		return "IdData [id=" + id + ", data=" + data + "]";
+	}
 }

@@ -38,7 +38,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class Price implements TabExecutor
 {
-	private Map<IdData, CryptoInfo> MAP = new HashMap<>();
+	private Map<IdData, CryptoInfo> map = new HashMap<>();
 	private static Price instance;
 	
 	@SuppressWarnings("unchecked")
@@ -52,7 +52,7 @@ public class Price implements TabExecutor
 		{
 			for(PRICE price : PRICE.LIST)
 			{
-				MAP.put(new IdData(price.id, price.data), new CryptoInfo(price.marketCap, price.circulatingSupply));
+				map.put(new IdData(price.id, price.data), new CryptoInfo(price.marketCap, price.circulatingSupply));
 			}
 			
 			PRICE.LIST = null;
@@ -63,7 +63,7 @@ public class Price implements TabExecutor
 					ByteArrayInputStream streamIn = new ByteArrayInputStream(ByteStreams.toByteArray(fileIn));
 					ObjectInputStream in = new ObjectInputStream(streamIn))
 			{
-				MAP = (Map<IdData, CryptoInfo>) in.readObject();
+				map = (Map<IdData, CryptoInfo>) in.readObject();
 			}
 			catch(ClassNotFoundException | IOException e)
 			{
@@ -80,7 +80,7 @@ public class Price implements TabExecutor
 				ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
 				ObjectOutputStream out = new ObjectOutputStream(streamOut))
 		{
-			out.writeObject(MAP);
+			out.writeObject(map);
 			fileOut.write(streamOut.toByteArray());
 		}
 		catch(IOException e)
@@ -97,7 +97,7 @@ public class Price implements TabExecutor
 		
 		if(args.length == 1)
 		{
-			for(IdData key : MAP.keySet())
+			for(IdData key : map.keySet())
 			{
 				Material type = Material.getMaterial(key.getId());
 				
@@ -197,13 +197,13 @@ public class Price implements TabExecutor
 
 		IdData key = new IdData(type.getId(), data);
 
-		if(!MAP.containsKey(key))
+		if(!map.containsKey(key))
 		{
 			sender.sendMessage(ChatColor.RED + bundle.getString("raid.cmd.sell.item-not-for-sale"));
 			return true;
 		}
 		
-		CryptoInfo cryptoInfo = MAP.get(key);
+		CryptoInfo cryptoInfo = map.get(key);
 		double marketCap = cryptoInfo.getMarketCap();
 		double circulatingSupply = cryptoInfo.getCirculatingSupply();
 		
@@ -222,9 +222,9 @@ public class Price implements TabExecutor
 		return false;
 	}
 	
-	public static Map<IdData, CryptoInfo> getPriceMap()
+	public Map<IdData, CryptoInfo> getPriceMap()
 	{
-		return instance.MAP;
+		return map;
 	}
 	
 	public static Price getInstance()

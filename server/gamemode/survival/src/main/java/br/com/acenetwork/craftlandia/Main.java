@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -44,6 +45,8 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderCrystal;
@@ -54,7 +57,9 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MushroomCow;
+import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
@@ -80,6 +85,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
@@ -132,6 +138,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -150,6 +157,7 @@ import br.com.acenetwork.commons.player.craft.CraftCommonPlayer;
 import br.com.acenetwork.craftlandia.event.BreakNaturallyEvent;
 import br.com.acenetwork.craftlandia.event.FallingBlockObstructEvent;
 import br.com.acenetwork.craftlandia.event.NPCLoadEvent;
+import br.com.acenetwork.craftlandia.event.TNTSpawnEvent;
 import br.com.acenetwork.craftlandia.executor.Delhome;
 import br.com.acenetwork.craftlandia.executor.Give;
 import br.com.acenetwork.craftlandia.executor.Home;
@@ -160,6 +168,7 @@ import br.com.acenetwork.craftlandia.executor.Price;
 import br.com.acenetwork.craftlandia.executor.Sell;
 import br.com.acenetwork.craftlandia.executor.Sellall;
 import br.com.acenetwork.craftlandia.executor.Sethome;
+import br.com.acenetwork.craftlandia.executor.Setprice;
 import br.com.acenetwork.craftlandia.executor.Shop;
 import br.com.acenetwork.craftlandia.executor.ShopSearch;
 import br.com.acenetwork.craftlandia.executor.Spawn;
@@ -171,6 +180,7 @@ import br.com.acenetwork.craftlandia.item.CommonRandomItem;
 import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
+import br.com.acenetwork.craftlandia.listener.TNTSpawnChecker;
 import br.com.acenetwork.craftlandia.listener.TestListener;
 import br.com.acenetwork.craftlandia.manager.BlockData;
 import br.com.acenetwork.craftlandia.manager.BreakReason;
@@ -190,6 +200,8 @@ import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -270,6 +282,7 @@ public class Main extends Common
 			getServer().getPluginManager().registerEvents(new PlayerMode(), this);
 			getServer().getPluginManager().registerEvents(new FallingBlockChecker(), this);
 			getServer().getPluginManager().registerEvents(new TestListener(), this);
+			getServer().getPluginManager().registerEvents(new TNTSpawnChecker(), this);
 			
 			ItemSpecial.load();
 			
@@ -280,6 +293,7 @@ public class Main extends Common
 //			registerCommand(new Playtime(), "playtime");
 			registerCommand(new Portal(), "portal");
 			registerCommand(new Price(), "price");
+			registerCommand(new Setprice(), "setprice");
 			registerCommand(new Spawn(), "spawn");
 			registerCommand(new Sell(), "sell");
 			registerCommand(new Sellall(), "sellall");
@@ -352,15 +366,51 @@ public class Main extends Common
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void tnt(EntitySpawnEvent e)
+	public void tnt(EntityExplodeEvent e)
 	{
-		Entity entity = e.getEntity();
-		
-		if(entity == null || entity.getType() != EntityType.PRIMED_TNT)
+		if(e.getEntityType() != EntityType.PRIMED_TNT)
 		{
 			return;
 		}
-		Bukkit.broadcastMessage(" aa? prime tnt");
+		
+		Entity entity = e.getEntity();
+		
+		if(!entity.hasMetadata("rarity") || entity.getMetadata("rarity").get(0).value() != Rarity.LEGENDARY)
+		{
+			return;
+		}
+		
+		if(entity.hasMetadata("spread") && !entity.getMetadata("spread").get(0).asBoolean())
+		{
+			return;
+		}
+		
+		Location l = entity.getLocation();
+		
+		for(double x = -1.0D; x <= 1.0D; x += 1.0D)
+		{
+			for(double z = -1.0D; z <= 1.0D; z += 1.0D)
+			{
+				if(x == 0.0D && z == 0.0D)
+				{
+					continue;
+				}
+				
+				TNTPrimed tnt = entity.getWorld().spawn(l, TNTPrimed.class);
+				tnt.setMetadata("special", new FixedMetadataValue(this, true));
+				tnt.setMetadata("spread", new FixedMetadataValue(this, false)); //important to stop spread on land world
+				
+				
+				tnt.setFuseTicks(40);
+				tnt.setVelocity(new Vector(x, 1.0D, z));
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void tnt(TNTSpawnEvent e)
+	{
+		TNTPrimed entity = e.getTNTPrimed();
 		
 		Block b = entity.getLocation().getBlock();
 		BlockData data = Util.readBlock(b);
@@ -368,9 +418,12 @@ public class Main extends Common
 		
 		Rarity tntRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
 		
+		if(tntRarity == Rarity.LEGENDARY)
+		{
+			entity.setMetadata("special", new FixedMetadataValue(this, true));
+		}
 		
 		entity.setMetadata("rarity", new FixedMetadataValue(this, tntRarity));
-		Bukkit.broadcastMessage(" aa " + tntRarity);
 	}
 	
 	@EventHandler
@@ -1705,12 +1758,35 @@ public class Main extends Common
 		
 		for(Block b : e.blockList())
 		{
+			if(b.getType() == Material.TNT)
+			{
+				b.setType(Material.AIR);
+				TNTPrimed chain = b.getWorld().spawn(b.getLocation().add(0.5D, 0.5D, 0.5D), TNTPrimed.class);
+				chain.setFuseTicks(1);
+				
+				continue;
+			}
+			
 			if(r.nextInt(power) == 0)
 			{
 				BlockUtil.breakNaturally(b, BreakReason.EXPLOSION);
 			}
-			else
+			else if(b.getType() != Material.AIR)
 			{
+				if(entity.hasMetadata("special") && entity.getMetadata("special").get(0).asBoolean())
+				{
+					FallingBlock fb = b.getWorld().spawnFallingBlock(b.getLocation().add(0.0D, 2.0D, 0.0D), b.getType(), b.getData());
+					
+					Vector v = fb.getLocation().toVector().subtract(entity.getLocation().toVector()).normalize();
+					
+					v.setX(v.getX() * 0.5D);
+					v.setY(Math.abs(v.getY()) * (1.0D + Math.random()));
+					v.setZ(v.getZ() * 0.5D);
+					
+					fb.setDropItem(false);
+					fb.setVelocity(v);
+				}
+				
 				b.setType(Material.AIR);
 			}
 		}
@@ -2141,7 +2217,13 @@ public class Main extends Common
 		}
 		
 		p.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 1, 5));
-		p.getWorld().createExplosion(p.getLocation(), 6.0F);
+		TNTPrimed tnt = p.getWorld().spawn(p.getLocation(), TNTPrimed.class);
+		
+		tnt.setMetadata("owner", new FixedMetadataValue(this, p.getUniqueId()));
+		tnt.setFuseTicks(0);
+		tnt.setYield(6.0F);
+		
+//		createExplosion(p.getLocation(), 6.0F);
 		p.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
 		
 		if(resistance != null)

@@ -34,4 +34,10 @@ public class CryptoInfo implements Serializable
 	{
 		this.circulatingSupply = circulatingSupply;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "CryptoInfo [marketCap=" + marketCap + ", circulatingSupply=" + circulatingSupply + "]";
+	}
 }

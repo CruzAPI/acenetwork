@@ -26,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockMultiPlaceEvent;
@@ -37,6 +38,7 @@ import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
@@ -49,7 +51,9 @@ import org.bukkit.material.Dispenser;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.event.CustomBlockExplodeEvent;
 import br.com.acenetwork.commons.event.CustomEntityDeathEvent;
+import br.com.acenetwork.commons.event.CustomEntityExplodeEvent;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.event.SocketEvent;
 import br.com.acenetwork.commons.listener.EntitySpawn;
@@ -402,6 +406,57 @@ public class Land implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(CustomBlockExplodeEvent ce)
+	{
+		BlockExplodeEvent e = ce.getEvent();
+		
+		Block b = e.getBlock();
+		
+		if(isLand(b) && hasOwner())
+		{
+			e.setCancelled(false);
+			
+			e.blockList().clear();
+			
+			for(Block blocks : ce.getOriginalBlocks())
+			{
+				if(isLand(blocks.getLocation()))
+				{
+					e.blockList().add(blocks);
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void a(CustomEntityExplodeEvent ce)
+	{
+		EntityExplodeEvent e = ce.getEvent();
+		
+		Entity entity = e.getEntity();
+		
+		if(isLand(entity.getLocation()) && hasOwner())
+		{
+			if(entity.hasMetadata("owner") && !isTrusted((UUID) entity.getMetadata("owner").get(0).value()))
+			{
+				return;
+			}
+			
+			e.setCancelled(false);
+			
+			e.blockList().clear();
+			
+			for(Block blocks : ce.getOriginalBlocks())
+			{
+				if(isLand(blocks.getLocation()))
+				{
+					e.blockList().add(blocks);
+				}
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void a(BlockGrowEvent e)
 	{
 		Block b = e.getBlock();
@@ -425,7 +480,7 @@ public class Land implements Listener
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
 	public void on(PlayerInteractEvent e)
 	{
 		Player p = e.getPlayer();

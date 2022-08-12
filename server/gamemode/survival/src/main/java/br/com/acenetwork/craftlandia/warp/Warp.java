@@ -79,6 +79,8 @@ import org.bukkit.material.Dispenser;
 import com.google.common.io.ByteStreams;
 
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.event.CustomBlockExplodeEvent;
+import br.com.acenetwork.commons.event.CustomEntityExplodeEvent;
 import br.com.acenetwork.commons.event.CustomStructureGrowEvent;
 import br.com.acenetwork.commons.manager.Pitch;
 import br.com.acenetwork.commons.player.CommonPlayer;
@@ -120,7 +122,7 @@ public abstract class Warp implements Listener
 		return MAP.get(w.getUID());
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void a(PlayerInteractEvent e)
 	{
 		Player p = e.getPlayer();
@@ -373,8 +375,10 @@ public abstract class Warp implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void b(EntityExplodeEvent e)
+	public void b(CustomEntityExplodeEvent ce)
 	{
+		EntityExplodeEvent e = ce.getEvent();
+		
 		if(e.getLocation().getWorld() != w)
 		{
 			return;
@@ -392,8 +396,10 @@ public abstract class Warp implements Listener
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void b(BlockExplodeEvent e)
+	public void b(CustomBlockExplodeEvent ce)
 	{
+		BlockExplodeEvent e = ce.getEvent();
+		
 		if(e.getBlock().getWorld() != w)
 		{
 			return;
@@ -699,6 +705,7 @@ public abstract class Warp implements Listener
 		
 		e.setCancelled(isSpawnProtection(b.getLocation()));
 	}
+	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void cancelEnderpearl(PlayerTeleportEvent e)
 	{
