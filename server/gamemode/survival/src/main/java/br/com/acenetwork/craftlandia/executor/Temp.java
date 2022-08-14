@@ -33,7 +33,7 @@ public class Temp implements TabExecutor, Listener
 {
 	private static final double HIGHEST = 200.0D * 20.0D;
 	private static final double HIGH = 100.0D * 20.0D;
-	private static final double NORMAL = 50.0D * 20.0D;
+	private static final double $1KK = 50.0D * 20.0D;
 	private static final double LOW = 25.0D * 20.0D;
 	private static final double LOWEST = 10.0D * 20.0D;
 	private static final double MEME = 5.0D * 20.0D;
@@ -47,148 +47,150 @@ public class Temp implements TabExecutor, Listener
 		// 10 < 17,5% liquidez baixíssima
 		// 5 < 30%  liquidez meme
 		
-		new PRICE(Material.STONE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.DIRT, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SAND, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SAND, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.GRAVEL, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LOG, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LOG, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.LOG, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.LOG, (short) 3, 1.0D, NORMAL);
-		new PRICE(Material.LOG_2, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LOG_2, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.SPONGE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.WOOL, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.OBSIDIAN, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.ICE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SNOW_BLOCK, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.CLAY, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.PUMPKIN, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.NETHERRACK, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SOUL_SAND, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GLOWSTONE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.MELON_BLOCK, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.ENDER_STONE, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.STONE,				(short) 0, 0.02D,	$1KK);
+		new PRICE(Material.DIRT,				(short) 0, 0.01D,	$1KK);
+		new PRICE(Material.SAND,				(short) 0, 0.05D,	$1KK);
+		new PRICE(Material.SAND,				(short) 1, 0.10D,	$1KK);
+		new PRICE(Material.GRAVEL,				(short) 0, 0.20D,	$1KK);
+		new PRICE(Material.LOG,					(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.LOG,					(short) 1, 1.00D,	$1KK);
+		new PRICE(Material.LOG,					(short) 2, 1.00D,	$1KK);
+		new PRICE(Material.LOG,					(short) 3, 1.00D,	$1KK);
+		new PRICE(Material.LOG_2,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.LOG_2,				(short) 1, 1.00D,	$1KK);
+		new PRICE(Material.SPONGE,				(short) 0, 500.00D, $1KK);
+		new PRICE(Material.WOOL,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.OBSIDIAN,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.ICE,					(short) 0, 0.20D,	$1KK);
+		new PRICE(Material.SNOW_BLOCK,			(short) 0, 0.20D,	$1KK);
+		new PRICE(Material.CLAY,				(short) 0, 0.25D,	$1KK);
+		new PRICE(Material.PUMPKIN,				(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.NETHERRACK,			(short) 0, 0.10D,	$1KK);
+		new PRICE(Material.SOUL_SAND,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.GLOWSTONE,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.MELON_BLOCK,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.ENDER_STONE,			(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.COAL_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.IRON_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GOLD_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.REDSTONE_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LAPIS_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.DIAMOND_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.EMERALD_ORE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.QUARTZ_ORE, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.COAL_ORE,			(short) 0, 2.50D,	$1KK);
+		new PRICE(Material.IRON_ORE,			(short) 0, 5.00D,	$1KK);
+		new PRICE(Material.GOLD_ORE,			(short) 0, 25.00D,	$1KK);
+		new PRICE(Material.REDSTONE_ORE,		(short) 0, 10.00D,	$1KK);
+		new PRICE(Material.LAPIS_ORE,			(short) 0, 10.00D,	$1KK);
+		new PRICE(Material.DIAMOND_ORE,			(short) 0, 100.00D,	$1KK);
+		new PRICE(Material.EMERALD_ORE,			(short) 0, 500.00D,	$1KK);
+		new PRICE(Material.QUARTZ_ORE,			(short) 0, 5.00D,	$1KK);
+		new PRICE(Material.COAL,				(short) 0, 0.25D,	$1KK);
+		new PRICE(Material.IRON_INGOT,			(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.GOLD_INGOT,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.REDSTONE,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.INK_SACK,			(short) 4, 1.00D,	$1KK); //LAPIS_LAZULI
+		new PRICE(Material.DIAMOND,				(short) 0, 10.00D,	$1KK);
+		new PRICE(Material.EMERALD,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.QUARTZ,				(short) 0, 2.00D,	$1KK);
 		
-		new PRICE(Material.LEAVES, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LEAVES, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.LEAVES, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.LEAVES, (short) 3, 1.0D, NORMAL);
-		new PRICE(Material.LEAVES_2, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LEAVES_2, (short) 1, 1.0D, NORMAL);
+		new PRICE(Material.LEAVES,				(short) 0, 0.10D,	$1KK);
+		new PRICE(Material.LEAVES,				(short) 1, 0.10D,	$1KK);
+		new PRICE(Material.LEAVES,				(short) 2, 0.10D,	$1KK);
+		new PRICE(Material.LEAVES,				(short) 3, 0.10D,	$1KK);
+		new PRICE(Material.LEAVES_2,			(short) 0, 0.10D,	$1KK);
+		new PRICE(Material.LEAVES_2,			(short) 1, 0.10D,	$1KK);
 		
-		new PRICE(Material.LONG_GRASS, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.LONG_GRASS, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.DEAD_BUSH, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.LONG_GRASS,			(short) 1, 0.10D,	$1KK);
+		new PRICE(Material.LONG_GRASS,			(short) 2, 0.10D,	$1KK);
+		new PRICE(Material.DEAD_BUSH,			(short) 0, 0.10D,	$1KK);
 		
-		new PRICE(Material.RED_MUSHROOM, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.BROWN_MUSHROOM, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.RED_MUSHROOM,		(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.BROWN_MUSHROOM,		(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.CACTUS, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.CACTUS,				(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.YELLOW_FLOWER, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.YELLOW_FLOWER,		(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.RED_ROSE, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 3, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 4, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 5, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 6, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 7, 1.0D, NORMAL);
-		new PRICE(Material.RED_ROSE, (short) 8, 1.0D, NORMAL);
+		new PRICE(Material.RED_ROSE,			(short) 1, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 2, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 3, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 4, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 5, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 6, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 7, 1.00D,	$1KK);
+		new PRICE(Material.RED_ROSE,			(short) 8, 1.00D,	$1KK);
 		
-		new PRICE(Material.DOUBLE_PLANT, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.DOUBLE_PLANT, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.DOUBLE_PLANT, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.DOUBLE_PLANT, (short) 3, 1.0D, NORMAL);
-		new PRICE(Material.DOUBLE_PLANT, (short) 4, 1.0D, NORMAL);
-		new PRICE(Material.DOUBLE_PLANT, (short) 5, 1.0D, NORMAL);
+		new PRICE(Material.DOUBLE_PLANT,		(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.DOUBLE_PLANT,		(short) 1, 0.50D,	$1KK);
+		new PRICE(Material.DOUBLE_PLANT,		(short) 2, 0.50D,	$1KK);
+		new PRICE(Material.DOUBLE_PLANT,		(short) 3, 0.50D,	$1KK);
+		new PRICE(Material.DOUBLE_PLANT,		(short) 4, 0.50D,	$1KK);
+		new PRICE(Material.DOUBLE_PLANT,		(short) 5, 0.50D,	$1KK);
 		
-		new PRICE(Material.VINE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.WATER_LILY, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.VINE,				(short) 0, 0.10D,	$1KK);
+		new PRICE(Material.WATER_LILY,			(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.SKULL_ITEM, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SKULL_ITEM, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.SKULL_ITEM, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.SKULL_ITEM, (short) 3, 1.0D, NORMAL);
-		new PRICE(Material.SKULL_ITEM, (short) 4, 1.0D, NORMAL);
+		new PRICE(Material.SKULL_ITEM,			(short) 0, 1000.00D,$1KK);
+		new PRICE(Material.SKULL_ITEM,			(short) 1, 1000.00D,$1KK);
+		new PRICE(Material.SKULL_ITEM,			(short) 2, 1000.00D,$1KK);
+		new PRICE(Material.SKULL_ITEM,			(short) 3, 1000.00D,$1KK);
+		new PRICE(Material.SKULL_ITEM,			(short) 4, 1000.00D,$1KK);
 		
-		new PRICE(Material.SADDLE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.IRON_BARDING, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GOLD_BARDING, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.DIAMOND_BARDING, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.NAME_TAG, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_12, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_11, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_10, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_9, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_8, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_7, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_6, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_5, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_4, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RECORD_3, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GREEN_RECORD, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GOLD_RECORD, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.SADDLE,				(short) 0, 100.00D,	$1KK);
+		new PRICE(Material.IRON_BARDING,		(short) 0, 100.00D,	$1KK);
+		new PRICE(Material.GOLD_BARDING,		(short) 0, 250.00D,	$1KK);
+		new PRICE(Material.DIAMOND_BARDING,		(short) 0, 500.00D,$1KK);
+		new PRICE(Material.NAME_TAG,			(short) 0, 1000.00D,$1KK);
+		new PRICE(Material.RECORD_12,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_11,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_10,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_9,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_8,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_7,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_6,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_5,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_4,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RECORD_3,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.GREEN_RECORD,		(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.GOLD_RECORD,			(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.SLIME_BALL, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.BONE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.ENDER_PEARL, (short) 0, 1.0D, NORMAL);
-		
-		
-		new PRICE(Material.PORK, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RAW_FISH, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RAW_FISH, (short) 1, 1.0D, NORMAL);
-		new PRICE(Material.RAW_FISH, (short) 2, 1.0D, NORMAL);
-		new PRICE(Material.RAW_FISH, (short) 3, 1.0D, NORMAL);
-		new PRICE(Material.RAW_BEEF, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RAW_CHICKEN, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.ROTTEN_FLESH, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SPIDER_EYE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.CARROT_ITEM, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.POTATO_ITEM, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RABBIT, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.MUTTON, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.BONE,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.SLIME_BALL,			(short) 0, 2.00D,	$1KK);
+		new PRICE(Material.ENDER_PEARL,			(short) 0, 3.00D,	$1KK);
 		
 		
-		new PRICE(Material.COAL, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.IRON_INGOT, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GOLD_INGOT, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.REDSTONE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.INK_SACK, (short) 4, 1.0D, NORMAL); //LAPIZ_LAZULI
-		new PRICE(Material.DIAMOND, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.EMERALD, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.QUARTZ, (short) 0, 1.0D, NORMAL);
+		new PRICE(Material.PORK,				(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.RAW_FISH,			(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.RAW_FISH,			(short) 1, 0.50D,	$1KK);
+		new PRICE(Material.RAW_FISH,			(short) 2, 0.50D,	$1KK);
+		new PRICE(Material.RAW_FISH,			(short) 3, 0.50D,	$1KK);
+		new PRICE(Material.RAW_BEEF,			(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.RAW_CHICKEN,			(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.ROTTEN_FLESH,		(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.SPIDER_EYE,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.CARROT_ITEM,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.POTATO_ITEM,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RABBIT,				(short) 0, 0.50D,	$1KK);
+		new PRICE(Material.MUTTON,				(short) 0, 0.50D,	$1KK);
 		
-		new PRICE(Material.STRING, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.FEATHER, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SULPHUR, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SEEDS, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.WHEAT, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.LEATHER, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.SUGAR, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.EGG, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.INK_SACK, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.INK_SACK, (short) 3, 1.0D, NORMAL); //COCOA_BEAN
-		new PRICE(Material.BLAZE_ROD, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.GHAST_TEAR, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.NETHER_STALK, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.NETHER_STAR, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.PRISMARINE_SHARD, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.PRISMARINE_CRYSTALS, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RABBIT_HIDE, (short) 0, 1.0D, NORMAL);
-		new PRICE(Material.RABBIT_FOOT, (short) 0, 1.0D, NORMAL);
+		
+		
+		
+		new PRICE(Material.STRING,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.FEATHER,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.SULPHUR,				(short) 0, 2.50D,	$1KK);
+		new PRICE(Material.SEEDS,				(short) 0, 0.10D,	$1KK);
+		new PRICE(Material.WHEAT,				(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.LEATHER,				(short) 0, 2.00D,	$1KK);
+		new PRICE(Material.SUGAR_CANE,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.EGG,					(short) 0, 0.25D,	$1KK);
+		new PRICE(Material.INK_SACK,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.INK_SACK,			(short) 3, 1.00D,	$1KK); //COCOA_BEAN
+		new PRICE(Material.BLAZE_ROD,			(short) 0, 3.00D,	$1KK);
+		new PRICE(Material.GHAST_TEAR,			(short) 0, 5.00D,	$1KK);
+		new PRICE(Material.NETHER_STALK,		(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.NETHER_STAR,			(short) 0, 5000.00D,$1KK);
+		new PRICE(Material.PRISMARINE_SHARD,	(short) 0, 2.50D,	$1KK);
+		new PRICE(Material.PRISMARINE_CRYSTALS,	(short) 0, 2.50D,	$1KK);
+		new PRICE(Material.RABBIT_HIDE,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.RABBIT_FOOT,			(short) 0, 1.00D,	$1KK);
+		new PRICE(Material.DRAGON_EGG,			(short) 0, 10000.00D,	$1KK);
 
 		
 //		new PRICE(1, (short) 0, 0.3D, 64, LOW);

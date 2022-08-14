@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,11 @@ public class Util
 	public static short toShort(byte[] a)
 	{
 		return (short) (a[0] << 8 | a[1] & 0xFF);
+	}
+	
+	public static Rarity getNonNullRarity(Entity entity)
+	{
+		return Optional.ofNullable(getRarity(entity)).orElse(getRarity(entity.getWorld()));
 	}
 	
 	public static Rarity getRarity(Entity entity)

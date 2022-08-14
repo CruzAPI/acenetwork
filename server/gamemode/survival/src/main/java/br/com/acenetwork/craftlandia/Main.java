@@ -49,6 +49,7 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -78,6 +79,7 @@ import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -363,6 +365,29 @@ public class Main extends Common
 		tag.set("pages", pages);
 		book.setTag(tag);
 		return book;
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void setHealth(CreatureSpawnEvent e)
+	{
+		Entity entity = e.getEntity();
+		if(!(entity instanceof Damageable))
+		{
+			return;
+		}
+		
+		Damageable damageable = (Damageable) entity;
+		Rarity rarity = Util.getNonNullRarity(entity);
+		
+		switch(e.getEntityType())
+		{
+		case ZOMBIE:
+			damageable.resetMaxHealth();
+			damageable.setMaxHealth(damageable.getMaxHealth() * rarity.getMultiplierAdminShop());
+			damageable.setHealth(damageable.getMaxHealth());
+		default:
+			break;
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
