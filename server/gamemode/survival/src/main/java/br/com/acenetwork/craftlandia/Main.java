@@ -61,6 +61,8 @@ import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Wither;
@@ -363,6 +365,24 @@ public class Main extends Common
 		tag.set("pages", pages);
 		book.setTag(tag);
 		return book;
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void maracuja(SpawnerSpawnEvent e)
+	{
+		if(!(e.getEntity() instanceof Skeleton))
+		{
+			return;
+		}
+		
+		if(e.getLocation().getBlock().getBiome() != Biome.HELL)
+		{
+			return;
+		}
+		
+		Skeleton skeleton = (Skeleton) e.getEntity();
+		
+		skeleton.setSkeletonType(new Random().nextInt(10) == 0 ? SkeletonType.NORMAL : SkeletonType.WITHER);
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

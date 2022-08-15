@@ -2,6 +2,7 @@ package br.com.acenetwork.craftlandia.manager;
 
 import java.text.DecimalFormat;
 import java.util.Comparator;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -41,6 +43,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.SpawnerSpawnEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -869,6 +872,35 @@ public class Land implements Listener
 			return ChatColor.DARK_GREEN;
 		default:
 			return ChatColor.GRAY;
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void maracuja(SpawnerSpawnEvent e)
+	{
+		if(!isLand(e.getLocation()))
+		{
+			return;
+		}
+		
+		if(isLand(e.getSpawner().getBlock()))
+		{
+			return;
+		}
+		
+		Random r = new Random();
+		
+		if(e.getSpawner().getSpawnedType() == EntityType.SKELETON && r.nextInt(4) != 0)
+		{
+			e.setCancelled(true);
+		}
+		else if(e.getSpawner().getSpawnedType() == EntityType.BLAZE && r.nextInt(3) != 0)
+		{
+			e.setCancelled(true);
+		}
+		else if(e.getSpawner().getSpawnedType() == EntityType.MAGMA_CUBE && r.nextInt(10) != 0)
+		{
+			e.setCancelled(true);
 		}
 	}
 	

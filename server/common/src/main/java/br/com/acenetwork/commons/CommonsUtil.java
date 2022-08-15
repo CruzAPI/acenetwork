@@ -2232,6 +2232,7 @@ public class CommonsUtil
 		
 		switch(type)
 		{
+		case MOB_SPAWNER:
 		case CHEST:
 		case WORKBENCH:
 		case FURNACE:
