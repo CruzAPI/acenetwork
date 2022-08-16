@@ -1532,19 +1532,13 @@ public class Main extends Common
 			return;
 		}
 		
-		Rarity rarity = Util.getRarity(item);
-		
-		if(rarity == null)
-		{
-			return;
-		}
-		
 		e.setCancelled(true);
 		
+		Rarity rarity = Optional.ofNullable(Util.getRarity(item)).orElse(Rarity.COMMON);
 		
 		Block relative = b.getRelative(e.getBlockFace());
 		
-		LivingEntity le = relative.getWorld().spawnCreature(relative.getLocation(), EntityType.fromId(item.getDurability()));
+		LivingEntity le = relative.getWorld().spawnCreature(relative.getLocation().add(0.5D, 0.0D, 0.5D), EntityType.fromId(item.getDurability()));
 		
 		if(!le.isValid())
 		{
@@ -1921,6 +1915,11 @@ public class Main extends Common
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void ab(PlayerFishEvent e)
 	{
+		if(!(e.getCaught() instanceof Item))
+		{
+			return;
+		}
+		
 		Player p = e.getPlayer();
 		
 		Rarity rarity = Util.getWorstRarity(Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON), 
