@@ -126,17 +126,17 @@ public class Temp implements TabExecutor, Listener
 		new PRICE(Material.VINE,				(short) 0, 0.10D,	$1KK);
 		new PRICE(Material.WATER_LILY,			(short) 0, 1.00D,	$1KK);
 		
-		new PRICE(Material.SKULL_ITEM,			(short) 0, 1000.00D,$1KK);
-		new PRICE(Material.SKULL_ITEM,			(short) 1, 1000.00D,$1KK);
-		new PRICE(Material.SKULL_ITEM,			(short) 2, 1000.00D,$1KK);
-		new PRICE(Material.SKULL_ITEM,			(short) 3, 1000.00D,$1KK);
-		new PRICE(Material.SKULL_ITEM,			(short) 4, 1000.00D,$1KK);
+		new PRICE(Material.SKULL_ITEM,			(short) 0, 1000D,	$1KK);
+		new PRICE(Material.SKULL_ITEM,			(short) 1, 100.D,	$1KK); //WITHER
+		new PRICE(Material.SKULL_ITEM,			(short) 2, 1000D,	$1KK);
+//		new PRICE(Material.SKULL_ITEM,			(short) 3, 1000D,	$1KK); //PLAYER
+		new PRICE(Material.SKULL_ITEM,			(short) 4, 1000D,	$1KK);
 		
-		new PRICE(Material.SADDLE,				(short) 0, 100.00D,	$1KK);
-		new PRICE(Material.IRON_BARDING,		(short) 0, 100.00D,	$1KK);
-		new PRICE(Material.GOLD_BARDING,		(short) 0, 250.00D,	$1KK);
-		new PRICE(Material.DIAMOND_BARDING,		(short) 0, 500.00D,$1KK);
-		new PRICE(Material.NAME_TAG,			(short) 0, 1000.00D,$1KK);
+		new PRICE(Material.SADDLE,				(short) 0, 50.0D,	$1KK);
+		new PRICE(Material.IRON_BARDING,		(short) 0, 250D,	$1KK);
+		new PRICE(Material.GOLD_BARDING,		(short) 0, 500D,	$1KK);
+		new PRICE(Material.DIAMOND_BARDING,		(short) 0, 1000D,	$1KK);
+		new PRICE(Material.NAME_TAG,			(short) 0, 50.0D,	$1KK);
 		new PRICE(Material.RECORD_12,			(short) 0, 1.00D,	$1KK);
 		new PRICE(Material.RECORD_11,			(short) 0, 1.00D,	$1KK);
 		new PRICE(Material.RECORD_10,			(short) 0, 1.00D,	$1KK);
@@ -175,7 +175,6 @@ public class Temp implements TabExecutor, Listener
 		new PRICE(Material.STRING,				(short) 0, 1.00D,	$1KK);
 		new PRICE(Material.FEATHER,				(short) 0, 1.00D,	$1KK);
 		new PRICE(Material.SULPHUR,				(short) 0, 2.50D,	$1KK);
-		new PRICE(Material.SEEDS,				(short) 0, 0.10D,	$1KK);
 		new PRICE(Material.WHEAT,				(short) 0, 1.00D,	$1KK);
 		new PRICE(Material.LEATHER,				(short) 0, 2.00D,	$1KK);
 		new PRICE(Material.SUGAR_CANE,			(short) 0, 1.00D,	$1KK);
@@ -185,12 +184,11 @@ public class Temp implements TabExecutor, Listener
 		new PRICE(Material.BLAZE_ROD,			(short) 0, 3.00D,	$1KK);
 		new PRICE(Material.GHAST_TEAR,			(short) 0, 5.00D,	$1KK);
 		new PRICE(Material.NETHER_STALK,		(short) 0, 1.00D,	$1KK);
-		new PRICE(Material.NETHER_STAR,			(short) 0, 5000.00D,$1KK);
+		new PRICE(Material.NETHER_STAR,			(short) 0, 5000D,	$1KK);
 		new PRICE(Material.PRISMARINE_SHARD,	(short) 0, 2.50D,	$1KK);
 		new PRICE(Material.PRISMARINE_CRYSTALS,	(short) 0, 2.50D,	$1KK);
-		new PRICE(Material.RABBIT_HIDE,			(short) 0, 1.00D,	$1KK);
 		new PRICE(Material.RABBIT_FOOT,			(short) 0, 1.00D,	$1KK);
-		new PRICE(Material.DRAGON_EGG,			(short) 0, 10000.00D,	$1KK);
+		new PRICE(Material.DRAGON_EGG,			(short) 0, 10000D,	$1KK);
 
 		
 //		new PRICE(1, (short) 0, 0.3D, 64, LOW);

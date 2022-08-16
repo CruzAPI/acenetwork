@@ -566,65 +566,793 @@ public class Price implements TabExecutor
 		
 		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 0), tempMap = new HashMap<>());
 		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
-		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 8.0D);
 		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
-//		elementMap.put(new IdData(Material., (short) 0), tempMap = new HashMap<>());
-//		tempMap.put(new IdData(Material., (short) 0), 1.0D);
-//		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 14), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 13), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 3), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 12), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 4), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 11), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 5), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 10), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 6), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 9), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 7), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 8), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 8), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 7), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 9), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 6), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 10), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 5), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 11), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 4), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 12), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 3), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 13), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 2), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 14), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 1), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_CLAY, (short) 15), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HARD_CLAY, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 0), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.PRISMARINE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PRISMARINE_SHARD, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.PRISMARINE, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PRISMARINE_SHARD, (short) 0), 9.0D);
+		
+		elementMap.put(new IdData(Material.PRISMARINE, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PRISMARINE_SHARD, (short) 0), 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.SEA_LANTERN, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PRISMARINE_SHARD, (short) 0), 4.0D);
+		tempMap.put(new IdData(Material.PRISMARINE_CRYSTALS, (short) 0), 5.0D);
+		
+		elementMap.put(new IdData(Material.HAY_BLOCK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WHEAT, (short) 0), 9.0D);
+		
+		elementMap.put(new IdData(Material.COAL_BLOCK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.COAL, (short) 0), 9.0D);
+		
+		elementMap.put(new IdData(Material.PACKED_ICE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.ICE, (short) 0), 9.0D);
+		
+		elementMap.put(new IdData(Material.RED_SANDSTONE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SAND, (short) 1), 4.0D);
+		
+		elementMap.put(new IdData(Material.RED_SANDSTONE, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RED_SANDSTONE, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.RED_SANDSTONE, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RED_SANDSTONE, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.RED_SANDSTONE_STAIRS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RED_SANDSTONE, (short) 0), 1.5D);
+		
+		elementMap.put(new IdData(Material.STONE_SLAB2, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RED_SANDSTONE, (short) 0), 0.5D);
+		
+		elementMap.put(new IdData(Material.SAPLING, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES, (short) 0), 10.0D);
+		
+		elementMap.put(new IdData(Material.SAPLING, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES, (short) 1), 10.0D);
+		
+		elementMap.put(new IdData(Material.SAPLING, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES, (short) 2), 10.0D);
+		
+		elementMap.put(new IdData(Material.SAPLING, (short) 3), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES, (short) 3), 10.0D);
+		
+		elementMap.put(new IdData(Material.SAPLING, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES_2, (short) 0), 10.0D);
+		
+		elementMap.put(new IdData(Material.SAPLING, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES_2, (short) 1), 10.0D);
+		
+		elementMap.put(new IdData(Material.WEB, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STRING, (short) 0), 10.0D);
+		
+		elementMap.put(new IdData(Material.TORCH, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 4.0D);
+		tempMap.put(new IdData(Material.COAL, (short) 0), 0.5D / 4.0D);
+		tempMap.put(new IdData(Material.COAL, (short) 1), 0.5D / 4.0D);
+		
+		elementMap.put(new IdData(Material.CHEST, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 8.0D);
+		
+		elementMap.put(new IdData(Material.WORKBENCH, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.FURNACE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.COBBLESTONE, (short) 0), 8.0D);
+		
+		elementMap.put(new IdData(Material.LADDER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 7.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.SNOW, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SNOW_BLOCK, (short) 0), 3.0D / 6.0D);
+		
+		elementMap.put(new IdData(Material.JUKEBOX, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 8.0D);
+		tempMap.put(new IdData(Material.DIAMOND, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 4.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.SPRUCE_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 1), 4.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.BIRCH_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 2), 4.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.JUNGLE_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 3), 4.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.ACACIA_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 4), 4.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.DARK_OAK_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 5), 4.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.THIN_GLASS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GLASS, (short) 0), 6.0D / 16.0D);
+		
+		elementMap.put(new IdData(Material.IRON_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 6.0D / 16.0D);
+		
+		elementMap.put(new IdData(Material.NETHER_FENCE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.NETHER_BRICK, (short) 0), 6.0D / 6.0D);
+		
+		elementMap.put(new IdData(Material.ENCHANTMENT_TABLE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.OBSIDIAN, (short) 0), 4.0D);
+		tempMap.put(new IdData(Material.DIAMOND, (short) 0), 2.0D);
+		tempMap.put(new IdData(Material.BOOK, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.ENDER_CHEST, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.OBSIDIAN, (short) 0), 8.0D);
+		tempMap.put(new IdData(Material.EYE_OF_ENDER, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.ANVIL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_BLOCK, (short) 0), 3.0D);
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 4.0D);
+		
+		elementMap.put(new IdData(Material.ANVIL, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.ANVIL, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.ANVIL, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.ANVIL, (short) 0), 1.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.TRAPPED_CHEST, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CHEST, (short) 0), 1.0D);
+		tempMap.put(new IdData(Material.TRIPWIRE_HOOK, (short) 0), 1.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 14), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 13), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 3), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 12), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 4), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 11), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 5), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 10), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 6), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 9), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 7), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 8), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 8), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 7), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 9), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 6), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 10), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 5), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 11), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 4), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 12), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 3), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 13), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 2), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 14), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 1), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.STAINED_GLASS_PANE, (short) 15), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.THIN_GLASS, (short) 0), 8.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 0), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.SLIME_BLOCK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SLIME_BALL, (short) 0), 9.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.SLIME_BLOCK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SLIME_BALL, (short) 0), 9.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 0), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 1), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 2), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 3), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 3), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 4), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 4), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 5), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 5), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 6), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 6), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 7), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 7), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 8), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 8), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 9), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 9), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 10), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 10), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 11), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 11), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 12), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 12), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 13), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 13), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 14), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 14), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.CARPET, (short) 15), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOL, (short) 15), 2.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.PAINTING, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 8.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOL, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.SIGN, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 6.0D / 3.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.BED, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOL, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.ITEM_FRAME, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 8.0D / 1.0D);
+		tempMap.put(new IdData(Material.LEATHER, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.FLOWER_POT, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CLAY_BRICK, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.DISPENSER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.COBBLE_WALL, (short) 0), 7.0D / 1.0D);
+		tempMap.put(new IdData(Material.BOW, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.NOTE_BLOCK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 8.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.PISTON_STICKY_BASE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PISTON_BASE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.SLIME_BALL, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.PISTON_BASE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.COBBLESTONE, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.TNT, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SAND, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.SULPHUR, (short) 0), 5.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.LEVER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.COBBLESTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.STONE_PLATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.WOOD_PLATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.IRON_PLATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.GOLD_PLATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_INGOT, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.REDSTONE_TORCH_ON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.WOOD_BUTTON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.STONE_BUTTON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.TRAP_DOOR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 6.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.GOLD_PLATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_INGOT, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.FENCE_GATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.SPRUCE_FENCE_GATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 1), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BIRCH_FENCE_GATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 2), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.JUNGLE_FENCE_GATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 3), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.ACACIA_FENCE_GATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 4), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.SPRUCE_FENCE_GATE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 5), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.REDSTONE_LAMP_OFF, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.GLOWSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.TRIPWIRE_HOOK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.DAYLIGHT_DETECTOR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GLASS, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.QUARTZ, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.WOOD_STEP, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.REDSTONE_BLOCK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 9.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.HOPPER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CHEST, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 5.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.DROPPER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.COBBLESTONE, (short) 0), 7.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.IRON_TRAPDOOR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 4.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.TRIPWIRE_HOOK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.DIODE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.REDSTONE_TORCH_ON, (short) 0), 2.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.STONE, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.REDSTONE_COMPARATOR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.REDSTONE_TORCH_ON, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.QUARTZ, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.STONE, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.IRON_DOOR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.WOOD_DOOR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.SPRUCE_DOOR_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 1), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.BIRCH_DOOR_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 2), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.JUNGLE_DOOR_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 3), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.ACACIA_DOOR_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 4), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.DARK_OAK_DOOR_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 5), 6.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.RAILS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 6.0D / 16.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 16.0D);
+		
+		elementMap.put(new IdData(Material.POWERED_RAIL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_INGOT, (short) 0), 6.0D / 6.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 6.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 6.0D);
+		
+		elementMap.put(new IdData(Material.DETECTOR_RAIL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 6.0D / 6.0D);
+		tempMap.put(new IdData(Material.STONE_PLATE, (short) 0), 1.0D / 6.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 6.0D);
+		
+		elementMap.put(new IdData(Material.ACTIVATOR_RAIL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 6.0D / 6.0D);
+		tempMap.put(new IdData(Material.STICK, (short) 0), 2.0D / 6.0D);
+		tempMap.put(new IdData(Material.REDSTONE_TORCH_ON, (short) 0), 1.0D / 6.0D);
+		
+		elementMap.put(new IdData(Material.MINECART, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 5.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.EXPLOSIVE_MINECART, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.TNT, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.MINECART, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.HOPPER_MINECART, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.HOPPER, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.MINECART, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.STORAGE_MINECART, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CHEST, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.MINECART, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.POWERED_MINECART, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.FURNACE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.MINECART, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.EXPLOSIVE_MINECART, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.TNT, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.MINECART, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BOAT, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 5.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.CARROT_STICK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.STRING, (short) 0), 2.0D / 1.0D);
+		tempMap.put(new IdData(Material.CARROT, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BEACON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GLASS, (short) 0), 5.0D / 1.0D);
+		tempMap.put(new IdData(Material.NETHER_STAR, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.OBSIDIAN, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BUCKET, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.WATER_BUCKET, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BUCKET, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.WATER, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.LAVA_BUCKET, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BUCKET, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.LAVA, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.MILK_BUCKET, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BUCKET, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.STATIONARY_WATER, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.SNOW_BALL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SNOW_BLOCK, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.PAPER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SUGAR_CANE, (short) 0), 3.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.BOOK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PAPER, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.LEATHER, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.EYE_OF_ENDER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.ENDER_PEARL, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.BLAZE_POWDER, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.FIREBALL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BLAZE_POWDER, (short) 0), 1.0D / 3.0D);
+		tempMap.put(new IdData(Material.COAL, (short) 0), 1.0D / 3.0D);
+		tempMap.put(new IdData(Material.SULPHUR, (short) 0), 1.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.BOOK_AND_QUILL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BOOK, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.FEATHER, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.EMPTY_MAP, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.COMPASS, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.PAPER, (short) 0), 8.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.APPLE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEAVES, (short) 0), 20.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BREAD, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WHEAT, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.GRILLED_PORK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PORK, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.GOLDEN_APPLE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.APPLE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.GOLD_INGOT, (short) 0), 8.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.GOLDEN_APPLE, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.APPLE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.GOLD_BLOCK, (short) 0), 8.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_FISH, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RAW_FISH, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_FISH, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RAW_FISH, (short) 1), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.CAKE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STATIONARY_WATER, (short) 0), 3.0D / 1.0D);
+		tempMap.put(new IdData(Material.SUGAR, (short) 0), 2.0D / 1.0D);
+		tempMap.put(new IdData(Material.EGG, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.WHEAT, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COOKIE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WHEAT, (short) 0), 2.0D / 8.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 3), 1.0D / 8.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_FISH, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RAW_FISH, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.MELON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.MELON_BLOCK, (short) 0), 1.0D / 9.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_BEEF, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RAW_BEEF, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_CHICKEN, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RAW_CHICKEN, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_MUTTON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.MUTTON, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COOKED_RABBIT, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RABBIT, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BAKED_POTATO, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.POTATO_ITEM, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.POISONOUS_POTATO, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.POTATO_ITEM, (short) 0), 50.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.PUMPKIN_PIE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PUMPKIN, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.EGG, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.SUGAR, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.RABBIT_STEW, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.COOKED_RABBIT, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.BROWN_MUSHROOM, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.CARROT_ITEM, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.BAKED_POTATO, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.BOWL, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COMPASS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.WATCH, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_INGOT, (short) 0), 4.0D / 1.0D);
+		tempMap.put(new IdData(Material.REDSTONE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.LEASH, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STRING, (short) 0), 4.0D / 2.0D);
+		tempMap.put(new IdData(Material.SLIME_BALL, (short) 0), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.ARROW, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.STICK, (short) 0), 1.0D / 4.0D);
+		tempMap.put(new IdData(Material.FEATHER, (short) 0), 1.0D / 4.0D);
+		tempMap.put(new IdData(Material.FLINT, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.GLASS_BOTTLE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GLASS, (short) 0), 3.0D / 3.0D);
+		
+		elementMap.put(new IdData(Material.FERMENTED_SPIDER_EYE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SPIDER_EYE, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.SUGAR, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.BROWN_MUSHROOM, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BLAZE_POWDER, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BLAZE_ROD, (short) 0), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.MAGMA_CREAM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SLIME_BALL, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.BLAZE_POWDER, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.BREWING_STAND_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BLAZE_ROD, (short) 0), 1.0D / 1.0D);
+		tempMap.put(new IdData(Material.COBBLESTONE, (short) 0), 3.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.CAULDRON_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.IRON_INGOT, (short) 0), 7.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.GOLDEN_CARROT, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_NUGGET, (short) 0), 8.0D / 1.0D);
+		tempMap.put(new IdData(Material.CARROT_ITEM, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.SPECKLED_MELON, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_NUGGET, (short) 0), 8.0D / 1.0D);
+		tempMap.put(new IdData(Material.MELON, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.COAL, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LOG, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.STICK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 2.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.BOWL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WOOD, (short) 0), 3.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.MELON_SEEDS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.MELON, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.PUMPKIN_SEEDS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.PUMPKIN, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.SEEDS, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.WHEAT, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.FLINT, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GRASS, (short) 0), 10.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.CLAY_BRICK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CLAY_BALL, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.CLAY_BALL, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CLAY, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.GLOWSTONE_DUST, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GLOWSTONE, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.SUGAR, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.SUGAR_CANE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.GOLD_NUGGET, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.GOLD_INGOT, (short) 0), 1.0D / 9.0D);
+		
+		elementMap.put(new IdData(Material.CLAY_BRICK, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CLAY_BALL, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.NETHER_BRICK_ITEM, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.NETHERRACK, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.RABBIT_HIDE, (short) 0), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.LEATHER, (short) 0), 1.0D / 4.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 1), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.RED_ROSE, (short) 0), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 2), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.CACTUS, (short) 0), 2.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 5), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 1), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 4), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 6), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 2), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 4), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 7), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 8), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 8), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 0), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 9), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 1), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 10), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 2), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 11), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.YELLOW_FLOWER, (short) 1), 1.0D / 1.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 12), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 4), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 15), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 13), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 9), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 5), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 14), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.INK_SACK, (short) 1), 1.0D / 2.0D);
+		tempMap.put(new IdData(Material.INK_SACK, (short) 11), 1.0D / 2.0D);
+		
+		elementMap.put(new IdData(Material.INK_SACK, (short) 15), tempMap = new HashMap<>());
+		tempMap.put(new IdData(Material.BONE, (short) 1), 1.0D / 3.0D);
 	}
 	
 	public void save()
