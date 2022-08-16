@@ -49,6 +49,7 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -56,6 +57,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
@@ -365,6 +367,26 @@ public class Main extends Common
 		tag.set("pages", pages);
 		book.setTag(tag);
 		return book;
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void entity(EntitySpawnEvent e)
+	{
+		if(!(e.getEntity() instanceof Damageable))
+		{
+			return;
+		}
+		
+		Damageable d = (Damageable) e.getEntity();
+		
+		Bukkit.getScheduler().runTask(this, () ->
+		{
+			Rarity rarity = Optional.ofNullable(Util.getRarity(d)).orElse(Util.getRarity(d.getWorld()));
+			
+			d.resetMaxHealth();
+			d.setMaxHealth(d.getMaxHealth() * rarity.getMultiplierAdminShop());
+			d.setHealth(d.getMaxHealth());
+		});
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -1348,10 +1370,10 @@ public class Main extends Common
 			return;
 		}
 		
-		Rarity rarity = Rarity.valueOfToString(entity.getCustomName());
-		Rarity rarity1 = rarity == null ? Util.getRarity(entity.getWorld()) : rarity;
+		Rarity rarity = Optional.ofNullable(Util.getRarity(entity)).orElse(Util.getRarity(entity.getWorld()));
 		
-		e.getDrops().forEach(x -> Util.setCommodity(x, rarity1));
+		e.getDrops().forEach(x -> Util.setCommodity(x, rarity));
+		e.setDroppedExp(e.getDroppedExp() * rarity.getMultiplierAdminShop());
 	}
 	
 	@EventHandler
