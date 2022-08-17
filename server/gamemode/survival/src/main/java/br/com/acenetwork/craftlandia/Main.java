@@ -5,19 +5,18 @@ import static org.bukkit.block.BlockFace.NORTH;
 import static org.bukkit.block.BlockFace.SOUTH;
 import static org.bukkit.block.BlockFace.WEST;
 
+import java.lang.StackWalker.Option;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -40,13 +39,11 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Bat;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Damageable;
@@ -57,9 +54,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Sheep;
@@ -71,7 +66,6 @@ import org.bukkit.entity.Wither;
 import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
@@ -83,12 +77,11 @@ import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
@@ -105,12 +98,11 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerShearEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -125,7 +117,6 @@ import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantInventory;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Attachable;
@@ -133,7 +124,6 @@ import org.bukkit.material.Bed;
 import org.bukkit.material.Directional;
 import org.bukkit.material.Door;
 import org.bukkit.material.Rails;
-import org.bukkit.material.Sign;
 import org.bukkit.material.Stairs;
 import org.bukkit.material.Step;
 import org.bukkit.material.TrapDoor;
@@ -141,15 +131,15 @@ import org.bukkit.material.WoodenStep;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.PacketType.Play;
 
 import br.com.acenetwork.commons.Common;
 import br.com.acenetwork.commons.CommonsUtil;
+import br.com.acenetwork.commons.constants.EntityCategory;
 import br.com.acenetwork.commons.constants.Tag;
 import br.com.acenetwork.commons.event.MagnataChangeEvent;
 import br.com.acenetwork.commons.event.PlayerSuccessLoginEvent;
@@ -180,7 +170,6 @@ import br.com.acenetwork.craftlandia.executor.Temp;
 import br.com.acenetwork.craftlandia.executor.Visit;
 import br.com.acenetwork.craftlandia.executor.WorldCMD;
 import br.com.acenetwork.craftlandia.inventory.CustomAnvil;
-import br.com.acenetwork.craftlandia.item.CommonRandomItem;
 import br.com.acenetwork.craftlandia.item.ContainmentPickaxe;
 import br.com.acenetwork.craftlandia.listener.FallingBlockChecker;
 import br.com.acenetwork.craftlandia.listener.PlayerMode;
@@ -204,8 +193,6 @@ import br.com.acenetwork.craftlandia.warp.WarpJackpot;
 import br.com.acenetwork.craftlandia.warp.WarpLand;
 import br.com.acenetwork.craftlandia.warp.WarpTutorial;
 import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -369,6 +356,231 @@ public class Main extends Common
 		return book;
 	}
 	
+//	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+//	public void debugMessage(EntityDamageByEntityEvent e)
+//	{
+//		if(e.getDamager() instanceof Arrow)
+//		{
+//			Arrow arrow = (Arrow) e.getDamager();
+//			Bukkit.broadcastMessage("isCritical? " + arrow.isCritical());
+//		}
+//		
+//		if(e.getDamager() instanceof Player || e.getDamager() instanceof Arrow || e.getEntity() instanceof Player)
+//		{
+//			Bukkit.broadcastMessage(e.getDamage() + " damage");
+//			Bukkit.broadcastMessage(e.getFinalDamage() + " finaldamage");
+//			
+//			Bukkit.broadcastMessage("oldHP = " + ((Damageable) e.getEntity()).getHealth());
+//			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
+//		}
+//	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void arrowRarity(PlayerPickupItemEvent e)
+	{
+		if(e.getItem().hasMetadata("rarity"))
+		{
+			Rarity rarity = (Rarity) e.getItem().getMetadata("rarity").get(0).value();
+			ItemStack itemStack = e.getItem().getItemStack();
+			Util.setCommodity(itemStack, rarity);
+			
+			Player p = e.getPlayer();
+			
+			e.setCancelled(true);
+			e.getItem().remove();
+			p.getInventory().addItem(itemStack);
+			
+			p.playSound(p.getLocation(), Sound.ITEM_PICKUP, 1.0F, 1.0F);
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void arrowRarity(ProjectileLaunchEvent e)
+	{
+		if(!(e.getEntity() instanceof Arrow))
+		{
+			return;
+		}
+		
+		ProjectileSource shooter = e.getEntity().getShooter();
+		
+		Rarity shooterRarity;
+		
+		if(shooter instanceof Player)
+		{
+			Player p = (Player) shooter;
+			int first = p.getInventory().first(Material.ARROW);
+			
+			Rarity bowRarity = Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON);
+			Rarity arrowRarity = first == -1 ? Rarity.COMMON : 
+					Optional.ofNullable(Util.getRarity(p.getInventory().getItem(first))).orElse(Rarity.COMMON);
+			
+			shooterRarity = Util.getWorstRarity(bowRarity, arrowRarity);
+		}
+		else if(shooter instanceof BlockState)
+		{
+			Block b = ((BlockState) shooter).getBlock();
+			BlockData data = Util.readBlock(b);
+			
+			shooterRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
+		}
+		else if(shooter instanceof Entity)
+		{
+			Entity entity = (Entity) shooter;
+			
+			shooterRarity = Optional.ofNullable(Util.getRarity(entity)).orElse(Util.getRarity(entity.getWorld()));
+		}
+		else
+		{
+			shooterRarity = Rarity.COMMON;
+		}
+		
+		Arrow arrow = (Arrow) e.getEntity();
+		
+		arrow.setMetadata("rarity", new FixedMetadataValue(this, shooterRarity));
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void playerRangedDamage(EntityDamageByEntityEvent e)
+	{
+		if(!(e.getDamager() instanceof Projectile) || e.getEntity() instanceof Player)
+		{
+			return;
+		}
+		
+		Projectile projectile = (Projectile) e.getDamager();
+		
+		if(!(projectile.getShooter() instanceof Player))
+		{
+			return;
+		}
+		
+		if(projectile instanceof Arrow)
+		{
+			Arrow arrow = (Arrow) projectile;
+			
+			if(!arrow.hasMetadata("rarity"))
+			{
+				return;
+			}
+			
+			Rarity rarity = (Rarity) arrow.getMetadata("rarity").get(0).value();
+			
+			e.setDamage(e.getDamage() * rarity.getMultiplierAdminShop());
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void playerMeleeDamage(EntityDamageByEntityEvent e)
+	{
+		if(!(e.getDamager() instanceof Player))
+		{
+			return;
+		}
+		
+		Player p = (Player) e.getDamager();
+		ItemStack inHand = p.getItemInHand();
+		Rarity weaponRarity = Optional.ofNullable(Util.getRarity(inHand)).orElse(Rarity.COMMON);
+		
+		boolean isPVP = e.getEntity() instanceof Player;
+		double damage = 0.0D;
+		
+		if(inHand.getType().getMaxDurability() > 0)
+		{
+			if(inHand.getType().name().contains("_SWORD"))
+			{
+				damage = 4.0D;
+			}
+			else if(inHand.getType().name().contains("_AXE"))
+			{
+				damage = 3.0D;
+			}
+			else if(inHand.getType().name().contains("_PICKAXE"))
+			{
+				damage = 2.0D;
+			}
+			else if(inHand.getType().name().contains("_SPADE"))
+			{
+				damage = 1.0D;
+			}
+			
+			if(damage > 0.0D)
+			{
+				if(inHand.getType().name().contains("STONE_"))
+				{
+					damage += 1.0D;
+				}
+				else if(inHand.getType().name().contains("IRON_"))
+				{
+					damage += 2.0D;
+				}
+				else if(inHand.getType().name().contains("DIAMOND_"))
+				{
+					damage += 3.0D;
+				}
+			}
+			else
+			{
+				weaponRarity = Rarity.COMMON;
+				damage = 1.0D;
+			}
+		}
+		else
+		{
+			damage = 1.0D;
+		}
+		
+		Optional<PotionEffect> weakness = p.getActivePotionEffects().stream().filter(x -> x.getType().equals(PotionEffectType.WEAKNESS)).findAny();
+		
+		if(weakness.isPresent())
+		{
+			PotionEffect effect = weakness.get();
+			
+			damage -= (effect.getAmplifier() + 1) * 2.0D;
+		}
+		
+		Optional<PotionEffect> strength = p.getActivePotionEffects().stream().filter(x -> x.getType().equals(PotionEffectType.INCREASE_DAMAGE)).findAny();
+		
+		if(strength.isPresent())
+		{
+			PotionEffect effect = strength.get();
+			
+			damage += damage * 1.0D * (effect.getAmplifier() + 1);
+		}
+		
+		if(CommonsUtil.isCritical(p))
+		{
+			damage *= isPVP ? 1.25D : 1.5D;
+		}
+		
+		ItemMeta meta = inHand.getItemMeta();
+		
+		if(meta != null)
+		{
+			if(meta.hasEnchant(Enchantment.DAMAGE_ALL))
+			{
+				damage += 1.0D + (meta.getEnchantLevel(Enchantment.DAMAGE_ALL) - 1) * 0.5D;
+			}
+			
+			if(meta.hasEnchant(Enchantment.DAMAGE_UNDEAD) && EntityCategory.getCategory(e.getEntity()) == EntityCategory.UNDEAD)
+			{
+				damage += meta.getEnchantLevel(Enchantment.DAMAGE_UNDEAD) * 2.5D;
+			}
+			
+			if(meta.hasEnchant(Enchantment.DAMAGE_ARTHROPODS) && EntityCategory.getCategory(e.getEntity()) == EntityCategory.ARTHROPOD)
+			{
+				damage += meta.getEnchantLevel(Enchantment.DAMAGE_ARTHROPODS) * 2.5D;
+			}
+		}
+		
+		if(!isPVP)
+		{
+			damage *= weaponRarity.getMultiplierAdminShop();
+		}
+		
+		e.setDamage(damage);
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void entity(EntitySpawnEvent e)
 	{
@@ -379,12 +591,21 @@ public class Main extends Common
 		
 		Damageable d = (Damageable) e.getEntity();
 		
+		if(d.hasMetadata("customHealth") && d.getMetadata("customHealth").get(0).asBoolean())
+		{
+			return;
+		}
+		
+		d.setMetadata("customHealth", new FixedMetadataValue(this, true));
+		
 		Bukkit.getScheduler().runTask(this, () ->
 		{
 			Rarity rarity = Optional.ofNullable(Util.getRarity(d)).orElse(Util.getRarity(d.getWorld()));
 			
+			double maxHealth = d.getMaxHealth() * rarity.getMultiplierAdminShop() * rarity.getData();
+			
 			d.resetMaxHealth();
-			d.setMaxHealth(d.getMaxHealth() * rarity.getMultiplierAdminShop());
+			d.setMaxHealth(maxHealth);
 			d.setHealth(d.getMaxHealth());
 		});
 	}
@@ -1373,7 +1594,7 @@ public class Main extends Common
 		Rarity rarity = Optional.ofNullable(Util.getRarity(entity)).orElse(Util.getRarity(entity.getWorld()));
 		
 		e.getDrops().forEach(x -> Util.setCommodity(x, rarity));
-		e.setDroppedExp(e.getDroppedExp() * rarity.getMultiplierAdminShop());
+		e.setDroppedExp(e.getDroppedExp() * rarity.getData());
 	}
 	
 	@EventHandler

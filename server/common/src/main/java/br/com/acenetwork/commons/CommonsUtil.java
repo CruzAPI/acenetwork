@@ -51,6 +51,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommonsUtil
 {
+	public static boolean isCritical(Player p)
+	{
+		return p.isFlying() || p.getVelocity().getY() < -0.0784000015258789D;
+	}
+	
 	public static UUID getUUID(File file)
 	{
 		UUID uuid;
