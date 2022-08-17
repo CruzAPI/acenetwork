@@ -131,6 +131,7 @@ import org.bukkit.material.WoodenStep;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -374,7 +375,7 @@ public class Main extends Common
 //			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
 //		}
 //	}
-	
+//	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void arrowRarity(PlayerPickupItemEvent e)
 	{
@@ -417,9 +418,9 @@ public class Main extends Common
 			
 			shooterRarity = Util.getWorstRarity(bowRarity, arrowRarity);
 		}
-		else if(shooter instanceof BlockState)
+		else if(shooter instanceof BlockProjectileSource)
 		{
-			Block b = ((BlockState) shooter).getBlock();
+			Block b = ((BlockProjectileSource) shooter).getBlock();
 			BlockData data = Util.readBlock(b);
 			
 			shooterRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
@@ -441,7 +442,7 @@ public class Main extends Common
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-	public void playerRangedDamage(EntityDamageByEntityEvent e)
+	public void rangedDamageToMobs(EntityDamageByEntityEvent e)
 	{
 		if(!(e.getDamager() instanceof Projectile) || e.getEntity() instanceof Player)
 		{
@@ -449,11 +450,6 @@ public class Main extends Common
 		}
 		
 		Projectile projectile = (Projectile) e.getDamager();
-		
-		if(!(projectile.getShooter() instanceof Player))
-		{
-			return;
-		}
 		
 		if(projectile instanceof Arrow)
 		{
@@ -536,7 +532,7 @@ public class Main extends Common
 		{
 			PotionEffect effect = weakness.get();
 			
-			damage -= (effect.getAmplifier() + 1) * 2.0D;
+			damage -= (effect.getAmplifier() + 1) * 1.0D;
 		}
 		
 		Optional<PotionEffect> strength = p.getActivePotionEffects().stream().filter(x -> x.getType().equals(PotionEffectType.INCREASE_DAMAGE)).findAny();
