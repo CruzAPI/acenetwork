@@ -541,11 +541,17 @@ public class Main extends Common
 		
 		Projectile projectile = (Projectile) e.getDamager();
 		
-		Rarity rarity = projectile.hasMetadata("rarity")
+		Rarity projectileRarity = projectile.hasMetadata("rarity")
 				? (Rarity) projectile.getMetadata("rarity").get(0).value()
 				: Rarity.COMMON;
+		Rarity entityRarity = Optional.ofNullable(Util.getRarity(e.getEntity()))
+				.orElse(Util.getRarity(e.getEntity().getWorld()));
 		
-		e.setDamage(e.getDamage() * rarity.getMultiplierAdminShop());
+		Rarity worst = Util.getWorstRarity(entityRarity, projectileRarity);
+		
+		int multiplier = Math.max(1, projectileRarity.getData() - entityRarity.getData() + 1);
+		
+		e.setDamage(e.getDamage() * worst.getMultiplierAdminShop() * multiplier);
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -654,7 +660,14 @@ public class Main extends Common
 		
 		if(!isPVP)
 		{
-			damage *= weaponRarity.getMultiplierAdminShop();
+			Rarity entityRarity = Optional.ofNullable(Util.getRarity(e.getEntity()))
+					.orElse(Util.getRarity(e.getEntity().getWorld()));
+			
+			Rarity worst = Util.getWorstRarity(entityRarity, weaponRarity);
+			
+			int multiplier = Math.max(1, weaponRarity.getData() - entityRarity.getData() + 1);
+			
+			damage *= worst.getMultiplierAdminShop() * multiplier;
 		}
 		
 		e.setDamage(damage);
