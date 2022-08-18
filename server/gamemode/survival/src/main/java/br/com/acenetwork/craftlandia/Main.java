@@ -358,25 +358,25 @@ public class Main extends Common
 		return book;
 	}
 	
-//	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-//	public void debugMessage(EntityDamageByEntityEvent e)
-//	{
-//		if(e.getDamager() instanceof Arrow)
-//		{
-//			Arrow arrow = (Arrow) e.getDamager();
-//			Bukkit.broadcastMessage("isCritical? " + arrow.isCritical());
-//		}
-//		
-//		if(e.getDamager() instanceof Player || e.getDamager() instanceof Arrow || e.getEntity() instanceof Player)
-//		{
-//			Bukkit.broadcastMessage(e.getDamage() + " damage");
-//			Bukkit.broadcastMessage(e.getFinalDamage() + " finaldamage");
-//			
-//			Bukkit.broadcastMessage("oldHP = " + ((Damageable) e.getEntity()).getHealth());
-//			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
-//		}
-//	}
-//	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void debugMessage(EntityDamageByEntityEvent e)
+	{
+		if(e.getDamager() instanceof Arrow)
+		{
+			Arrow arrow = (Arrow) e.getDamager();
+			Bukkit.broadcastMessage("isCritical? " + arrow.isCritical());
+		}
+		
+		if(e.getDamager() instanceof Player || e.getDamager() instanceof Arrow || e.getEntity() instanceof Player)
+		{
+			Bukkit.broadcastMessage(e.getDamage() + " damage");
+			Bukkit.broadcastMessage(e.getFinalDamage() + " finaldamage");
+			
+			Bukkit.broadcastMessage("oldHP = " + ((Damageable) e.getEntity()).getHealth());
+			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
+		}
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void arrowRarity(PlayerPickupItemEvent e)
 	{
@@ -459,7 +459,15 @@ public class Main extends Common
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void meleeDamageMobToMob(EntityDamageByEntityEvent e)
 	{
+		if(e.getEntity() instanceof Player || e.getDamager() instanceof Player || e.getDamager() instanceof Projectile)
+		{
+			return;
+		}
 		
+		Entity damager = e.getDamager();
+		Rarity damagerRarity = Optional.ofNullable(Util.getRarity(damager)).orElse(Util.getRarity(damager.getWorld()));
+		
+		e.setDamage(e.getDamage() * damagerRarity.getData());
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
