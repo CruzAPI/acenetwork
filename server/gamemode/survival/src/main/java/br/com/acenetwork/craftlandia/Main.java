@@ -358,31 +358,34 @@ public class Main extends Common
 		return book;
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void debugMessage(EntityDamageByEntityEvent e)
-	{
-		if(e.getDamager() instanceof Arrow)
-		{
-			Arrow arrow = (Arrow) e.getDamager();
-			Bukkit.broadcastMessage("isCritical? " + arrow.isCritical());
-		}
-		
-		if(e.getDamager() instanceof Player || e.getDamager() instanceof Arrow || e.getEntity() instanceof Player)
-		{
-			Bukkit.broadcastMessage(e.getDamage() + " damage");
-			Bukkit.broadcastMessage(e.getFinalDamage() + " finaldamage");
-			
-			Bukkit.broadcastMessage("oldHP = " + ((Damageable) e.getEntity()).getHealth());
-			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
-		}
-	}
+//	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+//	public void debugMessage(EntityDamageByEntityEvent e)
+//	{
+//		if(e.getDamager() instanceof Arrow)
+//		{
+//			Arrow arrow = (Arrow) e.getDamager();
+//			Bukkit.broadcastMessage("isCritical? " + arrow.isCritical());
+//		}
+//		
+//		if(e.getDamager() instanceof Player || e.getDamager() instanceof Arrow || e.getEntity() instanceof Player)
+//		{
+//			Bukkit.broadcastMessage(e.getDamage() + " damage");
+//			Bukkit.broadcastMessage(e.getFinalDamage() + " finaldamage");
+//			
+//			Bukkit.broadcastMessage("oldHP = " + ((Damageable) e.getEntity()).getHealth());
+//			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
+//		}
+//	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void arrowRarity(PlayerPickupItemEvent e)
 	{
-		if(e.getItem().hasMetadata("rarity"))
+		if(e.getItem().getItemStack().getType() == Material.ARROW)
 		{
-			Rarity rarity = (Rarity) e.getItem().getMetadata("rarity").get(0).value();
+			Rarity rarity =  e.getItem().hasMetadata("rarity")
+					? (Rarity) e.getItem().getMetadata("rarity").get(0).value()
+					: Rarity.COMMON;
+			
 			ItemStack itemStack = e.getItem().getItemStack();
 			Util.setCommodity(itemStack, rarity);
 			
@@ -485,6 +488,28 @@ public class Main extends Common
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void rangedDamageEnvironmentToPlayer(EntityDamageByEntityEvent e)
+	{
+		if(!(e.getDamager() instanceof Projectile))
+		{
+			return;
+		}
+		
+		Projectile projectile = (Projectile) e.getDamager();
+		
+		if(projectile.getShooter() instanceof Player)
+		{
+			return;
+		}
+		
+		Rarity rarity = projectile.hasMetadata("rarity")
+				? (Rarity) projectile.getMetadata("rarity").get(0).value()
+				: Rarity.COMMON;
+		
+		e.setDamage(e.getDamage() * rarity.getData());
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void rangedDamageToMobs(EntityDamageByEntityEvent e)
 	{
 		if(!(e.getDamager() instanceof Projectile) || e.getEntity() instanceof Player)
@@ -494,12 +519,9 @@ public class Main extends Common
 		
 		Projectile projectile = (Projectile) e.getDamager();
 		
-		if(!projectile.hasMetadata("rarity"))
-		{
-			return;
-		}
-		
-		Rarity rarity = (Rarity) projectile.getMetadata("rarity").get(0).value();
+		Rarity rarity = projectile.hasMetadata("rarity")
+				? (Rarity) projectile.getMetadata("rarity").get(0).value()
+				: Rarity.COMMON;
 		
 		e.setDamage(e.getDamage() * rarity.getMultiplierAdminShop());
 	}
