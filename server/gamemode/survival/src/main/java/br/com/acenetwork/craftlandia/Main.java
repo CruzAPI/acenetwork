@@ -83,6 +83,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
@@ -376,6 +378,18 @@ public class Main extends Common
 //			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
 //		}
 //	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void entityRegainMonitor(EntityRegainHealthEvent e)
+	{
+		if(e.getEntity() instanceof Player || !(e.getEntity() instanceof LivingEntity))
+		{
+			return;
+		}
+		LivingEntity le = (LivingEntity) e.getEntity();
+		
+		updateCustomName(le, le.getHealth() + e.getAmount());
+	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void arrowRarity(PlayerPickupItemEvent e)
@@ -1866,7 +1880,7 @@ public class Main extends Common
 	
 	private void updateCustomName(LivingEntity le, double d)
 	{
-		d = Math.max(0.0D, d);
+		d = Math.max(0.0D, Math.min(le.getMaxHealth(), d));
 		
 		DecimalFormat df = new DecimalFormat("#.#");
 		Rarity rarity = Optional.ofNullable(Util.getRarity(le)).orElse(Util.getRarity(le.getWorld()));
