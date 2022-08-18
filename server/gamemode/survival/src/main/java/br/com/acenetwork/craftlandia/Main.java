@@ -482,7 +482,7 @@ public class Main extends Common
 		Entity damager = e.getDamager();
 		Rarity damagerRarity = Optional.ofNullable(Util.getRarity(damager)).orElse(Util.getRarity(damager.getWorld()));
 		
-		e.setDamage(e.getDamage() * damagerRarity.getData());
+		e.setDamage(e.getDamage() * damagerRarity.getMultiplierAdminShop());
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -1888,22 +1888,22 @@ public class Main extends Common
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
-	public void ab(PlayerInteractEntityEvent e)
+	public void cancelNameTag(PlayerInteractEntityEvent e)
 	{
+		Player p = e.getPlayer();
+		ItemStack inHand = p.getItemInHand();
 		Entity entity = e.getRightClicked();
 		
-		if(entity.getCustomName() == null)
+		if(inHand.getType() != Material.NAME_TAG)
 		{
 			return;
 		}
 		
-		for(Rarity values : Rarity.values())
+		e.setCancelled(true);
+		
+		if(entity.getCustomName() == null)
 		{
-			if(values.toString().equals(entity.getCustomName()))
-			{
-				e.setCancelled(true);
-				return;
-			}
+			return;
 		}
 	}
 	
