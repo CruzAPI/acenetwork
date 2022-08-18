@@ -78,6 +78,7 @@ import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -386,6 +387,7 @@ public class Main extends Common
 		{
 			return;
 		}
+		
 		LivingEntity le = (LivingEntity) e.getEntity();
 		
 		updateCustomName(le, le.getHealth() + e.getAmount());
@@ -650,36 +652,31 @@ public class Main extends Common
 		e.setDamage(damage);
 	}
 	
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	private Rarity entityRarityPreSpawn;
+	
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void entity(CreatureSpawnEvent e)
 	{
-		if(!(e.getEntity() instanceof Damageable))
+		if(e.isCancelled())
 		{
+			entityRarityPreSpawn = null;
 			return;
 		}
 		
-		Damageable d = (Damageable) e.getEntity();
+		LivingEntity le = e.getEntity();
 		
-		if(d.hasMetadata("customHealth") && d.getMetadata("customHealth").get(0).asBoolean())
-		{
-			return;
-		}
+		Rarity rarity = entityRarityPreSpawn == null 
+				? Optional.ofNullable(Util.getRarity(le)).orElse(Util.getRarity(le.getWorld()))
+				: entityRarityPreSpawn;
+		entityRarityPreSpawn = null;
 		
-		d.setCustomName(Util.getRarity(d.getWorld()).toString());
+		le.setCustomName(Util.getRarity(le.getWorld()).toString());
+		double maxHealth = le.getMaxHealth() * rarity.getMultiplierAdminShop() * rarity.getData();
 		
-		d.setMetadata("customHealth", new FixedMetadataValue(this, true));
-		
-		Bukkit.getScheduler().runTask(this, () ->
-		{
-			Rarity rarity = Optional.ofNullable(Util.getRarity(d)).orElse(Util.getRarity(d.getWorld()));
-			
-			double maxHealth = d.getMaxHealth() * rarity.getMultiplierAdminShop() * rarity.getData();
-			
-			d.resetMaxHealth();
-			d.setMaxHealth(maxHealth);
-			d.setHealth(d.getMaxHealth());
-			updateCustomName(d);
-		});
+		le.resetMaxHealth();
+		le.setMaxHealth(maxHealth);
+		le.setHealth(le.getMaxHealth());
+		updateCustomName(le, rarity, le.getHealth());
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -1698,10 +1695,11 @@ public class Main extends Common
 						break loop;
 					}
 					
+					entityRarityPreSpawn = Util.getRarity(slime);
 					Slime child = (Slime) w.spawnEntity(new Location(w, slimeX + x, slimeY + 0.5D, slimeZ + z, 0.0F, r.nextInt(360) + r.nextFloat()), slime.getType());
 					child.setSize(Math.max(1, slime.getSize() / 2));
-					child.setCustomName(
-							Optional.ofNullable(Util.getRarity(slime)).orElse(Util.getRarity(child.getWorld())).toString());
+//					child.setCustomName(
+//							Optional.ofNullable(Util.getRarity(slime)).orElse(Util.getRarity(child.getWorld())).toString());
 				}
 			}
 		}
@@ -1844,6 +1842,7 @@ public class Main extends Common
 		
 		Block relative = b.getRelative(e.getBlockFace());
 		
+		entityRarityPreSpawn = rarity;
 		LivingEntity le = relative.getWorld().spawnCreature(relative.getLocation().add(0.5D, 0.0D, 0.5D), EntityType.fromId(item.getDurability()));
 		
 		if(!le.isValid())
@@ -1851,9 +1850,6 @@ public class Main extends Common
 			le.remove();
 			return;
 		}
-		
-		le.setCustomName(rarity.toString());
-		updateCustomName(le);
 		
 		if(p.getGameMode() == GameMode.CREATIVE)
 		{
@@ -1868,23 +1864,17 @@ public class Main extends Common
 		}
 	}
 	
-	private void updateCustomName(Entity entity)
+	private void updateCustomName(LivingEntity le, double d)
 	{
-		if(!(entity instanceof LivingEntity))
-		{
-			return;
-		}
-		
-		LivingEntity le = (LivingEntity) entity;
-		updateCustomName(le, le.getHealth());
+		Rarity rarity = Optional.ofNullable(Util.getRarity(le)).orElse(Util.getRarity(le.getWorld()));
+		updateCustomName(le, rarity, d);
 	}
 	
-	private void updateCustomName(LivingEntity le, double d)
+	private void updateCustomName(LivingEntity le, Rarity rarity, double d)
 	{
 		d = Math.max(0.0D, Math.min(le.getMaxHealth(), d));
 		
 		DecimalFormat df = new DecimalFormat("#.#");
-		Rarity rarity = Optional.ofNullable(Util.getRarity(le)).orElse(Util.getRarity(le.getWorld()));
 		le.setCustomName(rarity.toString() + " " + ChatColor.WHITE + df.format(d) + " " + ChatColor.RED + "❤");
 	}
 	
@@ -1913,10 +1903,8 @@ public class Main extends Common
 	{
 		Entity entity = e.getEntity();
 		BlockData data = Util.readBlock(e.getSpawner().getBlock());
-		entity.setCustomName(
-				Optional.ofNullable(data == null ? null : data.getRarity())
-				.orElse(Util.getRarity(entity.getWorld())).toString());
-		updateCustomName(entity);
+		entityRarityPreSpawn = Optional.ofNullable(data == null ? null : data.getRarity())
+				.orElse(Util.getRarity(entity.getWorld()));
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
