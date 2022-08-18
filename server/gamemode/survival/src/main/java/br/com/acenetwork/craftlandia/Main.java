@@ -80,6 +80,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -379,6 +380,30 @@ public class Main extends Common
 //			Bukkit.broadcastMessage("newHP = " + Math.max(0.0D, ((Damageable) e.getEntity()).getHealth() - e.getFinalDamage()));
 //		}
 //	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void damageByBlock(EntityDamageByBlockEvent e)
+	{
+		if(!(e.getEntity() instanceof LivingEntity))
+		{
+			return;
+		}
+		
+		Block b = e.getDamager();
+		
+		BlockData data = Util.readBlock(b);
+		
+		Rarity blockRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
+		
+		Rarity entityRarity = e.getEntity() instanceof Player ? Rarity.COMMON :
+				Optional.ofNullable(Util.getRarity(e.getEntity())).orElse(Util.getRarity(e.getEntity().getWorld()));
+		
+		Rarity worstRarity = Util.getWorstRarity(blockRarity, entityRarity);
+		
+		int multiplier = Math.max(1, blockRarity.getData() - entityRarity.getData() + 1);
+		
+		e.setDamage(e.getDamage() * worstRarity.getMultiplierAdminShop() * multiplier);
+	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void entityRegainMonitor(EntityRegainHealthEvent e)
