@@ -77,12 +77,12 @@ import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.SlimeSplitEvent;
 import org.bukkit.event.entity.SpawnerSpawnEvent;
@@ -454,9 +454,7 @@ public class Main extends Common
 			shooterRarity = Rarity.COMMON;
 		}
 		
-		Arrow arrow = (Arrow) e.getEntity();
-		
-		arrow.setMetadata("rarity", new FixedMetadataValue(this, shooterRarity));
+		e.getEntity().setMetadata("rarity", new FixedMetadataValue(this, shooterRarity));
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -638,7 +636,7 @@ public class Main extends Common
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void entity(EntitySpawnEvent e)
+	public void entity(CreatureSpawnEvent e)
 	{
 		if(!(e.getEntity() instanceof Damageable))
 		{
@@ -652,6 +650,8 @@ public class Main extends Common
 			return;
 		}
 		
+		d.setCustomName(Util.getRarity(d.getWorld()).toString());
+		
 		d.setMetadata("customHealth", new FixedMetadataValue(this, true));
 		
 		Bukkit.getScheduler().runTask(this, () ->
@@ -663,6 +663,7 @@ public class Main extends Common
 			d.resetMaxHealth();
 			d.setMaxHealth(maxHealth);
 			d.setHealth(d.getMaxHealth());
+			updateCustomName(d);
 		});
 	}
 	
@@ -1684,12 +1685,25 @@ public class Main extends Common
 					
 					Slime child = (Slime) w.spawnEntity(new Location(w, slimeX + x, slimeY + 0.5D, slimeZ + z, 0.0F, r.nextInt(360) + r.nextFloat()), slime.getType());
 					child.setSize(Math.max(1, slime.getSize() / 2));
-					child.setCustomName(slime.getCustomName());
+					child.setCustomName(
+							Optional.ofNullable(Util.getRarity(slime)).orElse(Util.getRarity(child.getWorld())).toString());
 				}
 			}
 		}
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void mobDamageMonitor(EntityDamageEvent e)
+	{
+		if(e.getEntity() instanceof Player || !(e.getEntity() instanceof LivingEntity))
+		{
+			return;
+		}
+		
+		LivingEntity le = (LivingEntity) e.getEntity();
+		updateCustomName(le, le.getHealth() - e.getFinalDamage());
+	}
+
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void setRarityChestLoot(InventoryMoveItemEvent e)
 	{
@@ -1824,6 +1838,7 @@ public class Main extends Common
 		}
 		
 		le.setCustomName(rarity.toString());
+		updateCustomName(le);
 		
 		if(p.getGameMode() == GameMode.CREATIVE)
 		{
@@ -1836,6 +1851,26 @@ public class Main extends Common
 		{	
 			p.setItemInHand(null);
 		}
+	}
+	
+	private void updateCustomName(Entity entity)
+	{
+		if(!(entity instanceof LivingEntity))
+		{
+			return;
+		}
+		
+		LivingEntity le = (LivingEntity) entity;
+		updateCustomName(le, le.getHealth());
+	}
+	
+	private void updateCustomName(LivingEntity le, double d)
+	{
+		d = Math.max(0.0D, d);
+		
+		DecimalFormat df = new DecimalFormat("#.#");
+		Rarity rarity = Optional.ofNullable(Util.getRarity(le)).orElse(Util.getRarity(le.getWorld()));
+		le.setCustomName(rarity.toString() + " " + ChatColor.WHITE + df.format(d) + " " + ChatColor.RED + "❤");
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -1863,8 +1898,10 @@ public class Main extends Common
 	{
 		Entity entity = e.getEntity();
 		BlockData data = Util.readBlock(e.getSpawner().getBlock());
-		entity.setCustomName(((data == null ? null : data.getRarity()) == null
-				? Util.getRarity(entity.getWorld()) : data.getRarity()).toString());
+		entity.setCustomName(
+				Optional.ofNullable(data == null ? null : data.getRarity())
+				.orElse(Util.getRarity(entity.getWorld())).toString());
+		updateCustomName(entity);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

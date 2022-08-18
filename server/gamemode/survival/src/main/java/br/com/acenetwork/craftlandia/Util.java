@@ -58,7 +58,15 @@ public class Util
 			return null;
 		}
 		
-		return Rarity.valueOfToString(entity.getCustomName());	
+		for(Rarity rarity : Rarity.values())
+		{
+			if(entity.getCustomName().contains(rarity.toString()))
+			{
+				return rarity;
+			}
+		}
+		
+		return null;
 	}
 	
 	public static Rarity getRarity(ItemStack item)
