@@ -595,6 +595,7 @@ public class Main extends Common
 		}
 		else
 		{
+			weaponRarity = Rarity.COMMON;
 			damage = 1.0D;
 		}
 		
