@@ -435,7 +435,7 @@ public class Main extends Common
 			Block b = ((BlockProjectileSource) shooter).getBlock();
 			BlockData data = Util.readBlock(b);
 			
-			Rarity itemRarity = Util.getRarity(itemDispensed);
+			Rarity itemRarity = Optional.ofNullable(Util.getRarity(itemDispensed)).orElse(Rarity.COMMON);
 			Rarity blockRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
 			
 			shooterRarity = Util.getWorstRarity(itemRarity, blockRarity);
@@ -454,6 +454,26 @@ public class Main extends Common
 		Arrow arrow = (Arrow) e.getEntity();
 		
 		arrow.setMetadata("rarity", new FixedMetadataValue(this, shooterRarity));
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void meleeDamageMobToMob(EntityDamageByEntityEvent e)
+	{
+		
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void meleeDamageMobToPlayer(EntityDamageByEntityEvent e)
+	{
+		if(!(e.getEntity() instanceof Player) || e.getDamager() instanceof Player || e.getDamager() instanceof Projectile)
+		{
+			return;
+		}
+		
+		Entity damager = e.getDamager();
+		Rarity damagerRarity = Optional.ofNullable(Util.getRarity(damager)).orElse(Util.getRarity(damager.getWorld()));
+		
+		e.setDamage(e.getDamage() * damagerRarity.getData());
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
