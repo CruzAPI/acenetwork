@@ -28,6 +28,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -48,12 +49,18 @@ import br.com.acenetwork.commons.executor.Permission;
 import br.com.acenetwork.commons.manager.IdData;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.EntityHuman;
+import net.minecraft.server.v1_8_R3.MobEffectList;
 
 public class CommonsUtil
 {
 	public static boolean isCritical(Player p)
 	{
-		return p.isFlying() || p.getVelocity().getY() < -0.0784000015258789D;
+		EntityHuman entityHuman = ((CraftPlayer) p).getHandle();
+		
+		return (p.isFlying() 
+				|| entityHuman.fallDistance > 0.0F && !entityHuman.onGround && !entityHuman.V() && !entityHuman.k_()) 
+				&& !entityHuman.hasEffect(MobEffectList.BLINDNESS) && entityHuman.vehicle == null;
 	}
 	
 	public static UUID getUUID(File file)
