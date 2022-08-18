@@ -439,10 +439,18 @@ public class Main extends Common
 				int first = p.getInventory().first(Material.ARROW);
 				
 				Rarity bowRarity = Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON);
-				Rarity arrowRarity = first == -1 ? Rarity.COMMON
-						: Optional.ofNullable(Util.getRarity(p.getInventory().getItem(first))).orElse(Rarity.COMMON);
 				
-				shooterRarity = Util.getWorstRarity(bowRarity, arrowRarity);
+				if(p.getGameMode() == GameMode.CREATIVE)
+				{
+					shooterRarity = bowRarity;
+				}
+				else
+				{
+					Rarity arrowRarity = first == -1 ? Rarity.COMMON
+							: Optional.ofNullable(Util.getRarity(p.getInventory().getItem(first))).orElse(Rarity.COMMON);
+					
+					shooterRarity = Util.getWorstRarity(bowRarity, arrowRarity);
+				}
 			}
 			else
 			{
