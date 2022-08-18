@@ -67,6 +67,7 @@ import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
@@ -395,35 +396,49 @@ public class Main extends Common
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-	public void arrowRarity(ProjectileLaunchEvent e)
+	private ItemStack itemDispensed;
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void arrowRarity(BlockDispenseEvent e)
 	{
-		if(!(e.getEntity() instanceof Arrow))
-		{
-			return;
-		}
-		
+		itemDispensed = e.getItem();
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void projectileRarity(ProjectileLaunchEvent e)
+	{
 		ProjectileSource shooter = e.getEntity().getShooter();
 		
-		Rarity shooterRarity;
+		Rarity shooterRarity = Rarity.COMMON;
 		
 		if(shooter instanceof Player)
 		{
 			Player p = (Player) shooter;
-			int first = p.getInventory().first(Material.ARROW);
 			
-			Rarity bowRarity = Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON);
-			Rarity arrowRarity = first == -1 ? Rarity.COMMON : 
-					Optional.ofNullable(Util.getRarity(p.getInventory().getItem(first))).orElse(Rarity.COMMON);
-			
-			shooterRarity = Util.getWorstRarity(bowRarity, arrowRarity);
+			if(e.getEntity() instanceof Arrow)
+			{
+				int first = p.getInventory().first(Material.ARROW);
+				
+				Rarity bowRarity = Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON);
+				Rarity arrowRarity = first == -1 ? Rarity.COMMON
+						: Optional.ofNullable(Util.getRarity(p.getInventory().getItem(first))).orElse(Rarity.COMMON);
+				
+				shooterRarity = Util.getWorstRarity(bowRarity, arrowRarity);
+			}
+			else
+			{
+				shooterRarity = Optional.ofNullable(Util.getRarity(p.getItemInHand())).orElse(Rarity.COMMON);
+			}
 		}
 		else if(shooter instanceof BlockProjectileSource)
 		{
 			Block b = ((BlockProjectileSource) shooter).getBlock();
 			BlockData data = Util.readBlock(b);
 			
-			shooterRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
+			Rarity itemRarity = Util.getRarity(itemDispensed);
+			Rarity blockRarity = Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(b.getWorld()));
+			
+			shooterRarity = Util.getWorstRarity(itemRarity, blockRarity);
 		}
 		else if(shooter instanceof Entity)
 		{
@@ -451,19 +466,14 @@ public class Main extends Common
 		
 		Projectile projectile = (Projectile) e.getDamager();
 		
-		if(projectile instanceof Arrow)
+		if(!projectile.hasMetadata("rarity"))
 		{
-			Arrow arrow = (Arrow) projectile;
-			
-			if(!arrow.hasMetadata("rarity"))
-			{
-				return;
-			}
-			
-			Rarity rarity = (Rarity) arrow.getMetadata("rarity").get(0).value();
-			
-			e.setDamage(e.getDamage() * rarity.getMultiplierAdminShop());
+			return;
 		}
+		
+		Rarity rarity = (Rarity) projectile.getMetadata("rarity").get(0).value();
+		
+		e.setDamage(e.getDamage() * rarity.getMultiplierAdminShop());
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
