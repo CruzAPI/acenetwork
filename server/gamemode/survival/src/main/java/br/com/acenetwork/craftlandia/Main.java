@@ -431,7 +431,7 @@ public class Main extends Common
 		
 		for(double x = -hitboxX; x <= hitboxX; x += hitboxX)
 		{
-			for(double y = -hitboxY; y <= hitboxY; y += hitboxY)
+			for(double y = 0.0D; y <= hitboxY * 2.0D; y += hitboxY)
 			{			
 				for(double z = -hitboxZ; z <= hitboxZ; z += hitboxZ)
 				{
