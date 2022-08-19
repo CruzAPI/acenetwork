@@ -9,11 +9,13 @@ import java.lang.StackWalker.Option;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Random;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +41,7 @@ import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Furnace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -79,6 +82,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -202,6 +206,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.EntityHuman;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
@@ -382,6 +387,63 @@ public class Main extends Common
 //	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+	public void damageByLava(EntityDamageEvent e)
+	{
+		if(!(e.getEntity() instanceof LivingEntity))
+		{
+			return;
+		}
+		
+		if(e.getCause() != DamageCause.LAVA)
+		{
+			return;
+		}
+		
+		LivingEntity le = (LivingEntity) e.getEntity();
+		
+		Rarity[] rarities = getOccupedBlocks(le).stream().filter(x -> x.getType().name().contains("LAVA")).map(x ->
+		{
+			BlockData data = Util.readBlock(x);
+			return Optional.ofNullable(data == null ? null : data.getRarity()).orElse(Util.getRarity(x.getWorld()));
+		}).toArray(x -> new Rarity[x]);
+		
+		Rarity blockRarity = rarities.length == 0 ? Rarity.COMMON : Util.getBestRarity(rarities);
+		
+		Rarity entityRarity = e.getEntity() instanceof Player ? Rarity.COMMON :
+			Optional.ofNullable(Util.getRarity(e.getEntity())).orElse(Util.getRarity(e.getEntity().getWorld()));
+	
+		Rarity worstRarity = Util.getWorstRarity(blockRarity, entityRarity);
+		
+		int multiplier = Math.max(1, blockRarity.getData() - entityRarity.getData() + 1);
+		
+		e.setDamage(e.getDamage() * worstRarity.getMultiplierAdminShop() * multiplier);
+	}
+	
+	private Set<Block> getOccupedBlocks(Entity entity)
+	{
+		Set<Block> set = new HashSet<>();
+		
+		AxisAlignedBB hitbox = ((CraftEntity) entity).getHandle().getBoundingBox();
+		
+		final double hitboxX = (hitbox.d - hitbox.a) / 2.0D;
+		final double hitboxY = (hitbox.e - hitbox.b) / 2.0D;
+		final double hitboxZ = (hitbox.f - hitbox.c) / 2.0D;
+		
+		for(double x = -hitboxX; x <= hitboxX; x += hitboxX)
+		{
+			for(double y = -hitboxY; y <= hitboxY; y += hitboxY)
+			{			
+				for(double z = -hitboxZ; z <= hitboxZ; z += hitboxZ)
+				{
+					set.add(entity.getLocation().add(x, y, z).getBlock());
+				}
+			}
+		}
+		
+		return set;
+	}
+	
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void damageByBlock(EntityDamageByBlockEvent e)
 	{
 		if(!(e.getEntity() instanceof LivingEntity))
@@ -390,6 +452,11 @@ public class Main extends Common
 		}
 		
 		Block b = e.getDamager();
+		
+		if(b == null)
+		{
+			return;
+		}
 		
 		BlockData data = Util.readBlock(b);
 		

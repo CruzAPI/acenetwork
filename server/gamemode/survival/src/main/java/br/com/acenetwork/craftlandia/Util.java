@@ -443,6 +443,34 @@ public class Util
 		return Arrays.stream(Property.values()).filter(x -> lore.contains(x.toString())).collect(Collectors.toSet());
 	}
 	
+	public static Rarity getBestRarity(Rarity... rarities)
+	{
+		if(rarities.length == 0)
+		{
+			return LEGENDARY;
+		}
+		
+		Rarity best = getWorstRarity();
+		
+		for(Rarity rarity : rarities)
+		{
+			rarity = rarity == null ? getWorstRarity() : rarity;
+			
+			if(rarity == getBestRarity())
+			{
+				return rarity;
+			}
+			
+			if(rarity.getData() > best.getData())
+			{
+				best = rarity;
+			}
+		}
+		
+		return best;
+
+	}
+	
 	public static Rarity getWorstRarity(Rarity... rarities)
 	{
 		if(rarities.length == 0)
